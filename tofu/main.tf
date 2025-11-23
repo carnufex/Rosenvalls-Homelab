@@ -1,21 +1,21 @@
-locals {
-  # Node Configuration
-  # Adjust CPU/RAM as needed for your hardware
-  control_plane_nodes = {
-    "k8s-cp-01" = { id = 101, cpu = 2, ram = 4096, ip = "192.168.1.201" }
-    # Uncomment for HA
-    # "k8s-cp-02" = { id = 102, cpu = 2, ram = 4096, ip = "192.168.1.202" }
-    # "k8s-cp-03" = { id = 103, cpu = 2, ram = 4096, ip = "192.168.1.203" }
+module "talos" {
+  source = "./talos"
+
+  providers = {
+    proxmox = proxmox
   }
 
-  worker_nodes = {
-    "k8s-worker-01" = { id = 201, cpu = 4, ram = 8192, ip = "192.168.1.211" }
-    "k8s-worker-02" = { id = 202, cpu = 4, ram = 8192, ip = "192.168.1.212" }
+  image = {
+    version = var.talos_version
   }
-  
-  # Common Settings
-  talos_version = "v1.8.3"
-  iso_storage   = "local" # Storage ID where ISOs are stored
+
+  cluster = {
+    name            = var.cluster_name
+    endpoint        = var.cluster_endpoint
+    talos_version   = var.talos_version
+    proxmox_cluster = var.proxmox.cluster_name
+    gateway         = var.gateway
+  }
+
+  nodes = var.nodes
 }
-
-# We will add VM resources here in the next step once we confirm the Proxmox connection.

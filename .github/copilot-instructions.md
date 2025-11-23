@@ -1,11 +1,12 @@
 # AI Instructions & Context
 
 ## Project Goal
-Build a resilient, production-grade Kubernetes homelab on Proxmox using GitOps principles.
-The ultimate goal is **Disaster Recovery**: If the server is destroyed, we should be able to install Proxmox, pull this repository, and restore the entire cluster state with minimal manual intervention.
+Build a resilient, production-grade Kubernetes homelab on Proxmox using GitOps principles based on [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab).
+The ultimate goal is to learn and understand while setting up a replica of the [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab) project. 
 
 ## Reference Architecture
 This project is inspired by and modeled after: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab)
+Documentation available at: https://homelab.orkestack.com/docs/getting-started/detailed-setup
 
 ## Technology Stack
 -   **Hypervisor**: Proxmox VE (Local)

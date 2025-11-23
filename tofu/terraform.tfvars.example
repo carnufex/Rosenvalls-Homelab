@@ -1,4 +1,34 @@
-proxmox_endpoint  = "https://192.168.1.X:8006/"
-proxmox_api_token = "root@pam!opentofu=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-target_node       = "pve"
-cluster_name      = "rosenvall-homelab"
+proxmox = {
+  name         = "pve"
+  cluster_name = "pve"
+  endpoint     = "https://192.168.1.100:8006/"
+  insecure     = true
+  username     = "root@pam"
+  api_token    = "root@pam!terraform=your-token-here"
+}
+
+cluster_name     = "talos-cluster"
+cluster_endpoint = "192.168.1.200" # VIP
+gateway          = "192.168.1.1"
+talos_version    = "v1.8.3"
+
+nodes = {
+  "control-01" = {
+    host_node     = "pve"
+    machine_type  = "controlplane"
+    ip            = "192.168.1.201"
+    vm_id         = 101
+    cpu           = 2
+    ram_dedicated = 4096
+    igpu          = false
+  }
+  "worker-01" = {
+    host_node     = "pve"
+    machine_type  = "worker"
+    ip            = "192.168.1.211"
+    vm_id         = 201
+    cpu           = 4
+    ram_dedicated = 8192
+    igpu          = false
+  }
+}

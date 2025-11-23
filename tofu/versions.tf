@@ -13,12 +13,13 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = var.proxmox_endpoint
-  api_token = var.proxmox_api_token
-  insecure = true # Self-signed certs are common in homelabs
-  
+  endpoint  = var.proxmox.endpoint
+  api_token = var.proxmox.api_token
+  insecure  = var.proxmox.insecure
+
   ssh {
-    agent = true
+    agent    = true
+    username = "root"
   }
 }
 
