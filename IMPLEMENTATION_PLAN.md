@@ -1,37 +1,38 @@
 # Kubernetes Homelab Setup - Implementation Plan
 
-## Goal Description
-Set up a Kubernetes homelab on Proxmox using **OpenTofu**, **Talos Linux**, and **ArgoCD**. The system is designed for complete disaster recovery from Git.
+## Project Goal
+Build a resilient, production-grade Kubernetes homelab on Proxmox using GitOps principles.
 Reference: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab)
 
-## User Review Required
-- **Proxmox Credentials**: We will need to set up environment variables or a `secrets.tfvars` (gitignored) for Proxmox API access.
-- **Domain Name**: Do you have a domain name to use with Cloudflare/Cloudflared?
+## Current Status (2025-11-23)
+- **Infrastructure**: ✅ Provisioned with OpenTofu & Talos Linux.
+- **GitOps**: ✅ ArgoCD installed and bootstrapping from `kubernetes/applications`.
+- **Networking**: ✅ Cilium installed (CNI).
+- **Ingress**: ✅ Cloudflared Tunnel active (`argo.rosenvall.se`).
 
-## Proposed Changes
+## Roadmap / Next Steps
 
-### 1. Repository Structure
-Align with the reference architecture:
-- `tofu/`: Infrastructure as Code (Proxmox VMs).
-- `talos/`: Machine configurations.
-- `k8s/`: Kubernetes manifests (ArgoCD applications).
+### 1. Security & Certificates (Priority)
+- [ ] **Install Cert-Manager**: Enable internal HTTPS and End-to-End encryption.
+- [ ] Configure Let's Encrypt issuers.
+- [ ] Update Cloudflared to use internal HTTPS with valid certs.
+- [ ] **Secrets Management**: Set up **External Secrets Operator** with Bitwarden (to replace manual secrets).
 
-### 2. Infrastructure Provisioning (OpenTofu)
-- Create `tofu/main.tf` to define the Proxmox VMs for Control Plane and Worker nodes.
-- Create `tofu/variables.tf` for cluster customization.
+### 2. Storage
+- [ ] **Install Longhorn**: Distributed block storage for persistent volumes.
+- [ ] Configure backup targets (e.g., NFS or S3).
 
-### 3. Talos Linux Setup
-- Generate machine secrets and configurations.
-- Bootstrap the cluster on the provisioned VMs.
+### 3. Authentication
+- [ ] **Install Authentik**: SSO and Identity Provider.
+- [ ] Protect ArgoCD and other apps behind Authentik.
 
-### 4. GitOps (ArgoCD)
-- Install ArgoCD on the new cluster.
-- Configure ArgoCD to watch this repository (`k8s/` directory).
+### 4. Observability (Optional/Later)
+- [ ] Prometheus/Grafana stack.
+- [ ] Loki for logs.
 
-## Verification Plan
-### Automated Tests
-- `tofu plan`: Verify infrastructure changes before applying.
-- `talosctl validate`: Check Talos config.
+### 5. Applications
 
-### Manual Verification
-- Destroy and Rebuild: The ultimate test is to wipe the VMs and restore everything using `tofu apply` and ArgoCD.
+
+## Notes
+- **Cloudflare Tunnel**: Currently running in "Offloading" mode (HTTPS external -> HTTP internal). Will be upgraded to full E2E encryption once Cert-Manager is in place.
+- **ArgoCD Access**: Available at `https://argo.rosenvall.se`.
