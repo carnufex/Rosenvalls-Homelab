@@ -22,8 +22,6 @@ spec:
           args:
             - tunnel
             - run
-            - --metrics
-            - 0.0.0.0:2000
             - --token
             - $(TUNNEL_TOKEN)
           env:
@@ -35,7 +33,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /ready
-              port: 2000
+              port: 20241
             initialDelaySeconds: 1
             periodSeconds: 10
           resources:
