@@ -7,10 +7,17 @@ metadata:
     argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
-  source:
-    repoURL: https://github.com/carnufex/Rosenvalls-Homelab.git
-    targetRevision: HEAD
-    path: kubernetes/infrastructure/network/cilium
+  sources:
+    - repoURL: https://helm.cilium.io/
+      chart: cilium
+      targetRevision: 1.16.1
+      helm:
+        releaseName: cilium
+        valueFiles:
+          - $values/kubernetes/infrastructure/network/cilium/values.yaml
+    - repoURL: https://github.com/carnufex/Rosenvalls-Homelab.git
+      targetRevision: HEAD
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system

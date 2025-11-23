@@ -5,5 +5,7 @@ server:
     enabled: false
 
 configs:
+  cm:
+    kustomize.buildOptions: --enable-helm
   params:
     server.insecure: true
