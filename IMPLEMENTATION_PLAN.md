@@ -13,10 +13,11 @@ Reference: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab)
 ## Roadmap / Next Steps
 
 ### 1. Security & Certificates (Priority)
-- [ ] **Install Cert-Manager**: Enable internal HTTPS and End-to-End encryption.
-- [ ] Configure Let's Encrypt issuers.
+- [x] **Install Cert-Manager**: Configured in `kubernetes/infrastructure/controllers/cert-manager`.
+- [ ] Configure Let's Encrypt issuers (Update email in `cluster-issuer.yaml`).
 - [ ] Update Cloudflared to use internal HTTPS with valid certs.
-- [ ] **Secrets Management**: Set up **External Secrets Operator** with Bitwarden (to replace manual secrets).
+- [x] **Secrets Management**: Installed External Secrets Operator.
+- [ ] Configure Bitwarden Secret Store (Update IDs in `cluster-secret-store.yaml` and create manual secret).
 
 ### 2. Storage
 - [ ] **Install Longhorn**: Distributed block storage for persistent volumes.
