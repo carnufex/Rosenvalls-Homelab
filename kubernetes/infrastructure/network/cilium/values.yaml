@@ -43,3 +43,8 @@ hubble:
     enabled: true
   ui:
     enabled: true
+
+ingressController:
+  enabled: true
+  default: true
+  loadbalancerMode: dedicated
