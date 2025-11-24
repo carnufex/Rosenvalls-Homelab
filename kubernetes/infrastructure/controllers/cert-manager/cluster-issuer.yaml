@@ -7,14 +7,14 @@ spec:
     # You must replace this email address with your own.
     # Let's Encrypt will use this to contact you about expiring
     # certificates, and issues related to your account.
-    email: user@example.com
+    email: christopher.rosenvall@gmail.com
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
       - dns01:
           cloudflare:
-            email: user@example.com
+            email: christopher.rosenvall@gmail.com
             apiTokenSecretRef:
               name: cloudflare-api-token-secret
               key: api-token
@@ -25,14 +25,14 @@ metadata:
   name: letsencrypt-prod
 spec:
   acme:
-    email: user@example.com
+    email: christopher.rosenvall@gmail.com
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
       - dns01:
           cloudflare:
-            email: user@example.com
+            email: christopher.rosenvall@gmail.com
             apiTokenSecretRef:
               name: cloudflare-api-token-secret
               key: api-token
