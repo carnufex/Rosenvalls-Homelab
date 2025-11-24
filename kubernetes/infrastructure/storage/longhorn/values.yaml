@@ -1,6 +1,9 @@
 persistence:
   defaultClassReplicaCount: 1
 
+preUpgradeChecker:
+  jobEnabled: false
+
 defaultSettings:
   createDefaultDiskLabeledNodes: true
   defaultDataPath: /var/lib/longhorn
