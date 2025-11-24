@@ -5,6 +5,20 @@ data "talos_machine_configuration" "this" {
   machine_type     = each.value.machine_type
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   talos_version    = var.cluster.talos_version
+  config_patches = [
+    yamlencode({
+      cluster = {
+        network = {
+          cni = {
+            name = "none"
+          }
+        }
+        proxy = {
+          disabled = true
+        }
+      }
+    })
+  ]
 }
 
 resource "talos_machine_configuration_apply" "this" {

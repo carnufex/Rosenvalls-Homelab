@@ -1,70 +1,69 @@
-# Rosenvalls-Homelab
+﻿# Rosenvalls-Homelab
 
 A production-grade Kubernetes homelab on Proxmox, managed with GitOps.
 
-## 🏗 Architecture
+##  Architecture
 
 This project uses **Infrastructure as Code (IaC)** to manage the entire lifecycle of the cluster:
 -   **Provisioning**: [OpenTofu](https://opentofu.org/) creates Virtual Machines on Proxmox.
 -   **OS**: [Talos Linux](https://www.talos.dev/) runs on the nodes (immutable, minimal, secure).
 -   **GitOps**: [ArgoCD](https://argo-cd.readthedocs.io/) manages all Kubernetes manifests from this repository.
 -   **Networking**: [Cilium](https://cilium.io/) (CNI) managed via ArgoCD.
+-   **Secrets**: [External Secrets Operator](https://external-secrets.io/) syncing from Bitwarden.
 
-## 🚀 Getting Started
+##  Getting Started
 
 Follow these steps to bootstrap the cluster from scratch.
 
 ### 1. Prerequisites
 
 Ensure you have the following tools installed on your local machine:
--   **[OpenTofu](https://opentofu.org/docs/intro/install/)**: Infrastructure provisioning (`winget install opentofu`).
--   **[Talosctl](https://www.talos.dev/v1.8/talosctl/install/)**: Talos CLI (`winget install siderolabs.talosctl`).
--   **[Kubectl](https://kubernetes.io/docs/tasks/tools/)**: Kubernetes CLI (`winget install kubectl`).
--   **[Helm](https://helm.sh/docs/intro/install/)**: Package manager (`winget install Helm.Helm`).
+-   **[OpenTofu](https://opentofu.org/docs/intro/install/)**: Infrastructure provisioning (winget install opentofu).
+-   **[Talosctl](https://www.talos.dev/v1.8/talosctl/install/)**: Talos CLI (winget install siderolabs.talosctl).
+-   **[Kubectl](https://kubernetes.io/docs/tasks/tools/)**: Kubernetes CLI (winget install kubectl).
+-   **[Helm](https://helm.sh/docs/intro/install/)**: Package manager (winget install Helm.Helm).
 
 ### 2. Infrastructure Provisioning (OpenTofu)
 
 We use OpenTofu to create the VMs on Proxmox.
 
 1.  **Navigate to the directory**:
-    ```powershell
+    `powershell
     cd tofu
-    ```
+    `
 
 2.  **Configure Credentials**:
-    Create a `terraform.tfvars` file (this file is gitignored to protect your secrets):
-    ```powershell
+    Create a 	erraform.tfvars file (this file is gitignored to protect your secrets):
+    `powershell
     cp terraform.tfvars.example terraform.tfvars
-    ```
-    Edit `terraform.tfvars` and fill in your details (Proxmox endpoint, API token, etc.).
+    `
+    Edit 	erraform.tfvars and fill in your details (Proxmox endpoint, API token, etc.).
 
 3.  **Apply Infrastructure**:
-    ```powershell
+    `powershell
     tofu init
     tofu apply
-    ```
+    `
     This will:
     -   Download the Talos ISO to Proxmox.
     -   Create the Control Plane and Worker VMs.
     -   Bootstrap the Talos cluster.
-    -   Generate `kubeconfig` and `talosconfig` in `tofu/output/`.
-
-    > **Troubleshooting**: If you encounter a "Bootstrap not implemented" error or certificate mismatches, it usually means the VMs are in a "split brain" state (Tofu thinks they are new, but they have old data).
-    > **Fix**: Delete the VMs in Proxmox manually, run `tofu state rm ...` for the VM resources, and run `tofu apply` again.
+    -   Generate kubeconfig and 	alosconfig in 	ofu/output/.
 
 ### 3. Accessing the Cluster
 
 1.  **Configure Kubectl**:
-    ```powershell
+    `powershell
     $env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
-    ```
+    `
 
 2.  **Verify Connection**:
     Until the Cluster VIP (Virtual IP) is configured via Cilium/Kube-VIP, you may need to point directly to the control plane node IP.
-    ```powershell
+    `powershell
     kubectl config set-cluster hemma-k8s --server=https://192.168.1.201:6443
     kubectl get nodes
-    ```
+    `
+    *Note: Nodes will be NotReady because no CNI (Networking) is installed yet.*
 
 ### 4. Installing ArgoCD (GitOps)
 
@@ -72,7 +71,7 @@ We install ArgoCD manually first to let it take over the rest of the cluster man
 
 1.  **Install ArgoCD**:
     Due to Windows/Helm compatibility issues with Kustomize, we use Helm directly:
-    ```powershell
+    `powershell
     # Add Argo Helm Repo
     helm repo add argo https://argoproj.github.io/argo-helm
     helm repo update
@@ -82,57 +81,36 @@ We install ArgoCD manually first to let it take over the rest of the cluster man
 
     # Install via Helm Template
     helm template argocd argo/argo-cd --version 7.7.16 --namespace argocd -f kubernetes/infrastructure/controllers/argocd/values.yaml --include-crds --kube-version 1.31.1 | kubectl apply -f -
-    ```
+    `
 
 2.  **Access ArgoCD UI**:
-    *   **User**: `admin`
+    *   **User**: dmin
     *   **Password**: Retrieve with:
-        ```powershell
+        `powershell
         kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
-        ```
+        `
     *   **Port Forward**:
-        ```powershell
+        `powershell
         kubectl -n argocd port-forward svc/argocd-server 8080:443
-        ```
-    *   Open [http://localhost:8080](http://localhost:8080) (or https depending on config).
+        `
+    *   Open [http://localhost:8080](http://localhost:8080).
 
-### 5. Bootstrapping Applications
+### 5. Manual Network Bootstrap (Cilium)
 
-We use the "App of Apps" pattern.
+Because we disabled the default CNI (Flannel) in Talos, the nodes are NotReady and cannot schedule pods (including ArgoCD). We must manually install Cilium to bootstrap the network.
 
-1.  **Apply the Bootstrap App**:
-    This tells ArgoCD to watch the `kubernetes/applications` folder in this repository.
-    ```powershell
-    kubectl apply -f kubernetes/bootstrap.yaml
-    ```
+`powershell
+helm repo add cilium https://helm.cilium.io/
+helm repo update
+helm install cilium cilium/cilium --version 1.16.1 --namespace kube-system --values kubernetes/infrastructure/network/cilium/values.yaml
+`
 
-2.  **Managed Components**:
-    ArgoCD will now automatically install:
-    -   **Cilium**: Advanced Networking & Security (CNI).
-    -   **Cert-Manager**: TLS Certificate Management (Let's Encrypt).
-    -   **External Secrets**: Secrets Management (Bitwarden).
-    -   **Cloudflared**: Secure Tunneling.
-    -   *(Future)*: Longhorn, etc.
+Once installed, verify nodes become Ready:
+`powershell
+kubectl get nodes
+`
 
-
-## 📂 Repository Structure
-
--   `tofu/`: Infrastructure definitions (Proxmox VMs, Talos config).
--   `kubernetes/`:
-    -   `applications/`: ArgoCD Application definitions (The "App of Apps").
-    -   `infrastructure/`: Helm charts and manifests for core services (ArgoCD, Cilium).
-    -   `bootstrap.yaml`: The entry point for ArgoCD.
-
-## 🛠 Troubleshooting Notes
-
--   **ArgoCD Redis Issues**: If ArgoCD complains about `NOAUTH`, restart the Redis and Server pods:
-    ```powershell
-    kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-redis
-    kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-server
-    ```
--   **Windows & Kustomize**: `kubectl apply -k` with Helm charts can be flaky on Windows. Prefer `helm template | kubectl apply -f -`.
-
-## 🔐 Secrets Management
+### 6. Secrets Management (Bitwarden)
 
 We use **External Secrets Operator** to sync secrets from **Bitwarden Secrets Manager**.
 
@@ -141,75 +119,44 @@ We use **External Secrets Operator** to sync secrets from **Bitwarden Secrets Ma
     -   An Access Token for that account.
 
 2.  **Bootstrap Secret**:
-    Before External Secrets can work, you must manually create the access token secret in the cluster:
-    ```powershell
-    kubectl create secret generic bitwarden-access-token `
-      --from-literal=token=<YOUR_ACCESS_TOKEN> `
+    Create the namespace and the secret manually so the operator can authenticate:
+    `powershell
+    kubectl create ns external-secrets
+    kubectl create secret generic bitwarden-access-token 
+      --from-literal=token=<YOUR_ACCESS_TOKEN> 
       --namespace external-secrets
-    ```
+    `
 
-3.  **Usage**:
-    -   Store secrets in Bitwarden.
-    -   Create an `ExternalSecret` manifest in Kubernetes referencing the Bitwarden Item UUID.
-    -   The operator will create a native Kubernetes Secret.
+### 7. Bootstrapping Applications
 
-## ☁️ Networking (Cloudflare Tunnel)
+We use the "App of Apps" pattern.
 
-We use **Cloudflared** to expose services securely without opening ports on the router.
+1.  **Apply the Bootstrap App**:
+    This tells ArgoCD to watch the kubernetes/applications folder in this repository.
+    `powershell
+    kubectl apply -f kubernetes/bootstrap.yaml
+    `
 
-1.  **Setup**:
-    -   Create a Tunnel in Cloudflare Zero Trust Dashboard.
-    -   Store the Tunnel Token in Bitwarden (Item: `Cloudflared`, Field: `TUNNEL_TOKEN`).
-    -   The `ExternalSecret` in `kubernetes/infrastructure/network/cloudflared/` fetches this token.
+2.  **Managed Components**:
+    ArgoCD will now automatically install:
+    -   **Cilium**: (Will take over management of the manual install).
+    -   **Cert-Manager**: TLS Certificate Management.
+    -   **External Secrets**: Secrets Management.
+    -   **Cloudflared**: Secure Tunneling.
 
-2.  **Ingress**:
-    -   Configure Ingress rules in the Cloudflare Dashboard to point to your internal services (e.g., `http://argocd-server.argocd.svc.cluster.local:80`).
+##  Repository Structure
 
-    ```powershell
-    tofu apply
-    ```
+-   	ofu/: Infrastructure definitions (Proxmox VMs, Talos config).
+-   kubernetes/:
+    -   pplications/: ArgoCD Application definitions (The "App of Apps").
+    -   infrastructure/: Helm charts and manifests for core services.
+    -   ootstrap.yaml: The entry point for ArgoCD.
 
-### 3. Cluster Bootstrap (Automated)
+##  Troubleshooting Notes
 
-The OpenTofu configuration now handles the entire bootstrap process:
-1.  Creates VMs.
-2.  Generates Talos configuration (with Static IPs).
-3.  Applies configuration to the nodes.
-4.  Bootstraps the cluster.
-5.  Retrieves `kubeconfig` and `talosconfig`.
-
-**Just run:**
-```powershell
-tofu apply
-```
-
-### 4. Access the Cluster
-
-Once `tofu apply` completes, you will see the `kubeconfig` and `talosconfig` in the output (marked as sensitive).
-
-1.  **Save Kubeconfig**:
-    ```powershell
-    tofu output -raw kubeconfig > ~/.kube/config
-    ```
-
-2.  **Save Talosconfig**:
-    ```powershell
-    tofu output -raw talosconfig > ~/.talos/config
-    talosctl config endpoint 192.168.1.201
-    talosctl config node 192.168.1.201
-    ```
-
-3.  **Verify**:
-    ```powershell
-    kubectl get nodes
-    ```
-
-### 4. GitOps (ArgoCD)
-
-*Instructions coming soon...*
-
-## 📂 Repository Structure
-
--   `tofu/`: OpenTofu configuration for Proxmox VMs.
--   `talos/`: Talos Linux machine configurations.
--   `k8s/`: Kubernetes manifests (ArgoCD applications).
+-   **ArgoCD Redis Issues**: If ArgoCD complains about NOAUTH or pods are stuck, restart the Redis and Server pods:
+    `powershell
+    kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-redis
+    kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-server
+    `
+-   **Windows & Kustomize**: kubectl apply -k with Helm charts can be flaky on Windows. Prefer helm template | kubectl apply -f -.
