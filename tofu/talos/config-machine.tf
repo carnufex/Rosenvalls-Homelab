@@ -16,6 +16,12 @@ data "talos_machine_configuration" "this" {
         proxy = {
           disabled = true
         }
+        inlineManifests = each.value.machine_type == "controlplane" ? [
+          {
+            name     = "cilium"
+            contents = file("${path.module}/inline-manifests/cilium-install.yaml")
+          }
+        ] : []
       }
     })
   ]

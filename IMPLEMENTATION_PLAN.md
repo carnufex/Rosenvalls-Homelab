@@ -20,7 +20,9 @@ Reference: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab)
 - [ ] Configure Bitwarden Secret Store (Update IDs in `cluster-secret-store.yaml` and create manual secret).
 
 ### 2. Storage
-- [ ] **Install Longhorn**: Distributed block storage for persistent volumes.
+- [x] **Install Longhorn**: Distributed block storage for persistent volumes.
+    - [ ] Verify Pods are running.
+    - [ ] Configure Cloudflare Tunnel for UI access.
 - [ ] Configure backup targets (e.g., NFS or S3).
 
 ### 3. Authentication

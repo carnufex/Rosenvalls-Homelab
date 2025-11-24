@@ -65,86 +65,39 @@ We use OpenTofu to create the VMs on Proxmox.
     ```
     *Note: Nodes will be `NotReady` because no CNI (Networking) is installed yet.*
 
-### 4. Installing ArgoCD (GitOps)
+### 4. Bootstrap Cluster (The Magic Step)
 
-We install ArgoCD manually first to let it take over the rest of the cluster management.
+We have automated the installation of GitOps (ArgoCD) and Secrets connection.
+*Note: Cilium (Networking) is now installed automatically by Talos during boot.*
 
-1.  **Install ArgoCD**:
-    Due to Windows/Helm compatibility issues with Kustomize, we use Helm directly:
+1.  **Run the Bootstrap Script**:
     ```powershell
-    # Add Argo Helm Repo
-    helm repo add argo https://argoproj.github.io/argo-helm
-    helm repo update
+    .\bootstrap.ps1
+    ```
+    This script will:
+    -   Install **ArgoCD** (GitOps).
+    -   Apply the **Bootstrap Application** (starts syncing this repo).
+    -   Prompt you for your **Bitwarden Access Token**.
 
-    # Apply Namespace
-    kubectl apply -f kubernetes/infrastructure/controllers/argocd/namespace.yaml
+### 5. Access ArgoCD
 
-    # Install via Helm Template
-    helm template argocd argo/argo-cd --version 7.7.16 --namespace argocd -f kubernetes/infrastructure/controllers/argocd/values.yaml --include-crds --kube-version 1.31.1 | kubectl apply -f -
+Once the bootstrap is complete:
+
+1.  **Get Admin Password**:
+    ```powershell
+    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
     ```
 
-2.  **Access ArgoCD UI**:
-    *   **User**: `admin`
-    *   **Password**: Retrieve with:
-        ```powershell
-        kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
-        ```
-    *   **Port Forward**:
-        ```powershell
-        kubectl -n argocd port-forward svc/argocd-server 8080:443
-        ```
+2.  **Port Forward**:
+    ```powershell
+    kubectl -n argocd port-forward svc/argocd-server 8080:443
+    ```
     *   Open [http://localhost:8080](http://localhost:8080).
 
-### 5. Manual Network Bootstrap (Cilium)
-
-Because we disabled the default CNI (Flannel) in Talos, the nodes are `NotReady` and cannot schedule pods (including ArgoCD). We must manually install Cilium to bootstrap the network.
 
 ```powershell
 helm repo add cilium https://helm.cilium.io/
-helm repo update
-helm install cilium cilium/cilium --version 1.16.1 --namespace kube-system --values kubernetes/infrastructure/network/cilium/values.yaml
-```
-
-Once installed, verify nodes become `Ready`:
-```powershell
-kubectl get nodes
-```
-
-### 6. Secrets Management (Bitwarden)
-
-We use **External Secrets Operator** to sync secrets from **Bitwarden Secrets Manager**.
-
-1.  **Prerequisites**:
-    -   A Bitwarden Machine Account.
-    -   An Access Token for that account.
-
-2.  **Bootstrap Secret**:
-    Create the namespace and the secret manually so the operator can authenticate:
-    ```powershell
-    kubectl create ns external-secrets
-    kubectl create secret generic bitwarden-access-token `
-      --from-literal=token=<YOUR_ACCESS_TOKEN> `
-      --namespace external-secrets
-    ```
-
-### 7. Bootstrapping Applications
-
-We use the "App of Apps" pattern.
-
-1.  **Apply the Bootstrap App**:
-    This tells ArgoCD to watch the `kubernetes/applications` folder in this repository.
-    ```powershell
-    kubectl apply -f kubernetes/bootstrap.yaml
-    ```
-
-2.  **Managed Components**:
-    ArgoCD will now automatically install:
-    -   **Cilium**: (Will take over management of the manual install).
-    -   **Cert-Manager**: TLS Certificate Management.
-    -   **External Secrets**: Secrets Management.
-    -   **Cloudflared**: Secure Tunneling.
-
-##  Repository Structure
+### 6. Repository Structure
 
 -   `tofu/`: Infrastructure definitions (Proxmox VMs, Talos config).
 -   `kubernetes/`:
