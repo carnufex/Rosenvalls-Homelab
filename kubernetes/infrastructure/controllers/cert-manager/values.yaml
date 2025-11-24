@@ -1,3 +1,6 @@
 installCRDs: true
+global:
+  leaderElection:
+    namespace: "cert-manager"
 prometheus:
   enabled: false

@@ -1,0 +1,33 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: bitwarden-selfsigned-issuer
+  namespace: external-secrets
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bitwarden-sdk-server-cert
+  namespace: external-secrets
+spec:
+  secretName: bitwarden-tls-certs
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  issuerRef:
+    name: bitwarden-selfsigned-issuer
+    kind: Issuer
+  commonName: bitwarden-sdk-server.external-secrets.svc
+  dnsNames:
+  - bitwarden-sdk-server
+  - bitwarden-sdk-server.external-secrets
+  - bitwarden-sdk-server.external-secrets.svc
+  - bitwarden-sdk-server.external-secrets.svc.cluster.local
+  isCA: false
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - server auth
+    - client auth
