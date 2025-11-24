@@ -109,7 +109,11 @@ We use the "App of Apps" pattern.
 2.  **Managed Components**:
     ArgoCD will now automatically install:
     -   **Cilium**: Advanced Networking & Security (CNI).
-    -   *(Future)*: Cert-Manager, Cloudflared, Longhorn, etc.
+    -   **Cert-Manager**: TLS Certificate Management (Let's Encrypt).
+    -   **External Secrets**: Secrets Management (Bitwarden).
+    -   **Cloudflared**: Secure Tunneling.
+    -   *(Future)*: Longhorn, etc.
+
 
 ## 📂 Repository Structure
 
@@ -127,27 +131,40 @@ We use the "App of Apps" pattern.
     kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-server
     ```
 -   **Windows & Kustomize**: `kubectl apply -k` with Helm charts can be flaky on Windows. Prefer `helm template | kubectl apply -f -`.
-    > 1. Go to **Datacenter** -> **Permissions**.
 
-    > 2. Add **User Permission** (or API Token Permission).
-    > 3. Path: `/storage/local` (or `/`).
-    > 4. User: Your API Token User.
-    > 5. Role: `PVEAdmin` or `PVEDatastoreAdmin`.
+## 🔐 Secrets Management
 
-3.  **Initialize OpenTofu**:
-    Downloads required providers (Proxmox, Talos).
+We use **External Secrets Operator** to sync secrets from **Bitwarden Secrets Manager**.
+
+1.  **Prerequisites**:
+    -   A Bitwarden Machine Account.
+    -   An Access Token for that account.
+
+2.  **Bootstrap Secret**:
+    Before External Secrets can work, you must manually create the access token secret in the cluster:
     ```powershell
-    tofu init
+    kubectl create secret generic bitwarden-access-token `
+      --from-literal=token=<YOUR_ACCESS_TOKEN> `
+      --namespace external-secrets
     ```
 
-4.  **Preview Changes**:
-    See what will be created.
-    ```powershell
-    tofu plan
-    ```
+3.  **Usage**:
+    -   Store secrets in Bitwarden.
+    -   Create an `ExternalSecret` manifest in Kubernetes referencing the Bitwarden Item UUID.
+    -   The operator will create a native Kubernetes Secret.
 
-5.  **Apply Infrastructure**:
-    Create the VMs.
+## ☁️ Networking (Cloudflare Tunnel)
+
+We use **Cloudflared** to expose services securely without opening ports on the router.
+
+1.  **Setup**:
+    -   Create a Tunnel in Cloudflare Zero Trust Dashboard.
+    -   Store the Tunnel Token in Bitwarden (Item: `Cloudflared`, Field: `TUNNEL_TOKEN`).
+    -   The `ExternalSecret` in `kubernetes/infrastructure/network/cloudflared/` fetches this token.
+
+2.  **Ingress**:
+    -   Configure Ingress rules in the Cloudflare Dashboard to point to your internal services (e.g., `http://argocd-server.argocd.svc.cluster.local:80`).
+
     ```powershell
     tofu apply
     ```

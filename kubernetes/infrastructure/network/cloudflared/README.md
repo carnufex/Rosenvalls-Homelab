@@ -19,6 +19,15 @@ This directory contains the configuration for the Cloudflare Tunnel.
     After creating the tunnel, you will see a command to install the connector.
     Copy the token from that command. It looks like a long base64 string following `--token`.
 
+3.  **Store Token in Bitwarden**:
+    Create a new item in your Bitwarden project.
+    Add a hidden field named `TUNNEL_TOKEN` with the token value.
+    Copy the Item UUID.
+
+4.  **Configure External Secret**:
+    Update `external-secret.yaml` with the Item UUID in the `remoteRef.key` field.
+
+
 3.  **Create the Secret**:
     Run the following command in your terminal (replace `<YOUR_TOKEN>` with the actual token):
 
