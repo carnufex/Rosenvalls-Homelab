@@ -1,0 +1,18 @@
+persistence:
+  defaultClassReplicaCount: 1
+
+defaultSettings:
+  createDefaultDiskLabeledNodes: true
+  defaultDataPath: /var/lib/longhorn
+
+ingress:
+  enabled: true
+  ingressClassName: cilium
+  host: longhorn.rosenvall.se
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  tls: true
+  tlsSecret: longhorn-tls
+
+csi:
+  kubeletRootDir: /var/lib/kubelet
