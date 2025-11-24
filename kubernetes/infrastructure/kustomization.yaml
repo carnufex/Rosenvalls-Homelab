@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - controllers
   - storage
+  - network/cilium/config.yaml
