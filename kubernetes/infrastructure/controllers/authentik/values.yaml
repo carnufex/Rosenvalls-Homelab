@@ -1,0 +1,41 @@
+authentik:
+  log_level: info
+  
+  # Use the secret created by ExternalSecrets
+  # The chart will look for AUTHENTIK_SECRET_KEY in the env
+  
+server:
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - authentik.rosenvall.se
+    tls:
+      - secretName: authentik-tls
+        hosts:
+          - authentik.rosenvall.se
+
+  # Load secrets from the ExternalSecret
+  envFrom:
+    - secretRef:
+        name: authentik-secret
+
+worker:
+  envFrom:
+    - secretRef:
+        name: authentik-secret
+
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: authentik-secret
+    secretKeys:
+      adminPasswordKey: postgresql-postgres-password
+      userPasswordKey: postgresql-password
+      replicationPasswordKey: postgresql-password # Using same for simplicity in homelab
+
+redis:
+  enabled: true
+  architecture: standalone

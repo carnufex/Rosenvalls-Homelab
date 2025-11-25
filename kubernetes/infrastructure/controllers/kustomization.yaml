@@ -3,5 +3,6 @@ kind: Kustomization
 
 resources:
   - argocd
+  - authentik
   - cert-manager
   - external-secrets
