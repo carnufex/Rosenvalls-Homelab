@@ -48,3 +48,5 @@ ingressController:
   enabled: true
   default: true
   loadbalancerMode: dedicated
+  service:
+    allocateLoadBalancerNodePorts: false
