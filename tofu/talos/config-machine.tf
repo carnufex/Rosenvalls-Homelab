@@ -23,6 +23,20 @@ data "talos_machine_configuration" "this" {
           }
         ] : []
       }
+    }),
+    yamlencode({
+      machine = {
+        disks = [
+          {
+            device = "/dev/sdb"
+            partitions = [
+              {
+                mountpoint = "/var/lib/longhorn"
+              }
+            ]
+          }
+        ]
+      }
     })
   ]
 }

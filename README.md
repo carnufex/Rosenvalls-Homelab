@@ -39,6 +39,7 @@ We use OpenTofu to create the VMs on Proxmox.
     ```
     Edit `terraform.tfvars` and fill in your details (Proxmox endpoint, API token, etc.).
 
+
 3.  **Apply Infrastructure**:
     ```powershell
     tofu init
@@ -49,6 +50,17 @@ We use OpenTofu to create the VMs on Proxmox.
     -   Create the Control Plane and Worker VMs.
     -   Bootstrap the Talos cluster.
     -   Generate `kubeconfig` and `talosconfig` in `tofu/output/`.
+
+    > **Note:**
+    > **Note:**
+    > Om klustret redan finns (t.ex. efter en wipe eller om du återanvänder resurser) **måste du först köra cleanup-scriptet** för att ta bort Talos-resurserna ur state innan du kör `tofu apply` igen:
+    >
+    > ```powershell
+    $env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
+    ./cleanup.ps1
+    ```
+    >
+    > Detta säkerställer att Talos-resurserna återskapas korrekt vid nästa apply och att du kan använda talosctl-kommandon direkt om du behöver felsöka.
 
 ### 3. Accessing the Cluster
 
@@ -106,6 +118,26 @@ helm repo add cilium https://helm.cilium.io/
     -   `bootstrap.yaml`: The entry point for ArgoCD.
 
 ##  Troubleshooting Notes
+### Control Plane Stuck Waiting for Bootstrap
+
+Om din control plane-node visar "waiting to join the cluster" och ber dig köra `talosctl bootstrap` trots att du förväntar dig att det ska ske automatiskt:
+
+- Kontrollera att du har kört `cleanup.ps1` och att alla Talos/etcd-diskar är nollställda (wipade) innan du kör `tofu apply`.
+- Talos bootstrap körs bara automatiskt första gången – om det finns gammal etcd-data på disken måste du wipa eller ta bort VM:n helt.
+- Om Terraform-state och verkligheten är ur synk kan bootstrap-resursen hoppas över.
+
+**Lösning:**
+
+1. Säkerställ att du har en ren miljö (wipade diskar, ingen gammal state).
+2. Kör `tofu apply` som vanligt.
+3. Om noden ändå står och väntar, kör bootstrap manuellt:
+
+    ```powershell
+    $env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
+    talosctl --nodes 192.168.1.201 --endpoints 192.168.1.201 bootstrap
+    ```
+
+Efter en lyckad bootstrap bör noden gå vidare och klustret bli hälsosamt.
 
 -   **ArgoCD Redis Issues**: If ArgoCD complains about `NOAUTH` or pods are stuck, restart the Redis and Server pods:
     ```powershell
