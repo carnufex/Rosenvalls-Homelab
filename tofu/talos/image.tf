@@ -2,7 +2,7 @@ resource "talos_image_factory_schematic" "this" {
   schematic = yamlencode({
     customization = {
       systemExtensions = {
-        officialExtensions = ["siderolabs/qemu-guest-agent", "siderolabs/iscsi-tools"]
+        officialExtensions = ["siderolabs/qemu-guest-agent", "siderolabs/iscsi-tools", "siderolabs/iscsi-tools", "siderolabs/util-linux-tools"]
       }
     }
   })
