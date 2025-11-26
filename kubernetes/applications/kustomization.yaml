@@ -5,3 +5,4 @@ resources:
   - cilium.yaml
   - cloudflared.yaml
   - infrastructure.yaml
+  - longhorn.yaml
