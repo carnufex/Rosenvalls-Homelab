@@ -29,6 +29,8 @@ worker:
 
 postgresql:
   enabled: true
+  image:
+    tag: latest
   auth:
     existingSecret: authentik-secret
     secretKeys:
@@ -39,3 +41,5 @@ postgresql:
 redis:
   enabled: true
   architecture: standalone
+  image:
+    tag: latest
