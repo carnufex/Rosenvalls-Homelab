@@ -6,37 +6,14 @@ data "talos_machine_configuration" "this" {
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   talos_version    = var.cluster.talos_version
   config_patches = [
-    yamlencode({
-      cluster = {
-        network = {
-          cni = {
-            name = "none"
-          }
-        }
-        proxy = {
-          disabled = true
-        }
-        inlineManifests = each.value.machine_type == "controlplane" ? [
-          {
-            name     = "cilium"
-            contents = file("${path.module}/inline-manifests/cilium-install.yaml")
-          }
-        ] : []
-      }
-    }),
-    yamlencode({
-      machine = {
-        disks = [
-          {
-            device = "/dev/sdb"
-            partitions = [
-              {
-                mountpoint = "/var/lib/longhorn"
-              }
-            ]
-          }
-        ]
-      }
+    templatefile("${path.module}/machine-config/${each.value.machine_type}.yaml.tftpl", {
+      disks          = each.value.disks
+      cilium_values  = var.cilium.values
+      cilium_install = var.cilium.install
+      vip            = var.cluster.endpoint
+      hostname       = each.key
+      node_ip        = each.value.ip
+      gateway        = var.cluster.gateway
     })
   ]
 }

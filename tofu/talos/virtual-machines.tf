@@ -26,12 +26,14 @@ resource "proxmox_virtual_environment_vm" "this" {
     file_id      = proxmox_virtual_environment_download_file.this.id
   }
 
-  # Extra disk för Longhorn
-  disk {
-    datastore_id = coalesce(each.value.datastore_id, "local-lvm")
-    interface    = "scsi1"
-    size         = 50
-    file_format  = "raw"
+  dynamic "disk" {
+    for_each = each.value.disks
+    content {
+      datastore_id = each.value.datastore_id
+      interface    = "${disk.value.type}${disk.value.unit_number}"
+      size         = tonumber(replace(disk.value.size, "G", ""))
+      file_format  = "raw"
+    }
   }
 
   initialization {

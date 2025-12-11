@@ -34,35 +34,41 @@ variable "gateway" {
   default     = "192.168.1.1"
 }
 
-variable "nodes" {
-  description = "Configuration for cluster nodes"
+variable "proxmox_datastore" {
+  description = "Proxmox datastore to use for VM disks"
+  type        = string
+  default     = "local-lvm"
+}
+
+variable "nodes_config" {
+  description = "Per-node configuration map"
   type = map(object({
-    host_node     = string
+    host_node     = optional(string)
     machine_type  = string
-    datastore_id  = optional(string)
     ip            = string
     mac_address   = optional(string)
     vm_id         = optional(number)
-    cpu           = number
-    ram_dedicated = number
-    igpu          = optional(bool, false)
+    ram_dedicated = optional(number)
+    cpu           = optional(number)
+    igpu          = optional(bool)
+    disks = optional(map(object({
+      device      = optional(string)
+      size        = optional(string)
+      type        = optional(string)
+      mountpoint  = optional(string)
+      unit_number = optional(number)
+    })))
   }))
   default = {
     "k8s-cp-01" = {
-      host_node     = "pve"
       machine_type  = "controlplane"
       ip            = "192.168.1.201"
       vm_id         = 101
-      cpu           = 2
-      ram_dedicated = 4096
     }
     "k8s-worker-01" = {
-      host_node     = "pve"
       machine_type  = "worker"
       ip            = "192.168.1.211"
       vm_id         = 201
-      cpu           = 4
-      ram_dedicated = 8192
     }
   }
 }

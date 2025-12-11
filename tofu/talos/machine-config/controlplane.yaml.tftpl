@@ -1,0 +1,47 @@
+machine:
+  certSANs:
+    - ${vip}
+    - ${node_ip}
+  kubelet:
+    extraMounts:
+      - destination: /var/lib/longhorn
+        type: bind
+        source: /var/lib/longhorn
+        options:
+          - bind
+          - rshared
+          - rw
+  network:
+    hostname: ${hostname}
+    interfaces:
+      - interface: eth0
+        dhcp: false
+        addresses:
+          - ${node_ip}/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: ${gateway}
+        vip:
+          ip: ${vip}
+
+cluster:
+  network:
+    cni:
+      name: none
+  proxy:
+    disabled: true
+  inlineManifests:
+    - name: cilium-values
+      contents: |
+        ---
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: cilium-values
+          namespace: kube-system
+        data:
+          values.yaml: |-
+            ${indent(12, cilium_values)}
+    - name: cilium-bootstrap
+      contents: |
+        ${indent(8, cilium_install)}

@@ -32,5 +32,20 @@ variable "nodes" {
     cpu           = number
     ram_dedicated = number
     igpu          = optional(bool, false)
+    disks = optional(map(object({
+      device      = string
+      size        = string
+      type        = string
+      mountpoint  = string
+      unit_number = number
+    })), {})
   }))
+}
+
+variable "cilium" {
+  description = "Cilium configuration"
+  type = object({
+    values  = string
+    install = string
+  })
 }

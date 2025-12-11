@@ -1,0 +1,40 @@
+cluster:
+  network:
+    cni:
+      name: none
+  proxy:
+    disabled: true
+
+machine:
+  network:
+    hostname: ${hostname}
+    interfaces:
+      - interface: eth0
+        dhcp: false
+        addresses:
+          - ${node_ip}/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: ${gateway}
+  kubelet:
+    extraMounts:
+%{ if length(disks) > 0 }
+%{ for disk_name, disk in disks }
+      - destination: ${disk.mountpoint}
+        type: bind
+        source: ${disk.mountpoint}
+        options:
+          - bind
+          - rshared
+          - rw
+%{ endfor }
+%{ endif }
+
+%{ if length(disks) > 0 }
+  disks:
+%{ for disk_name, disk in disks }
+    - device: ${disk.device}
+      partitions:
+        - mountpoint: ${disk.mountpoint}
+%{ endfor }
+%{ endif }

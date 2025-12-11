@@ -70,17 +70,15 @@ We use OpenTofu to create the VMs on Proxmox.
     ```
 
 2.  **Verify Connection**:
-    Until the Cluster VIP (Virtual IP) is configured via Cilium/Kube-VIP, you may need to point directly to the control plane node IP.
+    The Cluster VIP (Virtual IP) should be reachable as Cilium is installed during boot.
     ```powershell
-    kubectl config set-cluster hemma-k8s --server=https://192.168.1.201:6443
     kubectl get nodes
     ```
-    *Note: Nodes will be `NotReady` because no CNI (Networking) is installed yet.*
+    *Note: Nodes should be `Ready` as Cilium (CNI) is pre-installed.*
 
 ### 4. Bootstrap Cluster (The Magic Step)
 
 We have automated the installation of GitOps (ArgoCD) and Secrets connection.
-*Note: Cilium (Networking) is now installed automatically by Talos during boot.*
 
 1.  **Run the Bootstrap Script**:
     ```powershell
