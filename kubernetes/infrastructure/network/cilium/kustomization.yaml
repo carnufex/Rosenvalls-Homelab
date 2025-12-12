@@ -3,3 +3,11 @@ kind: Kustomization
 
 resources:
   - config.yaml
+
+helmCharts:
+  - name: cilium
+    repo: https://helm.cilium.io/
+    version: 1.16.1
+    releaseName: cilium
+    namespace: kube-system
+    valuesFile: values.yaml

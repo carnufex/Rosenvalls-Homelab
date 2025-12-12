@@ -18,6 +18,9 @@ spec:
     - repoURL: https://github.com/carnufex/Rosenvalls-Homelab.git
       targetRevision: HEAD
       ref: values
+    - repoURL: https://github.com/carnufex/Rosenvalls-Homelab.git
+      targetRevision: HEAD
+      path: kubernetes/infrastructure/network/cilium
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
