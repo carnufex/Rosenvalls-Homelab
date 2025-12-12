@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infrastructure
+  name: cilium-config
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/carnufex/Rosenvalls-Homelab.git
     targetRevision: HEAD
-    path: kubernetes/infrastructure
+    path: kubernetes/infrastructure/network/cilium
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
