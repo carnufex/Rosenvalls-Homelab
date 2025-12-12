@@ -30,7 +30,7 @@ worker:
 postgresql:
   enabled: true
   image:
-    tag: latest
+    tag: 15
   auth:
     existingSecret: authentik-secret
     secretKeys:
@@ -42,4 +42,4 @@ redis:
   enabled: true
   architecture: standalone
   image:
-    tag: latest
+    tag: 7.2
