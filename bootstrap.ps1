@@ -11,6 +11,33 @@ if (-not (Test-Path $KubeConfigPath)) {
 $env:KUBECONFIG = $KubeConfigPath
 Write-Host "Environment configured." -ForegroundColor Green
 
+# 1.5 Wait for Kubernetes API
+Write-Host "Waiting for Kubernetes API to be reachable..." -ForegroundColor Cyan
+$RetryCount = 0
+$MaxRetries = 60 # Wait up to 5-10 minutes
+$SleepSeconds = 10
+
+do {
+    try {
+        $Nodes = kubectl get nodes --request-timeout=5s 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Kubernetes API is up!" -ForegroundColor Green
+            break
+        }
+    } catch {
+        # Ignore errors and retry
+    }
+    
+    $RetryCount++
+    Write-Host "   API not ready yet... (Attempt $RetryCount/$MaxRetries)" -NoNewline -ForegroundColor DarkGray
+    Write-Host "`r" -NoNewline
+    Start-Sleep -Seconds $SleepSeconds
+} while ($RetryCount -lt $MaxRetries)
+
+if ($RetryCount -ge $MaxRetries) {
+    Write-Error "Timed out waiting for Kubernetes API. Please check cluster status manually."
+}
+
 # 2. Install ArgoCD (GitOps)
 Write-Host "Installing ArgoCD..." -ForegroundColor Cyan
 helm repo add argo https://argoproj.github.io/argo-helm

@@ -6,6 +6,8 @@ cluster:
     disabled: true
 
 machine:
+  nodeLabels:
+    node.longhorn.io/create-default-disk: "true"
   network:
     hostname: ${hostname}
     interfaces:
@@ -17,8 +19,6 @@ machine:
           - network: 0.0.0.0/0
             gateway: ${gateway}
   kubelet:
-    nodeLabels:
-      node.longhorn.io/create-default-disk: "true"
     extraMounts:
 %{ if length(disks) > 0 }
 %{ for disk_name, disk in disks }
