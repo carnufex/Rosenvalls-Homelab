@@ -43,6 +43,11 @@ Write-Host "Installing ArgoCD..." -ForegroundColor Cyan
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+
+# Install Gateway API CRDs (Required for Cilium Gateway)
+Write-Host "Installing Gateway API CRDs..." -ForegroundColor Cyan
+kubectl apply -k kubernetes/infrastructure/crds/gateway-api
+
 helm upgrade --install argocd argo/argo-cd --version 7.7.16 `
     --namespace argocd `
     -f kubernetes/infrastructure/controllers/argocd/values.yaml `

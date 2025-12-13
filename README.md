@@ -98,11 +98,14 @@ Once the bootstrap is complete:
     kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
     ```
 
-2.  **Port Forward**:
-    ```powershell
-    kubectl -n argocd port-forward svc/argocd-server 8080:443
-    ```
-    *   Open [http://localhost:8080](http://localhost:8080).
+2.  **Access via Gateway**:
+    ArgoCD is exposed via the Gateway API.
+    -   **URL**: `https://argo.rosenvall.se` (Requires Cloudflare Tunnel configured)
+    -   **Local Access (Port Forward)**:
+        ```powershell
+        kubectl -n argocd port-forward svc/argocd-server 8080:443
+        ```
+        Open [http://localhost:8080](http://localhost:8080).
 
 
 ```powershell
