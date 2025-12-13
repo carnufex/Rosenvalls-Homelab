@@ -4,6 +4,7 @@ namespace: argocd
 
 resources:
   - namespace.yaml
+  - httproute.yaml
 
 helmCharts:
   - name: argo-cd

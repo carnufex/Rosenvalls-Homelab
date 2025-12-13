@@ -45,8 +45,11 @@ hubble:
     enabled: true
 
 ingressController:
-  enabled: true
+  enabled: false
   default: true
   loadbalancerMode: dedicated
   service:
     allocateLoadBalancerNodePorts: false
+
+gatewayAPI:
+  enabled: true

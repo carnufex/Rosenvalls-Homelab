@@ -2,18 +2,10 @@ server:
   extraArgs:
     - --insecure
   ingress:
-    enabled: true
-    ingressClassName: cilium
-    annotations: {}
-    hosts:
-      - argo.rosenvall.se
-    paths:
-      - /
-    pathType: Prefix
-    tls: []
+    enabled: false
 
 configs:
   cm:
     kustomize.buildOptions: --enable-helm
   params:
-    server.insecure: false
+    server.insecure: true
