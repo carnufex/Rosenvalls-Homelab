@@ -1,7 +1,16 @@
 server:
-  extraArgs: []
+  extraArgs:
+    - --insecure
   ingress:
-    enabled: false
+    enabled: true
+    ingressClassName: cilium
+    annotations: {}
+    hosts:
+      - argo.rosenvall.se
+    paths:
+      - /
+    pathType: Prefix
+    tls: []
 
 configs:
   cm:
