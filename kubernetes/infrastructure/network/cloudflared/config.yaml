@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+  namespace: cloudflare
+data:
+  config.yaml: |
+    # The tunnel token is provided via environment variable, so we don't need credentials-file here.
+    
+    ingress:
+      # Route all traffic for *.rosenvall.se to the Cilium External Gateway
+      - hostname: "*.rosenvall.se"
+        service: https://cilium-gateway-external.gateway.svc.cluster.local:443
+        originRequest:
+          originServerName: "*.rosenvall.se"
+          noTLSVerify: true # Trust the self-signed/internal cert presented by the gateway if needed, or ensure CA is trusted.
+      
+      # Route root domain
+      - hostname: rosenvall.se
+        service: https://cilium-gateway-external.gateway.svc.cluster.local:443
+        originRequest:
+          originServerName: rosenvall.se
+          noTLSVerify: true
+
+      # Catch-all
+      - service: http_status:404
