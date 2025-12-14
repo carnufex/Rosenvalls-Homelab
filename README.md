@@ -100,7 +100,7 @@ Once the bootstrap is complete:
 
 2.  **Access via Gateway**:
     ArgoCD is exposed via the Gateway API.
-    -   **URL**: `https://argo.rosenvall.se` (Requires Cloudflare Tunnel configured)
+    -   **URL**: `https://argocd.rosenvall.se` (Requires Cloudflare Tunnel configured)
     -   **Local Access (Port Forward)**:
         ```powershell
         kubectl -n argocd port-forward svc/argocd-server 8080:443
@@ -110,7 +110,25 @@ Once the bootstrap is complete:
 
 ```powershell
 helm repo add cilium https://helm.cilium.io/
-### 6. Repository Structure
+### 6. Security (Post-Install)
+
+Since the cluster is exposed to the internet via Cloudflare Tunnel, perform these steps immediately:
+
+1.  **Secure Dashboards**:
+    -   Go to Cloudflare Zero Trust -> Access -> Applications.
+    -   Create policies for `argocd.rosenvall.se`, `longhorn.rosenvall.se`, etc.
+    -   Restrict access to your email only.
+
+2.  **Change Default Passwords**:
+    -   **ArgoCD**: Login with the initial password and change it:
+        ```powershell
+        argocd login argocd.rosenvall.se --username admin --grpc-web
+        argocd account update-password
+        kubectl -n argocd delete secret argocd-initial-admin-secret
+        ```
+    -   **Authentik**: Complete the initial setup at `https://authentik.rosenvall.se/if/flow/initial-setup/`.
+
+### 7. Repository Structure
 
 -   `tofu/`: Infrastructure definitions (Proxmox VMs, Talos config).
 -   `kubernetes/`:
