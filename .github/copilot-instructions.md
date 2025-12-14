@@ -1,7 +1,7 @@
 # AI Instructions & Context
 
 ## Project Goal
-Build a resilient, production-grade Kubernetes homelab on Proxmox using GitOps principles based on [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab).
+Build a resilient, production-grade Kubernetes homelab on Proxmox using GitOps principles based on [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab). The source is available in this workspace under theepicsaxguy/homelab.
 The ultimate goal is to learn and understand while setting up a replica of the [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab) project. 
 
 ## Reference Architecture

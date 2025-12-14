@@ -4,4 +4,5 @@ namespace: gateway
 
 resources:
   - namespace.yaml
-  - gateway.yaml
+  - gw-external.yaml
+  - gw-internal.yaml
