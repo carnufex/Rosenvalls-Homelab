@@ -4,5 +4,6 @@ namespace: gateway
 
 resources:
   - namespace.yaml
+  - cert-wildcard.yaml
   - gw-external.yaml
   - gw-internal.yaml

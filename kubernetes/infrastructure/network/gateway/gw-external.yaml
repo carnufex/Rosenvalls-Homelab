@@ -9,6 +9,17 @@ spec:
     annotations:
       io.cilium/lb-ipam-ips: 192.168.1.222
   listeners:
+    - protocol: HTTPS
+      port: 443
+      name: https
+      hostname: "*.rosenvall.se"
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: cert-wildcard
+      allowedRoutes:
+        namespaces:
+          from: All
     - protocol: HTTP
       port: 80
       name: http
