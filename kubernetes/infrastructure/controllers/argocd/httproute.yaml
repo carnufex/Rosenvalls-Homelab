@@ -9,6 +9,7 @@ spec:
       namespace: gateway
   hostnames:
     - argo.rosenvall.se
+    - argocd.rosenvall.se
   rules:
     - matches:
         - path:

@@ -7,6 +7,8 @@ data:
   config.yaml: |
     # The tunnel token is provided via environment variable, so we don't need credentials-file here.
     
+    metrics: 0.0.0.0:2000
+    
     ingress:
       # Route all traffic for *.rosenvall.se to the Cilium External Gateway
       - hostname: "*.rosenvall.se"
