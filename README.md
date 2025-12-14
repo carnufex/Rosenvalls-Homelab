@@ -101,15 +101,13 @@ Once the bootstrap is complete:
 2.  **Access via Gateway**:
     ArgoCD is exposed via the Gateway API.
     -   **URL**: `https://argocd.rosenvall.se` (Requires Cloudflare Tunnel configured)
+        > **Note:** Configure the Cloudflare Tunnel to point directly to the Service URL `http://argocd-server.argocd.svc.cluster.local:80` instead of the Gateway IP, to avoid internal routing issues.
     -   **Local Access (Port Forward)**:
         ```powershell
         kubectl -n argocd port-forward svc/argocd-server 8080:443
         ```
         Open [http://localhost:8080](http://localhost:8080).
 
-
-```powershell
-helm repo add cilium https://helm.cilium.io/
 ### 6. Security (Post-Install)
 
 Since the cluster is exposed to the internet via Cloudflare Tunnel, perform these steps immediately:
