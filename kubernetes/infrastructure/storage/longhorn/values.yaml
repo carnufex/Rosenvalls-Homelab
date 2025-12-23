@@ -99,7 +99,7 @@ resources:
     memory: 128Mi
 
 ingress:
-  enabled: true
+  enabled: false
   ingressClassName: cilium
   host: longhorn.rosenvall.se
   annotations:
