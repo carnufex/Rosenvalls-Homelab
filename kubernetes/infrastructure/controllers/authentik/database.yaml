@@ -28,6 +28,11 @@ spec:
   instances: 2
   imageName: ghcr.io/cloudnative-pg/postgresql:17
 
+  bootstrap:
+    initdb:
+      database: authentik
+      owner: app
+
   storage:
     size: 20Gi
     storageClass: longhorn
