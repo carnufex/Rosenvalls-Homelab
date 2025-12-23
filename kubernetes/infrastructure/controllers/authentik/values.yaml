@@ -1,5 +1,10 @@
+global:
+  imageRegistry: public.ecr.aws
+
 authentik:
   log_level: info
+  image:
+    repository: ghcr.io/goauthentik/server
   
   # Use the secret created by ExternalSecrets
   # The chart will look for AUTHENTIK_SECRET_KEY in the env
@@ -30,7 +35,14 @@ worker:
 postgresql:
   enabled: true
   image:
+    registry: public.ecr.aws
+    repository: bitnami/postgresql
     tag: 15
+  primary:
+    image:
+      registry: public.ecr.aws
+      repository: bitnami/postgresql
+      tag: 15
   auth:
     existingSecret: authentik-secret
     secretKeys:
@@ -42,4 +54,11 @@ redis:
   enabled: true
   architecture: standalone
   image:
+    registry: public.ecr.aws
+    repository: bitnami/redis
     tag: 7.2
+  master:
+    image:
+      registry: public.ecr.aws
+      repository: bitnami/redis
+      tag: 7.2
