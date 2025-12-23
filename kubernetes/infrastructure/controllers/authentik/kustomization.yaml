@@ -5,6 +5,8 @@ namespace: authentik
 resources:
   - namespace.yaml
   - external-secret.yaml
+  - database.yaml
+  - httproute.yaml
 
 helmCharts:
   - name: authentik

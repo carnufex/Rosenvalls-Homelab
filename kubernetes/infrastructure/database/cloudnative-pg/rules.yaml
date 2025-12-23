@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpg-prometheus-rule
+  namespace: cnpg-system
+  labels:
+    prometheus: kube-prometheus
+spec:
+  groups:
+  - name: cnpg
+    rules:
+    - alert: CNPGClusterDegraded
+      annotations:
+        description: Cluster {{ $labels.name }} in namespace {{ $labels.namespace }} is degraded.
+        summary: CNPG Cluster Degraded
+      expr: |
+        cnpg_cluster_status_phase{phase="healthy"} != 1
+      for: 5m
+      labels:
+        severity: warning

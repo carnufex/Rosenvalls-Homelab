@@ -1,0 +1,50 @@
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: authentik-minio-store
+  namespace: authentik
+spec:
+  configuration:
+    destinationPath: s3://homelab-postgres-backups/auth/authentik-postgresql
+    endpointURL: https://truenas.pc-tips.se:9000
+    s3Credentials:
+      accessKeyId:
+        name: longhorn-minio-credentials
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKey:
+        name: longhorn-minio-credentials
+        key: AWS_SECRET_ACCESS_KEY
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: authentik-postgresql
+  namespace: authentik
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/gfs: enabled
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+
+  storage:
+    size: 20Gi
+    storageClass: longhorn
+
+  walStorage:
+    size: 4Gi
+    storageClass: longhorn
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "256MB"

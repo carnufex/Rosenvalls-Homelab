@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - crds/gateway-api
+  - database/cloudnative-pg
   - controllers
   - storage
   - network/cilium

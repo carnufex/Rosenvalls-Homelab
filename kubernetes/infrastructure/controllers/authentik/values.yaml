@@ -1,64 +1,121 @@
 global:
-  imageRegistry: public.ecr.aws
+  nameOverride: ""
+  fullnameOverride: ""
+  namespaceOverride: ""
+  additionalLabels: {}
+  revisionHistoryLimit: 3
+  env: []
+  envFrom:
+    - secretRef:
+        name: authentik-core-secrets
+  volumeMounts:
+    - name: db-creds
+      mountPath: /secrets/authentik
+      readOnly: true
+  volumes:
+    - name: db-creds
+      secret:
+        secretName: authentik-postgresql-app
 
 authentik:
+  secret_key: "env://AUTHENTIK_SECRET_KEY"
+  enabled: true
   log_level: info
-  image:
-    repository: ghcr.io/goauthentik/server
-  
-  # Use the secret created by ExternalSecrets
-  # The chart will look for AUTHENTIK_SECRET_KEY in the env
-  
-server:
-  ingress:
-    enabled: true
-    ingressClassName: cilium
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    hosts:
-      - authentik.rosenvall.se
-    tls:
-      - secretName: authentik-tls
-        hosts:
-          - authentik.rosenvall.se
+  events:
+    context_processors:
+      geoip: /geoip/GeoLite2-City.mmdb
+      asn: /geoip/GeoLite2-ASN.mmdb
+  web:
+    path: /
+  email:
+    host: ""
+    port: 587
+    username: ""
+    password: ""
+    use_tls: false
+    use_ssl: false
+    timeout: 30
+    from: ""
+  outposts:
+    container_image_base: ghcr.io/goauthentik/%(type)s:%(version)s
+  error_reporting:
+    enabled: false
+    environment: "k8s"
+    send_pii: false
+  postgresql:
+    host: authentik-postgresql-rw
+    name: authentik
+    user: file:///secrets/authentik/username
+    password: file:///secrets/authentik/password
+    port: "5432"
+    sslmode: require
+  redis:
+    password: "env://AUTHENTIK_REDIS__PASSWORD"
 
-  # Load secrets from the ExternalSecret
-  envFrom:
-    - secretRef:
-        name: authentik-secret
+blueprints:
+  configMaps:
+    - authentik-blueprints
+  secrets: []
+
+server:
+  enabled: true
+  service:
+    annotations: {}
+    labels: {}
+    type: LoadBalancer
 
 worker:
-  envFrom:
-    - secretRef:
-        name: authentik-secret
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  livenessProbe:
+    timeoutSeconds: 5
+  readinessProbe:
+    timeoutSeconds: 5
+  startupProbe:
+    timeoutSeconds: 5
 
 postgresql:
-  enabled: true
-  image:
-    registry: public.ecr.aws
-    repository: bitnami/postgresql
-    tag: 15
-  primary:
-    image:
-      registry: public.ecr.aws
-      repository: bitnami/postgresql
-      tag: 15
-  auth:
-    existingSecret: authentik-secret
-    secretKeys:
-      adminPasswordKey: postgresql-postgres-password
-      userPasswordKey: postgresql-password
-      replicationPasswordKey: postgresql-password # Using same for simplicity in homelab
+  enabled: false
+
+serviceAccount:
+  create: true
+  annotations: {}
+  serviceAccountSecret:
+    enabled: false
+  fullnameOverride: authentik
+
+geoip:
+  enabled: false
+  editionIds: "GeoLite2-City GeoLite2-ASN"
+  updateInterval: 8
+  accountId: ""
+  licenseKey: ""
+  existingSecret:
+    secretName: ""
+    accountId: "account_id"
+    licenseKey: "license_key"
 
 redis:
   enabled: true
   architecture: standalone
-  image:
-    registry: public.ecr.aws
-    repository: bitnami/redis
-    tag: 7.2
+  auth:
+    enabled: true
+    existingSecret: authentik-core-secrets
+    existingSecretPasswordKey: redis-password
   master:
-    image:
-      registry: public.ecr.aws
-      repository: bitnami/redis
-      tag: 7.2
+    persistence:
+      enabled: true
+      size: 1Gi
+
+prometheus:
+  rules:
+    enabled: true
+
+metrics:
+  enabled: true
