@@ -161,4 +161,6 @@ Efter en lyckad bootstrap bör noden gå vidare och klustret bli hälsosamt.
     kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-redis
     kubectl -n argocd delete pod -l app.kubernetes.io/name=argocd-server
     ```
+-   **Authentik Database**: The `authentik` database is bootstrapped automatically via `database.yaml`. If you see "database does not exist" errors, ensure the `bootstrap.initdb` section is present in the manifest.
+-   **Backups**: Authentik and Longhorn backups require the `longhorn-minio-credentials` secret. You must create an `ExternalSecret` mapping your Minio credentials from Bitwarden to this secret name in both `authentik` and `longhorn-system` namespaces.
 -   **Windows & Kustomize**: `kubectl apply -k` with Helm charts can be flaky on Windows. Prefer `helm template | kubectl apply -f -`.
