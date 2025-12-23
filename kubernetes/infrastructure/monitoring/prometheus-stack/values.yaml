@@ -1,7 +1,7 @@
 grafana:
   persistence:
     enabled: true
-    size: 10Gi
+    size: 5Gi
     storageClassName: longhorn
   
   resources:
@@ -39,7 +39,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 50Gi
+              storage: 20Gi
     resources:
       requests:
         cpu: 500m
