@@ -8,6 +8,8 @@ global:
   envFrom:
     - secretRef:
         name: authentik-core-secrets
+    - secretRef:
+        name: authentik-blueprint-secrets
   volumeMounts:
     - name: db-creds
       mountPath: /secrets/authentik

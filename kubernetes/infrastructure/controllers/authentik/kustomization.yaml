@@ -5,6 +5,7 @@ namespace: authentik
 resources:
   - namespace.yaml
   - external-secret.yaml
+  - external-secret-blueprints.yaml
   - database.yaml
   - httproute.yaml
   - blueprints.yaml

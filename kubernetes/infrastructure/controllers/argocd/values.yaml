@@ -6,6 +6,27 @@ server:
 
 configs:
   cm:
+    create: true
+    url: https://argocd.rosenvall.se
     kustomize.buildOptions: --enable-helm
+    dex.config: |
+      connectors:
+      - config:
+          issuer: https://sso.rosenvall.se/application/o/argocd/
+          clientID: $dex.authentik.clientId
+          clientSecret: $dex.authentik.clientSecret
+          insecureEnableGroups: true
+          scopes:
+            - openid
+            - profile
+            - email
+        name: authentik
+        type: oidc
+        id: authentik
   params:
     server.insecure: true
+  rbac:
+    create: true
+    policy.csv: |
+      g, ArgoCD Admins, role:admin
+      g, ArgoCD Viewers, role:readonly
