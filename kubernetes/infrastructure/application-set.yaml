@@ -75,3 +75,10 @@ spec:
           kind: Cluster
           jsonPointers:
             - /status
+          jqPathExpressions:
+            - .spec.monitoring
+            - .spec.bootstrap.initdb.encoding
+            - .spec.bootstrap.initdb.localeCType
+            - .spec.bootstrap.initdb.localeCollate
+            - .spec.postgresGID
+            - .spec.postgresUID
