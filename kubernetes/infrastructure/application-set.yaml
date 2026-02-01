@@ -49,8 +49,8 @@ spec:
         - group: admissionregistration.k8s.io
           kind: MutatingWebhookConfiguration
           jsonPointers:
-            - /webhooks/0/clientConfig/caBundle
+            - /webhooks/*/clientConfig/caBundle
         - group: admissionregistration.k8s.io
           kind: ValidatingWebhookConfiguration
           jsonPointers:
-            - /webhooks/0/clientConfig/caBundle
+            - /webhooks/*/clientConfig/caBundle
