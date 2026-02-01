@@ -54,3 +54,15 @@ spec:
           kind: ValidatingWebhookConfiguration
           jsonPointers:
             - /webhooks/*/clientConfig/caBundle
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          jsonPointers:
+            - /status
+        - group: gateway.networking.k8s.io
+          kind: HTTPRoute
+          jsonPointers:
+            - /status
+        - group: postgresql.cnpg.io
+          kind: Cluster
+          jsonPointers:
+            - /status
