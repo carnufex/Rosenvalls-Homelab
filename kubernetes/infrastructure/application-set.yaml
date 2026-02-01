@@ -43,9 +43,9 @@ spec:
         - group: external-secrets.io
           kind: ExternalSecret
           jsonPointers:
-            - /spec/data/0/remoteRef/conversionStrategy
-            - /spec/data/0/remoteRef/decodingStrategy
-            - /spec/data/0/remoteRef/metadataPolicy
+            - /spec/data/*/remoteRef/conversionStrategy
+            - /spec/data/*/remoteRef/decodingStrategy
+            - /spec/data/*/remoteRef/metadataPolicy
         - group: admissionregistration.k8s.io
           kind: MutatingWebhookConfiguration
           jsonPointers:
@@ -62,6 +62,11 @@ spec:
           kind: HTTPRoute
           jsonPointers:
             - /status
+            - /spec/parentRefs/*/group
+            - /spec/parentRefs/*/kind
+            - /spec/rules/*/backendRefs/*/group
+            - /spec/rules/*/backendRefs/*/kind
+            - /spec/rules/*/backendRefs/*/weight
         - group: postgresql.cnpg.io
           kind: Cluster
           jsonPointers:
