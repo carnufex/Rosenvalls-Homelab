@@ -1,21 +1,3 @@
----
-apiVersion: barmancloud.cnpg.io/v1
-kind: ObjectStore
-metadata:
-  name: authentik-minio-store
-  namespace: authentik
-spec:
-  configuration:
-    destinationPath: s3://homelab-postgres-backups/auth/authentik-postgresql
-    endpointURL: https://truenas.pc-tips.se:9000
-    s3Credentials:
-      accessKeyId:
-        name: longhorn-minio-credentials
-        key: AWS_ACCESS_KEY_ID
-      secretAccessKey:
-        name: longhorn-minio-credentials
-        key: AWS_SECRET_ACCESS_KEY
----
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
