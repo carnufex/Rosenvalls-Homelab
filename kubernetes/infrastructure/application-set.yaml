@@ -48,25 +48,29 @@ spec:
             - .spec.data[].remoteRef.metadataPolicy
         - group: admissionregistration.k8s.io
           kind: MutatingWebhookConfiguration
-          jsonPointers:
-            - /webhooks/*/clientConfig/caBundle
+          jqPathExpressions:
+            - .webhooks[].clientConfig.caBundle
         - group: admissionregistration.k8s.io
           kind: ValidatingWebhookConfiguration
-          jsonPointers:
-            - /webhooks/*/clientConfig/caBundle
+          jqPathExpressions:
+            - .webhooks[].clientConfig.caBundle
         - group: gateway.networking.k8s.io
           kind: Gateway
           jsonPointers:
             - /status
+          jqPathExpressions:
+            - .spec.listeners[].tls.certificateRefs[].group
+            - .spec.listeners[].tls.certificateRefs[].kind
         - group: gateway.networking.k8s.io
           kind: HTTPRoute
           jsonPointers:
             - /status
-            - /spec/parentRefs/*/group
-            - /spec/parentRefs/*/kind
-            - /spec/rules/*/backendRefs/*/group
-            - /spec/rules/*/backendRefs/*/kind
-            - /spec/rules/*/backendRefs/*/weight
+          jqPathExpressions:
+            - .spec.parentRefs[].group
+            - .spec.parentRefs[].kind
+            - .spec.rules[].backendRefs[].group
+            - .spec.rules[].backendRefs[].kind
+            - .spec.rules[].backendRefs[].weight
         - group: postgresql.cnpg.io
           kind: Cluster
           jsonPointers:
