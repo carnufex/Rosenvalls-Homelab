@@ -38,6 +38,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          - RespectIgnoreDifferences=true
       ignoreDifferences:
         - group: external-secrets.io
           kind: ExternalSecret
@@ -45,3 +46,11 @@ spec:
             - /spec/data/0/remoteRef/conversionStrategy
             - /spec/data/0/remoteRef/decodingStrategy
             - /spec/data/0/remoteRef/metadataPolicy
+        - group: admissionregistration.k8s.io
+          kind: MutatingWebhookConfiguration
+          jsonPointers:
+            - /webhooks/0/clientConfig/caBundle
+        - group: admissionregistration.k8s.io
+          kind: ValidatingWebhookConfiguration
+          jsonPointers:
+            - /webhooks/0/clientConfig/caBundle
