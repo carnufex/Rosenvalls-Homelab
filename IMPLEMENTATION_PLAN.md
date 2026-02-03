@@ -2,7 +2,7 @@
 
 ## Project Goal
 Build a resilient, production-grade Kubernetes homelab on Proxmox using GitOps principles.
-Reference: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab)
+Reference: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab), also available in workspace under ./homelab-main
 
 ## Current Status (2025-11-25)
 - **Infrastructure**: ✅ Provisioned with OpenTofu & Talos Linux.
@@ -22,28 +22,66 @@ Reference: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab)
 - [x] **Install Cert-Manager**: Configured in `kubernetes/infrastructure/controllers/cert-manager`.
 - [x] **Secrets Management**: Installed External Secrets Operator.
 - [x] **Configure Bitwarden Secret Store**: Token configured and secrets syncing.
-- [ ] **Verify Let's Encrypt**: Check if `ClusterIssuer` is issuing valid certificates for `longhorn.rosenvall.se`.
+- [x] **Verify Let's Encrypt**: Check if `ClusterIssuer` is issuing valid certificates for `longhorn.rosenvall.se`.
 
 ### 3. Storage
 - [x] **Install Longhorn**: Distributed block storage for persistent volumes.
 - [x] **Configure Ingress**: `longhorn.rosenvall.se` exposed via Cilium Ingress.
-- [ ] Configure backup targets (e.g., NFS or S3).
+- [x] Configure backup targets (e.g., NFS or S3).
 
-### 4. Authentication (In Progress)
-- [ ] **Install Authentik**: Configured in `kubernetes/infrastructure/controllers/authentik`.
-    - [ ] Create Bitwarden secret `authentik-secrets` with `secret-key` and `postgresql-password`.
-    - [ ] Verify Pods are running.
-    - [ ] Verify Ingress `authentik.rosenvall.se`.
-- [ ] Protect ArgoCD and other apps behind Authentik.
+### 4. Authentication (Completed)
+- [x] **Install Authentik**: Configured in `kubernetes/infrastructure/controllers/authentik`.
+    - [x] Create Bitwarden secret `authentik-secrets` with `secret-key` and `postgresql-password`.
+    - [x] Verify Pods are running.
+    - [x] Verify Ingress `authentik.rosenvall.se`.
+- [x] Protect ArgoCD and other apps behind Authentik.
 
-### 5. Observability
-- [ ] Prometheus/Grafana stack.
-- [ ] Loki for logs.
+### 5. Observability (In Progress)
+- [x] Prometheus/Grafana stack.
+- [ ] **Loki for logs**:
+    - [ ] Create `kubernetes/infrastructure/monitoring/loki-stack`.
+    - [ ] Deploy `loki-stack` Helm Chart (Grafana repo).
+    - [ ] Configure `values.yaml`:
+        - `loki.persistence.enabled`: true (Longhorn).
+        - `promtail.enabled`: true.
+        - `grafana.enabled`: false (Already have one).
+    - [ ] Integrate with existing Grafana (Datasource).
 
-### 6. Applications
-- [ ] Home Assistant
-- [ ] Plex/Jellyfin
-- [ ] ...
+### 6. Applications (Migration Phase)
+> [!IMPORTANT]
+> **Namespace Strategy**: Applications will be grouped by function into namespaces based on their directory name in `kubernetes/applications/`.
+> - `home-automation`: Home Assistant, Hub Central
+> - `media`: Plex, *Arr stack, Deluge, Wireguard
+
+#### Phase 1: Home Automation (`kubernetes/applications/home-automation`)
+- [ ] **Hub Central**
+    - Deployment: `ghcr.io/carnufex/hub-central:latest`
+    - Service: ClusterIP
+    - Ingress: `hub.rosenvall.se` -> Port 80
+- [ ] **Home Assistant**
+    - Deployment: `ghcr.io/home-assistant/home-assistant:stable`
+    - Network: `hostNetwork: true` (Required for discovery/native integrations) OR Service `type: LoadBalancer` (BGP).
+    - Storage: Longhorn PVC (`/config`).
+    - Ingress: `hass.rosenvall.se` (Proxy to host/service).
+
+#### Phase 2: Media Stack (`kubernetes/applications/media`)
+- [ ] **VPN Gateway (Gluetun/Wireguard)**
+    - Use `qdm12/gluetun` or custom Sidecar for robust VPN handling.
+    - **Crucial**: Deluge must route strictly through this.
+- [ ] **Deluge**
+    - **Architecture**: Sidecar container in the *same Pod* as VPN.
+    - Storage: Longhorn PVC (`/config`, `/lagring`).
+    - Ingress: `deluge.rosenvall.se`.
+- [ ] **Examples/Templates**:
+    - `radarr`, `sonarr`, `jackett`, `overseerr`
+    - Standard Deployments with Longhorn PVCs for config.
+    - Shared Media Volume: Either a ReadWriteMany (NFS/Longhorn) PVC or specific mounts. *Longhorn RWM is experimental/heavy, might prefer NFS for media content if available on the network, or separate PVCs if libraries are distinct.*
+    - **Storage Decision**: The user utilizes `${LAGRING}`. If this refers to a NAS, we should use `nfs-client-provisioner` or direct NFS PVs. If it's local disk, we migrate to Longhorn. *Assumption: Use Longhorn for Configs, verify Media storage strategy.*
+- [ ] **Plex**
+    - Deployment: `plexinc/pms-docker:plexpass`
+    - Networking: `hostNetwork: true` preferred for DLNA/Cast.
+    - Resources: GPU Passthrough (Intel/Nvidia) if transcoding needed.
+    - Storage: Mount media volumes.
 
 ## Notes
 - **Access**:
