@@ -36,18 +36,22 @@ Reference: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab), al
     - [x] Verify Ingress `authentik.rosenvall.se`.
 - [x] Protect ArgoCD and other apps behind Authentik.
 
-### 5. Observability (In Progress)
-- [x] Prometheus/Grafana stack.
 - [ ] **Loki for logs**:
-    - [ ] Create `kubernetes/infrastructure/monitoring/loki-stack`.
-    - [ ] Deploy `loki-stack` Helm Chart (Grafana repo).
-    - [ ] Configure `values.yaml`:
+    - [x] Create `kubernetes/infrastructure/monitoring/loki-stack`.
+    - [x] Deploy `loki-stack` Helm Chart (Grafana repo).
+    - [x] Configure `values.yaml`:
         - `loki.persistence.enabled`: true (Longhorn).
         - `promtail.enabled`: true.
         - `grafana.enabled`: false (Already have one).
-    - [ ] Integrate with existing Grafana (Datasource).
+    - [x] Integrate with existing Grafana (Datasource).
 
-### 6. Applications (Migration Phase)
+### 6. Robustness & Disaster Recovery
+- [ ] **Database Backups**:
+    - [ ] Configure CloudNativePG to backup WAL to Minio (S3).
+    - [ ] Verify point-in-time recovery.
+    - [ ] Ensure `loki` has limits to prevent OOM.
+
+### 7. Applications (Migration Phase)
 > [!IMPORTANT]
 > **Namespace Strategy**: Applications will be grouped by function into namespaces based on their directory name in `kubernetes/applications/`.
 > - `home-automation`: Home Assistant, Hub Central
