@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - http-route.yaml
   - s3-external-secret.yaml
+  - recurring-job.yaml
 
 helmCharts:
   - name: longhorn

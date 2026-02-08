@@ -1,0 +1,10 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: authentik-daily-backup
+  namespace: authentik
+spec:
+  schedule: "0 0 3 * * *" # Every day at 03:00
+  backupOwnerReference: self
+  cluster:
+    name: authentik-postgresql
