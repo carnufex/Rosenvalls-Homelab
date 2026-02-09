@@ -12,11 +12,12 @@ spec:
 
   bootstrap:
     recovery:
-      source: authentik-postgresql
+      source: authentik-old-data
 
   externalClusters:
-    - name: authentik-postgresql
+    - name: authentik-old-data
       barmanObjectStore:
+        serverName: "authentik-postgresql"
         destinationPath: "s3://rosenvall-homelab-backup/authentik/"
         endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
         s3Credentials:
@@ -50,7 +51,7 @@ spec:
 
   backup:
     barmanObjectStore:
-      destinationPath: "s3://rosenvall-homelab-backup/authentik/"
+      destinationPath: "s3://rosenvall-homelab-backup/authentik-dr/"
       endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
       s3Credentials:
         accessKeyId:
