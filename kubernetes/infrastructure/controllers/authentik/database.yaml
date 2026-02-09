@@ -26,9 +26,6 @@ spec:
           secretAccessKey:
             name: s3-credentials
             key: ACCESS_SECRET_KEY
-        s3Config:
-          forcePathStyle: true
-          region: auto
 
   storage:
     size: 20Gi
@@ -64,6 +61,3 @@ spec:
           key: ACCESS_SECRET_KEY
       wal:
         compression: gzip
-      s3Config:
-        forcePathStyle: true
-        region: auto
