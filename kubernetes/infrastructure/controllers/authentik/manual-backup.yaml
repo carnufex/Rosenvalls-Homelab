@@ -1,0 +1,8 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Backup
+metadata:
+  name: authentik-manual-backup
+  namespace: authentik
+spec:
+  cluster:
+    name: authentik-postgresql

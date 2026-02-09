@@ -1,0 +1,48 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: authentik-postgresql
+  namespace: authentik
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+
+  # Recovery bootstrap
+  bootstrap:
+    recovery:
+      source: authentik-postgresql
+
+  externalClusters:
+    - name: authentik-postgresql
+      barmanObjectStore:
+        destinationPath: "s3://rosenvall-homelab-backup/authentik/"
+        endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
+        s3Credentials:
+          accessKeyId:
+            name: s3-credentials
+            key: ACCESS_KEY_ID
+          secretAccessKey:
+            name: s3-credentials
+            key: ACCESS_SECRET_KEY
+
+  storage:
+    size: 20Gi
+    storageClass: longhorn
+
+  walStorage:
+    size: 4Gi
+    storageClass: longhorn
+
+  backup:
+    barmanObjectStore:
+      destinationPath: "s3://rosenvall-homelab-backup/authentik/"
+      endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
+      s3Credentials:
+        accessKeyId:
+          name: s3-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: s3-credentials
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip
