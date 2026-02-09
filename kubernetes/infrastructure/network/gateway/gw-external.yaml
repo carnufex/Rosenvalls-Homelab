@@ -15,7 +15,8 @@ spec:
       hostname: "*.rosenvall.se"
       tls:
         certificateRefs:
-          - kind: Secret
+          - group: ""
+            kind: Secret
             name: cert-wildcard
       allowedRoutes:
         namespaces:

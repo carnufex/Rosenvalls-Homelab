@@ -40,6 +40,11 @@ spec:
           - ServerSideApply=true
           - RespectIgnoreDifferences=true
       ignoreDifferences:
+        - group: apps
+          kind: StatefulSet
+          jqPathExpressions:
+            - .spec.volumeClaimTemplates[].apiVersion
+            - .spec.volumeClaimTemplates[].kind
         - group: external-secrets.io
           kind: ExternalSecret
           jqPathExpressions:
