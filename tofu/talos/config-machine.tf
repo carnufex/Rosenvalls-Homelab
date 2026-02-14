@@ -5,17 +5,26 @@ data "talos_machine_configuration" "this" {
   machine_type     = each.value.machine_type
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   talos_version    = var.cluster.talos_version
-  config_patches = [
-    templatefile("${path.module}/machine-config/${each.value.machine_type}.yaml.tftpl", {
-      disks          = each.value.disks
-      cilium_values  = var.cilium.values
-      cilium_install = var.cilium.install
-      vip            = var.cluster.endpoint
-      hostname       = each.key
-      node_ip        = each.value.ip
-      gateway        = var.cluster.gateway
-    })
-  ]
+  config_patches = concat(
+    [
+      templatefile("${path.module}/machine-config/${each.value.machine_type}.yaml.tftpl", {
+        disks              = each.value.disks
+        cilium_values      = var.cilium.values
+        cilium_install     = var.cilium.install
+        vip                = var.cluster.endpoint
+        hostname           = each.key
+        node_ip            = each.value.ip
+        gateway            = var.cluster.gateway
+        igpu               = each.value.igpu
+        gpu_node_exclusive = lookup(each.value, "gpu_node_exclusive", false)
+      })
+    ],
+    # Conditionally add GPU patches for GPU-enabled worker nodes
+    lookup(each.value, "igpu", false) ? [
+      file("${path.module}/patches/gpu-modules.yaml"),
+      file("${path.module}/patches/gpu-runtime.yaml")
+    ] : []
+  )
 }
 
 resource "talos_machine_configuration_apply" "this" {

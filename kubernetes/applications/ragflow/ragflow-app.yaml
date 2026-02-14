@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ragflow-helm
+  namespace: argocd
+spec:
+  project: applications
+  source:
+    repoURL: https://github.com/infiniflow/ragflow.git
+    targetRevision: v0.24.0
+    path: helm
+    helm:
+      releaseName: ragflow
+      valuesObject:
+        env:
+          # Use Infinity as the doc engine (lighter than Elasticsearch)
+          DOC_ENGINE: infinity
+          TZ: "Europe/Stockholm"
+        ragflow:
+          service:
+            type: ClusterIP
+        # Persistent storage configuration - uses default StorageClass (Longhorn)
+        infinity:
+          storage:
+            capacity: 10Gi
+        mysql:
+          storage:
+            capacity: 5Gi
+        redis:
+          storage:
+            capacity: 2Gi
+        minio:
+          storage:
+            capacity: 10Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ragflow
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true

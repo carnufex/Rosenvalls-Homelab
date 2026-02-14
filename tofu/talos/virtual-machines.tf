@@ -9,6 +9,14 @@ resource "proxmox_virtual_environment_vm" "this" {
     enabled = true
   }
 
+  # GPU nodes need virtio VGA instead of default
+  dynamic "vga" {
+    for_each = each.value.igpu ? [1] : []
+    content {
+      type = "virtio"
+    }
+  }
+
   cpu {
     cores = each.value.cpu
     type  = "host"
@@ -23,7 +31,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     interface    = "scsi0"
     size         = 20
     file_format  = "raw"
-    file_id      = proxmox_virtual_environment_download_file.this.id
+    file_id      = proxmox_virtual_environment_download_file.this[local.node_schematic_key[each.key]].id
   }
 
   dynamic "disk" {
@@ -52,4 +60,27 @@ resource "proxmox_virtual_environment_vm" "this" {
   operating_system {
     type = "l26" # Linux 2.6 - 5.x Kernel
   }
+
+  # GPU configuration is handled manually in Proxmox GUI due to API permission restrictions
+  # The lifecycle block ensures Tofu doesn't try to remove the manually added GPU
+  lifecycle {
+     ignore_changes = [
+       hostpci,
+       kvm_arguments
+     ]
+  }
+
+  # PCI passthrough configuration commented out to allow manual GUI configuration
+  # dynamic "hostpci" {
+  #   for_each = each.value.igpu && length(each.value.gpu_devices) > 0 ? {
+  #     for i, bdf in each.value.gpu_devices : i => bdf
+  #   } : {}
+  #   content {
+  #     device = "hostpci${hostpci.key}"
+  #     id     = hostpci.value
+  #     pcie   = true
+  #     rombar = true
+  #     xvga   = tonumber(hostpci.key) == 0
+  #   }
+  # }
 }

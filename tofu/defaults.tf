@@ -1,12 +1,19 @@
 variable "defaults_worker" {
   description = "Default configuration for worker nodes"
   type = object({
-    host_node     = optional(string)
-    machine_type  = string
-    cpu           = number
-    cpu_units     = optional(number)
-    ram_dedicated = number
-    igpu          = bool
+    host_node          = optional(string)
+    machine_type       = string
+    cpu                = number
+    cpu_units          = optional(number)
+    ram_dedicated      = number
+    igpu               = bool
+    gpu_node_exclusive = bool
+    gpu_devices        = list(string)
+    gpu_device_meta = map(object({
+      id           = string
+      subsystem_id = string
+      iommu_group  = number
+    }))
     disks = map(object({
       device      = string
       size        = string
@@ -16,11 +23,14 @@ variable "defaults_worker" {
     }))
   })
   default = {
-    machine_type  = "worker"
-    cpu           = 4
-    cpu_units     = 1024
-    ram_dedicated = 8192
-    igpu          = false
+    machine_type       = "worker"
+    cpu                = 4
+    cpu_units          = 1024
+    ram_dedicated      = 8192
+    igpu               = false
+    gpu_node_exclusive = false
+    gpu_devices        = []
+    gpu_device_meta    = {}
     disks = {
       longhorn = {
         device      = "/dev/sdb"
@@ -36,12 +46,19 @@ variable "defaults_worker" {
 variable "defaults_controlplane" {
   description = "Default configuration for control plane nodes"
   type = object({
-    host_node     = optional(string)
-    machine_type  = string
-    cpu           = number
-    cpu_units     = optional(number)
-    ram_dedicated = number
-    igpu          = bool
+    host_node          = optional(string)
+    machine_type       = string
+    cpu                = number
+    cpu_units          = optional(number)
+    ram_dedicated      = number
+    igpu               = bool
+    gpu_node_exclusive = bool
+    gpu_devices        = list(string)
+    gpu_device_meta = map(object({
+      id           = string
+      subsystem_id = string
+      iommu_group  = number
+    }))
     disks = map(object({
       device      = string
       size        = string
@@ -51,11 +68,14 @@ variable "defaults_controlplane" {
     }))
   })
   default = {
-    machine_type  = "controlplane"
-    cpu           = 2
-    cpu_units     = 1024
-    ram_dedicated = 4096
-    igpu          = false
-    disks         = {}
+    machine_type       = "controlplane"
+    cpu                = 2
+    cpu_units          = 1024
+    ram_dedicated      = 4096
+    igpu               = false
+    gpu_node_exclusive = false
+    gpu_devices        = []
+    gpu_device_meta    = {}
+    disks              = {}
   }
 }

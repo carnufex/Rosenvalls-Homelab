@@ -8,6 +8,13 @@ cluster:
 machine:
   nodeLabels:
     node.longhorn.io/create-default-disk: "true"
+%{ if igpu }
+    gpu: "true"
+%{ endif }
+%{ if igpu && gpu_node_exclusive }
+  nodeTaints:
+    gpu: "true:NoSchedule"
+%{ endif }
   network:
     hostname: ${hostname}
     interfaces:

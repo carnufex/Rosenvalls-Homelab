@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ns.yaml
+
+helmCharts:
+  - name: gpu-operator
+    repo: https://helm.ngc.nvidia.com/nvidia
+    version: v25.10.1
+    releaseName: gpu-operator
+    includeCRDs: true
+    namespace: gpu-operator
+    valuesInline:
+      driver:
+        # Talos uses pre-installed NVIDIA kernel modules via system extensions
+        # so we disable the in-cluster driver compilation
+        enabled: false
+      toolkit:
+        # The NVIDIA container toolkit is also pre-installed in the Talos image
+        enabled: false
+      # Tolerate our GPU taint so the operator pods can schedule on GPU nodes
+      tolerations:
+        - key: "gpu"
+          operator: "Exists"
+          effect: "NoSchedule"

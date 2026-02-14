@@ -50,7 +50,14 @@ variable "nodes_config" {
     vm_id         = optional(number)
     ram_dedicated = optional(number)
     cpu           = optional(number)
-    igpu          = optional(bool)
+    igpu               = optional(bool)
+    gpu_node_exclusive = optional(bool)
+    gpu_devices        = optional(list(string))
+    gpu_device_meta = optional(map(object({
+      id           = string
+      subsystem_id = string
+      iommu_group  = number
+    })))
     disks = optional(map(object({
       device      = optional(string)
       size        = optional(string)
