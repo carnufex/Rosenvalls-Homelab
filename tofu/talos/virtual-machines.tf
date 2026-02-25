@@ -4,6 +4,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   name      = each.key
   node_name = each.value.host_node
   vm_id     = each.value.vm_id
+  machine   = "q35"
 
   agent {
     enabled = true
