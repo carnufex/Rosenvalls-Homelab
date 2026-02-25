@@ -64,7 +64,7 @@ server:
   service:
     annotations: {}
     labels: {}
-    type: LoadBalancer
+    type: ClusterIP
 
 worker:
   enabled: true
