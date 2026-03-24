@@ -1,8 +1,6 @@
 grafana:
   persistence:
-    enabled: true
-    size: 5Gi
-    storageClassName: longhorn
+    enabled: false
   
   resources:
     requests:
@@ -30,12 +28,23 @@ prometheusOperator:
       cpu: 200m
       memory: 256Mi
 
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn-observability
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
 prometheus:
   prometheusSpec:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: longhorn
+          storageClassName: longhorn-observability
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:

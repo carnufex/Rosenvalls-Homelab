@@ -114,6 +114,7 @@ redis:
     persistence:
       enabled: true
       size: 1Gi
+      storageClass: longhorn-critical
 
 prometheus:
   rules:

@@ -31,7 +31,7 @@ data:
           invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
           client_type: confidential
           redirect_uris:
-            - url: https://argocd.rosenvall.se/auth/callback
+            - url: https://argo.rosenvall.se/api/dex/callback
               matching_mode: strict
           client_id: !Env ARGOCD_CLIENT_ID
           client_secret: !Env ARGOCD_CLIENT_SECRET

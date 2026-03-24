@@ -3,6 +3,8 @@ kind: Kustomization
 
 resources:
   - argocd
-  - authentik
+  - authentik-db-prereqs
+  - authentik-runtime
+  - authentik-db-ops
   - cert-manager
   - external-secrets

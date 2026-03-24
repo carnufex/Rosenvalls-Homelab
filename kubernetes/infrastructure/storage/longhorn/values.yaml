@@ -3,8 +3,9 @@ crdConversion:
 
 metrics:
   serviceMonitor:
-    enabled: false
-    additionalLabels: {}
+    enabled: true
+    additionalLabels:
+      release: kube-prometheus-stack
     annotations: {}
     interval: '30s'
     scrapeTimeout: '10s'
@@ -81,6 +82,7 @@ defaultSettings:
   backupstorePollInterval: 300
   replicaSoftAntiAffinity: false
   concurrentAutomaticEngineUpgradePerNodeLimit: 3
+  allowVolumeCreationWithDegradedAvailability: false
 
 persistence:
   defaultClass: true

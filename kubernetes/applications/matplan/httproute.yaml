@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: matplan
+  namespace: matplan
+spec:
+  parentRefs:
+    - name: external
+      namespace: gateway
+  hostnames:
+    - matplan.rosenvall.se
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: matplan-api
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: matplan-frontend
+          port: 8080

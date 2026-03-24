@@ -12,7 +12,10 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
-      - dns01:
+      - selector:
+          dnsZones:
+            - rosenvall.se
+        dns01:
           cloudflare:
             email: christopher.rosenvall@gmail.com
             apiTokenSecretRef:
@@ -30,7 +33,10 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-      - dns01:
+      - selector:
+          dnsZones:
+            - rosenvall.se
+        dns01:
           cloudflare:
             email: christopher.rosenvall@gmail.com
             apiTokenSecretRef:

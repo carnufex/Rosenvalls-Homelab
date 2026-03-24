@@ -5,8 +5,10 @@ metadata:
   namespace: authentik
 spec:
   parentRefs:
-    - name: internal-gateway
-      namespace: network
+    - name: internal
+      namespace: gateway
+    - name: external
+      namespace: gateway
   hostnames:
     - authentik.rosenvall.se
   rules:

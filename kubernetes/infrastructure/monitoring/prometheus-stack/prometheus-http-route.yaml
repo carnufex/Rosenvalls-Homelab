@@ -5,8 +5,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: internal-gateway
-      namespace: network
+    - name: internal
+      namespace: gateway
   hostnames:
     - prometheus.rosenvall.se
   rules:

@@ -1,0 +1,51 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: authentik-postgresql
+  namespace: authentik
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/gfs: enabled
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+
+  bootstrap:
+    initdb:
+      database: authentik
+      owner: authentik
+
+  storage:
+    size: 20Gi
+    storageClass: longhorn-critical
+
+  walStorage:
+    size: 4Gi
+    storageClass: longhorn-critical
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: "1"
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "256MB"
+
+  backup:
+    barmanObjectStore:
+      destinationPath: "s3://rosenvall-homelab-backup/authentik-dr/"
+      endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
+      s3Credentials:
+        accessKeyId:
+          name: s3-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: s3-credentials
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip

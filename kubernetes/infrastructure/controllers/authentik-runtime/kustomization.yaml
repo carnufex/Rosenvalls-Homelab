@@ -3,12 +3,7 @@ kind: Kustomization
 namespace: authentik
 
 resources:
-  - namespace.yaml
-  - external-secret.yaml
-  - s3-external-secret.yaml
   - external-secret-blueprints.yaml
-  - database.yaml
-  - scheduled-backup.yaml
   - httproute.yaml
   - blueprints.yaml
 

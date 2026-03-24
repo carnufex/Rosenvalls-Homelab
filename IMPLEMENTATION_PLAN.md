@@ -1,5 +1,7 @@
 # Kubernetes Homelab Setup - Implementation Plan
 
+> Historical planning artifact. Treat `README.md`, `docs/cluster-operations.md`, `AGENTS.md`, and the manifests under `kubernetes/` as the current source of truth.
+
 ## Project Goal
 Build a resilient, production-grade Kubernetes homelab on Proxmox using GitOps principles.
 Reference: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab), also available in workspace under ./homelab-main

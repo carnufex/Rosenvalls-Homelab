@@ -4,15 +4,22 @@ This directory contains the configuration for Longhorn, a distributed block stor
 
 ## Configuration
 
--   **Namespace**: `longhorn-system`
--   **Replicas**: Configured to `1` initially (since we have 1 worker node).
--   **Ingress**: Exposed at `longhorn.rosenvall.se` via Cloudflare Tunnel (managed by Cilium/Ingress).
+- Namespace: `longhorn-system`
+- Default replica policy: `2`
+- Metrics: ServiceMonitor enabled for `kube-prometheus-stack`
+- UI route: `https://longhorn.rosenvall.se` (internal gateway)
 
-## Usage
+## Storage Profiles
 
-Longhorn provides the default `StorageClass` for the cluster.
-When a PVC is created without specifying a storage class, Longhorn will provision the volume.
+- `longhorn` (default): general workloads
+- `longhorn-critical`: critical stateful data, retained volumes, replica count 2
+- `longhorn-observability`: monitoring data, replica count 2
 
-## Access
+## Backup
 
-The Longhorn UI is available at: `https://longhorn.rosenvall.se`
+- Backup target is configured to R2 (`defaultBackupStore`).
+- Longhorn recurring backup job runs daily at 02:00.
+
+## Recovery Expectations
+
+For filesystem inconsistencies, snapshot or back up first and then perform recovery through GitOps changes and runbook steps.

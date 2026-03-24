@@ -1,52 +1,35 @@
 # Cloudflared Setup
 
-This directory contains the configuration for the Cloudflare Tunnel.
+This directory contains the in-cluster Cloudflare Tunnel deployment.
 
-## Prerequisites
+## Current model
 
-1.  A Cloudflare account.
-2.  A domain managed by Cloudflare.
+- The tunnel token lives in Bitwarden.
+- External Secrets materializes that token into `cloudflared-secret` in the `cloudflare` namespace.
+- The tunnel forwards `*.rosenvall.se` and `rosenvall.se` to `https://cilium-gateway-external.gateway.svc.cluster.local:443`.
+- The external Gateway then dispatches traffic to app-level `HTTPRoute` resources.
 
-## Setup Instructions
+This means the tunnel depends on the full secret chain being healthy:
 
-1.  **Create a Tunnel**:
-    Go to the [Cloudflare Zero Trust Dashboard](https://one.dash.cloudflare.com/).
-    Navigate to **Networks** > **Tunnels**.
-    Create a new tunnel (select "Cloudflared" as the connector).
-    Name it (e.g., `homelab`).
+1. `bitwarden-access-token` must exist in `external-secrets`.
+2. `ClusterSecretStore/bitwarden-secretsmanager` must be `Ready`.
+3. `ExternalSecret/cloudflared-tunnel-token` must create `cloudflared-secret`.
+4. `Deployment/cloudflared` can then start successfully.
 
-2.  **Get the Token**:
-    After creating the tunnel, you will see a command to install the connector.
-    Copy the token from that command. It looks like a long base64 string following `--token`.
+## Setup
 
-3.  **Store Token in Bitwarden**:
-    Create a new item in your Bitwarden project.
-    Add a hidden field named `TUNNEL_TOKEN` with the token value.
-    Copy the Item UUID.
+1. Create the tunnel in Cloudflare Zero Trust.
+2. Store the tunnel token in Bitwarden.
+3. Put the Bitwarden item UUID in `external-secret.yaml`.
+4. Ensure the bootstrap secret `bitwarden-access-token` exists in the cluster.
 
-4.  **Configure External Secret**:
-    Update `external-secret.yaml` with the Item UUID in the `remoteRef.key` field.
+## Break-glass recovery
 
+If Bitwarden or External Secrets is down and you need the tunnel back temporarily, you can create the runtime secret directly:
 
-3.  **Create the Secret**:
-    Run the following command in your terminal (replace `<YOUR_TOKEN>` with the actual token):
+```powershell
+kubectl create namespace cloudflare --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n cloudflare create secret generic cloudflared-secret --from-literal=TUNNEL_TOKEN=<token> --dry-run=client -o yaml | kubectl apply -f -
+```
 
-    ```powershell
-    kubectl create namespace cloudflare --dry-run=client -o yaml | kubectl apply -f -
-    kubectl -n cloudflare create secret generic cloudflared-secret --from-literal=TUNNEL_TOKEN=<YOUR_TOKEN>
-    ```
-
-4.  **Configure Ingress**:
-    In the Cloudflare Dashboard, configure the "Public Hostname" for the tunnel.
-    - **Service**: `http://traefik.kube-system.svc.cluster.local:80` (or whatever ingress controller you use).
-    
-    *Note: Since we are using Cilium, we might not have an Ingress Controller set up yet unless we enabled Cilium Ingress or installed Traefik/Nginx. If using Cilium Ingress, point it to the Cilium Ingress service.*
-
-    If you just want to expose ArgoCD directly for now:
-    - **Hostname**: `argocd.yourdomain.com`
-    - **Service**: `https://argocd-server.argocd.svc.cluster.local:443`
-    - **Additional Settings**: Enable "No TLS Verify" (since ArgoCD uses self-signed certs).
-
-## Deployment
-
-The `cloudflared` deployment in this directory will automatically connect using the token provided in the secret.
+Backfill that state to Bitwarden and External Secrets afterward so GitOps remains the source of truth.

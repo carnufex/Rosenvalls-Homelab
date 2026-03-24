@@ -13,6 +13,8 @@ spec:
   bootstrap:
     recovery:
       source: authentik-old-data
+      database: authentik
+      owner: authentik
 
   externalClusters:
     - name: authentik-old-data
@@ -30,11 +32,11 @@ spec:
 
   storage:
     size: 20Gi
-    storageClass: longhorn
+    storageClass: longhorn-critical
 
   walStorage:
     size: 4Gi
-    storageClass: longhorn
+    storageClass: longhorn-critical
 
   resources:
     requests:
@@ -42,7 +44,7 @@ spec:
       cpu: 200m
     limits:
       memory: 1Gi
-      cpu: '1'
+      cpu: "1"
 
   postgresql:
     parameters:

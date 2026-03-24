@@ -7,6 +7,8 @@ resources:
   - http-route.yaml
   - s3-external-secret.yaml
   - recurring-job.yaml
+  - storage-class-critical.yaml
+  - storage-class-observability.yaml
 
 helmCharts:
   - name: longhorn
