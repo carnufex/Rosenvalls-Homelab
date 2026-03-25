@@ -25,7 +25,7 @@ spec:
         path: '{{.path.path}}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: default
+        namespace: '{{ if eq .path.basename "argocd" }}argocd{{ else if or (eq .path.basename "authentik-db-prereqs") (eq .path.basename "authentik-runtime") (eq .path.basename "authentik-db-ops") }}authentik{{ else if eq .path.basename "cert-manager" }}cert-manager{{ else if eq .path.basename "external-secrets" }}external-secrets{{ else if eq .path.basename "cloudflared" }}cloudflare{{ else if eq .path.basename "gateway" }}gateway{{ else if eq .path.basename "longhorn" }}longhorn-system{{ else if eq .path.basename "cloudnative-pg" }}cnpg-system{{ else if or (eq .path.basename "loki-stack") (eq .path.basename "prometheus-stack") }}monitoring{{ else }}default{{ end }}'
       syncPolicy:
         automated:
           prune: true

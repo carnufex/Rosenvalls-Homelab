@@ -7,10 +7,11 @@ data:
   ASPNETCORE_ENVIRONMENT: Staging
   ASPNETCORE_URLS: http://+:8080
   Cors__AllowedOrigins__0: https://matplan.rosenvall.se
-  Database__ApplyMigrations: "false"
+  Database__ApplyMigrations: "true"
   Database__SeedDemoData: "false"
   DataProtection__KeysPath: /var/lib/matplan/dpkeys
   FeatureFlags__RecipeAssistantEnabled: "false"
   FeatureFlags__VoiceAssistantEnabled: "false"
   FeatureFlags__VoiceWakeWordEnabled: "false"
+  GoogleAuth__ClientId: 752703847113-sk82lb3mb0p0snl8m2s7pmvemac74p9n.apps.googleusercontent.com
   GoogleAuth__RedirectUri: https://matplan.rosenvall.se/api/auth/google/callback

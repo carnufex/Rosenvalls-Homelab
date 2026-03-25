@@ -1,0 +1,39 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: matplan-postgresql
+  namespace: matplan
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/gfs: enabled
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+
+  bootstrap:
+    initdb:
+      database: matplan
+      owner: matplan
+      secret:
+        name: matplan-postgresql-bootstrap
+
+  storage:
+    size: 10Gi
+    storageClass: longhorn-critical
+
+  walStorage:
+    size: 2Gi
+    storageClass: longhorn-critical
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"

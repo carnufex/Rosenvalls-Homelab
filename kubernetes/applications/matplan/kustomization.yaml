@@ -4,10 +4,6 @@ kind: Kustomization
 resources:
   - ns.yaml
   - configmap.yaml
-  - externalsecret.yaml
   - data-protection-pvc.yaml
-  - api-deployment.yaml
-  - api-service.yaml
-  - frontend-deployment.yaml
-  - frontend-service.yaml
-  - httproute.yaml
+  - database-bootstrap-secret.yaml
+  - database.yaml
