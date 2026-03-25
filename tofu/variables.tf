@@ -45,6 +45,7 @@ variable "nodes_config" {
   type = map(object({
     host_node     = optional(string)
     machine_type  = string
+    boot_disk_size_gib = optional(number)
     ip            = string
     mac_address   = optional(string)
     vm_id         = optional(number)

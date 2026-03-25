@@ -25,6 +25,7 @@ variable "nodes" {
   type = map(object({
     host_node     = string
     machine_type  = string
+    boot_disk_size_gib = number
     datastore_id  = optional(string)
     ip            = string
     mac_address   = optional(string)

@@ -14,6 +14,12 @@ This repository manages the full stack:
 - External Secrets syncs runtime secrets from Bitwarden.
 - Longhorn provides persistent storage.
 
+Node disk layout matters:
+
+- The Talos boot disk backs the `EPHEMERAL` volume used by kubelet, containerd, logs, and CNPG init jobs.
+- The separate worker `longhorn` disk only backs Longhorn data under `/var/lib/longhorn`.
+- New nodes default to a `64 GiB` boot disk via `boot_disk_size_gib` so stateful bootstrap jobs do not compete for a tiny root disk.
+
 ## Bootstrap
 
 ### Prerequisites
@@ -170,3 +176,9 @@ talosctl --nodes 192.168.1.201 --endpoints 192.168.1.201 bootstrap
 ### Storage issues
 
 Grafana has already shown a Longhorn-backed filesystem inconsistency once. Treat PVC repair as a separate recovery step after the secret and routing chain is green. See `docs/cluster-operations.md` for the validation order before making storage changes.
+
+### Node root disk pressure
+
+If stateful workloads fail with `ephemeral-storage` or `DiskPressure`, check the Talos boot disk before blaming Longhorn. Longhorn capacity and kubelet/containerd capacity are separate concerns in this cluster design.
+
+For new nodes, set `boot_disk_size_gib` in `tofu/terraform.tfvars` if you want to override the `64 GiB` default. Existing nodes keep their already-provisioned Talos `EPHEMERAL` volume, so increasing the VM disk in Git is a forward fix; current nodes need a controlled rebuild or reprovisioning event to consume the larger boot disk.

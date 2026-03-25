@@ -3,6 +3,7 @@ variable "defaults_worker" {
   type = object({
     host_node          = optional(string)
     machine_type       = string
+    boot_disk_size_gib = number
     cpu                = number
     cpu_units          = optional(number)
     ram_dedicated      = number
@@ -24,6 +25,7 @@ variable "defaults_worker" {
   })
   default = {
     machine_type       = "worker"
+    boot_disk_size_gib = 64
     cpu                = 4
     cpu_units          = 1024
     ram_dedicated      = 8192
@@ -48,6 +50,7 @@ variable "defaults_controlplane" {
   type = object({
     host_node          = optional(string)
     machine_type       = string
+    boot_disk_size_gib = number
     cpu                = number
     cpu_units          = optional(number)
     ram_dedicated      = number
@@ -69,6 +72,7 @@ variable "defaults_controlplane" {
   })
   default = {
     machine_type       = "controlplane"
+    boot_disk_size_gib = 64
     cpu                = 2
     cpu_units          = 1024
     ram_dedicated      = 4096

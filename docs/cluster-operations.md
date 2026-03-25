@@ -116,6 +116,18 @@ Storage class intent:
 - `longhorn-critical`: stateful critical data (for example CNPG)
 - `longhorn-observability`: monitoring data (Prometheus/Alertmanager)
 
+Talos node storage intent:
+
+- The VM boot disk backs the Talos `EPHEMERAL` volume, which is where kubelet/containerd image layers, logs, and other transient workload data live.
+- The separate worker `longhorn` disk backs only Longhorn replica data under `/var/lib/longhorn`.
+- If a node reports `DiskPressure`, inspect the root/ephemeral path even if Longhorn still shows healthy free capacity.
+
+Current provisioning contract:
+
+- New nodes default to `boot_disk_size_gib = 64`.
+- Override per-node in `tofu/terraform.tfvars` when needed.
+- Existing nodes do not automatically re-provision Talos `EPHEMERAL`; plan a controlled node replacement if you need the larger boot disk to take effect.
+
 If a volume shows filesystem corruption, snapshot/backup first, then execute the documented restore path through GitOps changes.
 
 ## GitOps Notes
