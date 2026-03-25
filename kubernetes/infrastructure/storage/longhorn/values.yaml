@@ -76,7 +76,9 @@ defaultSettings:
   defaultDataPath: /var/lib/longhorn/
   autoDeletePodWhenVolumeDetachedUnexpectedly: true
   autoSalvage: true
-  replicaZoneSoftAntiAffinity: false
+  # Single-zone homelab: nodes without topology.kubernetes.io/zone are treated as the same zone.
+  # Keep zone anti-affinity soft so 2-replica volumes can still place one replica per worker.
+  replicaZoneSoftAntiAffinity: true
   concurrentReplicaRebuildPerNodeLimit: 1
   replicaReplenishmentWaitInterval: 600
   backupstorePollInterval: 300
