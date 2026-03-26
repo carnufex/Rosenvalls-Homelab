@@ -4,5 +4,8 @@ resources:
   - namespace.yaml
   - deployment.yaml
   - external-secret.yaml
-  - config.yaml
 namespace: cloudflare
+configMapGenerator:
+  - name: cloudflared-config
+    files:
+      - config.yaml=tunnel-config.yaml

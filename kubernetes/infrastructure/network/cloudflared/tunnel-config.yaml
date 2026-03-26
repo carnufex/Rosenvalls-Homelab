@@ -1,0 +1,21 @@
+# The tunnel token is provided via environment variable, so we don't need credentials-file here.
+
+metrics: 0.0.0.0:2000
+
+ingress:
+  # Route all traffic for *.rosenvall.se to the Cilium External Gateway.
+  - hostname: "*.rosenvall.se"
+    service: https://cilium-gateway-external.gateway.svc.cluster.local:443
+    originRequest:
+      matchSNItoHost: true
+      noTLSVerify: true
+
+  # Route root domain.
+  - hostname: rosenvall.se
+    service: https://cilium-gateway-external.gateway.svc.cluster.local:443
+    originRequest:
+      originServerName: rosenvall.se
+      noTLSVerify: true
+
+  # Catch-all.
+  - service: http_status:404
