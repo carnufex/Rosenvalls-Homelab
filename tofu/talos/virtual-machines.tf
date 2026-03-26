@@ -69,7 +69,10 @@ resource "proxmox_virtual_environment_vm" "this" {
   lifecycle {
      ignore_changes = [
        hostpci,
-       kvm_arguments
+       kvm_arguments,
+       # Once the boot disk is created, a refreshed shared Talos image should not
+       # force every VM to be replaced. Planned reprovisioning still uses -replace.
+       disk[0].file_id
      ]
   }
 

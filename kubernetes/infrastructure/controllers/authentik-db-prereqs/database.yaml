@@ -20,7 +20,7 @@ spec:
     storageClass: longhorn-critical
 
   walStorage:
-    size: 4Gi
+    size: 8Gi
     storageClass: longhorn-critical
 
   resources:
@@ -38,7 +38,7 @@ spec:
 
   backup:
     barmanObjectStore:
-      destinationPath: "s3://rosenvall-homelab-backup/authentik-dr/"
+      destinationPath: "s3://rosenvall-homelab-backup/authentik/live/"
       endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
       s3Credentials:
         accessKeyId:

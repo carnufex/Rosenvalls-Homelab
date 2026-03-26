@@ -34,13 +34,37 @@ Install these tools locally:
 ### Provision infrastructure
 
 ```powershell
-cd tofu
-Copy-Item terraform.tfvars.example terraform.tfvars
+Copy-Item .\tofu\terraform.tfvars.example .\tofu\terraform.tfvars
+cd .\tofu
 tofu init
+tofu plan
 tofu apply
+cd ..
 ```
 
-This generates `tofu/output/kubeconfig` and `tofu/output/talosconfig`.
+`tofu` writes access artifacts into `.\tofu\output\`, so the rest of this README assumes you are back at repo root after the infra step.
+
+Fresh-cluster expectation:
+
+- `tofu plan` should be a clean create-only plan
+- `tofu apply` should create the VMs and generate `tofu/output/kubeconfig` plus `tofu/output/talosconfig`
+
+Day-2 expectation:
+
+- if existing nodes still boot from `20 GiB`, pin `boot_disk_size_gib = 20` per node in the local `terraform.tfvars` before `tofu apply`
+- only remove that pin when you intentionally want a node reprovision or full outage event
+- always read the plan before apply; storage size and shared Talos image drift can otherwise widen the blast radius
+
+Verify the cluster before GitOps bootstrap:
+
+```powershell
+$env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
+talosctl config info
+talosctl --nodes 192.168.1.201 --endpoints 192.168.1.201 get members
+
+$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
+kubectl get nodes -o wide
+```
 
 If the cluster already exists and Talos state has drifted, run the cleanup script before re-applying:
 
@@ -48,6 +72,8 @@ If the cluster already exists and Talos state has drifted, run the cleanup scrip
 $env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
 ./cleanup.ps1
 ```
+
+If `tofu plan` wants to replace the shared Talos download file, treat that as an infra warning and read the full plan carefully before apply. Running VMs no longer inherit that source-file drift automatically, but a planned reprovision will still consume the newer image.
 
 ### Bootstrap GitOps
 
@@ -182,3 +208,12 @@ Grafana has already shown a Longhorn-backed filesystem inconsistency once. Treat
 If stateful workloads fail with `ephemeral-storage` or `DiskPressure`, check the Talos boot disk before blaming Longhorn. Longhorn capacity and kubelet/containerd capacity are separate concerns in this cluster design.
 
 For new nodes, set `boot_disk_size_gib` in `tofu/terraform.tfvars` if you want to override the `64 GiB` default. Existing nodes keep their already-provisioned Talos `EPHEMERAL` volume, so increasing the VM disk in Git is a forward fix; current nodes need a controlled rebuild or reprovisioning event to consume the larger boot disk.
+
+Before rebuilding a worker, run:
+
+```powershell
+$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
+./scripts/preflight-worker-rebuild.ps1 -TargetNode worker-01
+```
+
+The full rolling rebuild procedure lives in `docs/cluster-operations.md`.

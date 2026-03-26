@@ -7,6 +7,36 @@ $env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
 $env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
 ```
 
+## OpenTofu Apply Notes
+
+Treat `tofu apply` as a two-step flow, not a blind bootstrap shortcut:
+
+```powershell
+cd .\tofu
+tofu init
+tofu plan
+tofu apply
+cd ..
+```
+
+Observed contracts from live runs:
+
+- `tofu/output/*` is written from inside `tofu/` and then consumed from repo root as `tofu/output/*`
+- existing nodes can inherit new defaults unless they are pinned explicitly in the local `terraform.tfvars`
+- a changed shared Talos download artifact may still appear in `tofu plan`; read the plan before apply even if you only intended a single-node change
+
+Pre-bootstrap verification after infra apply:
+
+```powershell
+$env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
+talosctl config info
+talosctl --nodes 192.168.1.201 --endpoints 192.168.1.201 get members
+
+$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
+kubectl get nodes -o wide
+kubectl get pods -n kube-system
+```
+
 Base health:
 
 ```powershell
@@ -127,6 +157,75 @@ Current provisioning contract:
 - New nodes default to `boot_disk_size_gib = 64`.
 - Override per-node in `tofu/terraform.tfvars` when needed.
 - Existing nodes do not automatically re-provision Talos `EPHEMERAL`; plan a controlled node replacement if you need the larger boot disk to take effect.
+
+## Rolling Worker Rebuild
+
+Use this when a worker needs to pick up a larger Talos boot disk or otherwise be reprovisioned cleanly.
+
+Start by choosing one of these paths:
+
+- Rolling rebuild without full outage:
+  pin existing nodes to their current `boot_disk_size_gib` in the local `tofu/terraform.tfvars`, then add the temporary worker
+- Planned full outage / reprovision:
+  remove the old disk-size pins and expect replacements for every node that still runs on the smaller boot disk
+
+1. For the rolling path, pin existing nodes to their current boot disk size in the local `tofu/terraform.tfvars`, then add a temporary third worker with `boot_disk_size_gib = 64` and run:
+
+```powershell
+cd tofu
+tofu plan
+tofu apply
+```
+
+2. Wait for the temporary worker to become Ready, then run the maintenance gate from the repo root:
+
+```powershell
+$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
+./scripts/preflight-worker-rebuild.ps1 -TargetNode worker-01
+```
+
+3. Cordon and drain the target worker:
+
+```powershell
+kubectl cordon worker-01
+kubectl drain worker-01 --ignore-daemonsets --delete-emptydir-data --grace-period=60 --timeout=15m
+```
+
+4. Reset the old Talos node so it leaves the cluster cleanly:
+
+```powershell
+$env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
+talosctl reset --nodes 192.168.1.211 --endpoints 192.168.1.201 --graceful=false --reboot=false
+kubectl delete node worker-01
+```
+
+5. Recreate the worker through OpenTofu so the larger boot disk and fresh Talos `EPHEMERAL` volume are applied:
+
+```powershell
+cd tofu
+tofu plan -replace='module.talos.proxmox_virtual_environment_vm.this["worker-01"]'
+tofu apply -replace='module.talos.proxmox_virtual_environment_vm.this["worker-01"]'
+```
+
+6. Wait for `worker-01` to return as `Ready`, then run the same post-check gates used during bootstrap:
+
+```powershell
+$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
+./scripts/argocd-health-gate.ps1
+./scripts/preflight-core.ps1
+kubectl get clusters.postgresql.cnpg.io -A
+kubectl get volumes.longhorn.io -n longhorn-system
+```
+
+7. Repeat the same flow for the next worker only after the cluster is fully healthy again.
+
+8. Remove the temporary worker from `tofu/terraform.tfvars` and run `tofu apply` once both permanent workers are rebuilt and stable.
+
+If `tofu plan` still shows more replacements than expected, stop and inspect:
+
+- whether an existing node is still inheriting a new `boot_disk_size_gib`
+- whether the shared Talos download file is being refreshed
+- whether the requested maintenance mode was supposed to be rolling or full-outage
 
 If a volume shows filesystem corruption, snapshot/backup first, then execute the documented restore path through GitOps changes.
 

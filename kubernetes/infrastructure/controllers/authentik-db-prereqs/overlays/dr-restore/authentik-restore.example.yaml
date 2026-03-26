@@ -15,7 +15,7 @@ spec:
   externalClusters:
     - name: authentik-postgresql
       barmanObjectStore:
-        destinationPath: "s3://rosenvall-homelab-backup/authentik/"
+        destinationPath: "s3://rosenvall-homelab-backup/authentik/live/"
         endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
         s3Credentials:
           accessKeyId:
@@ -30,12 +30,12 @@ spec:
     storageClass: longhorn
 
   walStorage:
-    size: 4Gi
+    size: 8Gi
     storageClass: longhorn
 
   backup:
     barmanObjectStore:
-      destinationPath: "s3://rosenvall-homelab-backup/authentik/"
+      destinationPath: "s3://rosenvall-homelab-backup/authentik/dr/"
       endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
       s3Credentials:
         accessKeyId:
