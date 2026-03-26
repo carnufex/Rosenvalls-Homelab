@@ -6,10 +6,11 @@ This directory contains the in-cluster Cloudflare Tunnel deployment.
 
 - The tunnel token lives in Bitwarden.
 - External Secrets materializes that token into `cloudflared-secret` in the `cloudflare` namespace.
+- The running tunnel is token-managed (`cloudflared tunnel run --token ...`), so published application routes and origin parameters are currently sourced from the Cloudflare dashboard, not from this repository.
 - The tunnel forwards `*.rosenvall.se` and `rosenvall.se` to `https://cilium-gateway-external.gateway.svc.cluster.local:443`.
 - The external Gateway then dispatches traffic to app-level `HTTPRoute` resources.
-- The wildcard route must use `matchSNItoHost: true` so Cloudflared presents the requested hostname as SNI to the Gateway. A literal wildcard SNI such as `*.rosenvall.se` breaks TLS routing.
-- The tunnel config is generated through `configMapGenerator`, so config changes roll the `cloudflared` pods automatically via the hashed ConfigMap name.
+- The wildcard published route in Cloudflare must enable `Match SNI to Host` so Cloudflared presents the requested hostname as SNI to the Gateway. A literal wildcard SNI such as `*.rosenvall.se` breaks TLS routing and returns Cloudflare `502`.
+- The local tunnel config is still generated through `configMapGenerator`, so process-level config changes roll the `cloudflared` pods automatically via the hashed ConfigMap name.
 
 This means the tunnel depends on the full secret chain being healthy:
 
@@ -22,8 +23,10 @@ This means the tunnel depends on the full secret chain being healthy:
 
 1. Create the tunnel in Cloudflare Zero Trust.
 2. Store the tunnel token in Bitwarden.
-3. Put the Bitwarden item UUID in `external-secret.yaml`.
-4. Ensure the bootstrap secret `bitwarden-access-token` exists in the cluster.
+3. In Cloudflare Zero Trust, define the published application routes that point at the external Gateway.
+4. For the wildcard route `*.rosenvall.se`, enable `Match SNI to Host` in Additional application settings.
+5. Put the Bitwarden item UUID in `external-secret.yaml`.
+6. Ensure the bootstrap secret `bitwarden-access-token` exists in the cluster.
 
 ## Break-glass recovery
 

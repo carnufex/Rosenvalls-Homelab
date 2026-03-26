@@ -14,6 +14,11 @@ This repository manages the full stack:
 - External Secrets syncs runtime secrets from Bitwarden.
 - Longhorn provides persistent storage.
 
+Cloudflare caveat:
+
+- the current tunnel is token-managed, so published application routes and origin parameters are still controlled in the Cloudflare dashboard
+- the repo manages the in-cluster connector and secrets, but not the dashboard-side wildcard route contract yet
+
 Node disk layout matters:
 
 - The Talos boot disk backs the `EPHEMERAL` volume used by kubelet, containerd, logs, and CNPG init jobs.
@@ -184,6 +189,8 @@ kubectl get certificate -n gateway cert-wildcard
 kubectl get gateway -n gateway external -o yaml
 kubectl get httproute -A
 ```
+
+If a wildcard host returns Cloudflare `502` while the app and `HTTPRoute` are healthy, check the wildcard published application route in Cloudflare Zero Trust. The route must have `Match SNI to Host` enabled when it forwards to `https://cilium-gateway-external.gateway.svc.cluster.local:443`.
 
 Cloudflare DNS01 token contract for cert-manager:
 

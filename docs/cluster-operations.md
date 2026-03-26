@@ -104,6 +104,12 @@ Resolve-DnsName argo.rosenvall.se
 Invoke-WebRequest -Uri https://argo.rosenvall.se -Method Head
 ```
 
+Current tunnel contract:
+
+- the in-cluster connector is Git-managed
+- the published application routes for the token-managed tunnel are currently Cloudflare-dashboard-managed
+- if a wildcard hostname returns `502` but the backing `HTTPRoute` is `Accepted`, inspect the wildcard published route in Cloudflare Zero Trust and ensure `Match SNI to Host` is enabled
+
 ## ArgoCD And Authentik
 
 ArgoCD admin password:
