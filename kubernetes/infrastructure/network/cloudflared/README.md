@@ -8,6 +8,7 @@ This directory contains the in-cluster Cloudflare Tunnel deployment.
 - External Secrets materializes that token into `cloudflared-secret` in the `cloudflare` namespace.
 - The tunnel forwards `*.rosenvall.se` and `rosenvall.se` to `https://cilium-gateway-external.gateway.svc.cluster.local:443`.
 - The external Gateway then dispatches traffic to app-level `HTTPRoute` resources.
+- The wildcard route must use `matchSNItoHost: true` so Cloudflared presents the requested hostname as SNI to the Gateway. A literal wildcard SNI such as `*.rosenvall.se` breaks TLS routing.
 
 This means the tunnel depends on the full secret chain being healthy:
 

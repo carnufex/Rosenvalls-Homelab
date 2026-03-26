@@ -14,8 +14,8 @@ data:
       - hostname: "*.rosenvall.se"
         service: https://cilium-gateway-external.gateway.svc.cluster.local:443
         originRequest:
-          originServerName: "*.rosenvall.se"
-          noTLSVerify: true # Trust the self-signed/internal cert presented by the gateway if needed, or ensure CA is trusted.
+          matchSNItoHost: true
+          noTLSVerify: true
       
       # Route root domain
       - hostname: rosenvall.se
