@@ -39,6 +39,10 @@ If Google sign-in is not enabled yet, the API can still start without a configur
 The live manifests use immutable GHCR digests rather than floating tags.
 Update the deployment manifests after each successful publish workflow in `D:\Github\MatPlan`.
 
+Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PAT`
+from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`
+secret for `ServiceAccount/matplan-runtime`.
+
 ## Runtime Assumptions
 
 - API runs as `ASPNETCORE_ENVIRONMENT=Staging`

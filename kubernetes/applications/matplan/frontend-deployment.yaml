@@ -15,6 +15,7 @@ spec:
       labels:
         app.kubernetes.io/name: matplan-frontend
     spec:
+      serviceAccountName: matplan-runtime
       containers:
         - name: frontend
           image: ghcr.io/carnufex/matplan-frontend@sha256:238486d34252f35dc8a64fde840a443ccbb626076826a5868c675a194ea4dd22

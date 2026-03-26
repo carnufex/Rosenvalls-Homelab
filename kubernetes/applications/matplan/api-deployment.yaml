@@ -15,6 +15,7 @@ spec:
       labels:
         app.kubernetes.io/name: matplan-api
     spec:
+      serviceAccountName: matplan-runtime
       containers:
         - name: api
           image: ghcr.io/carnufex/matplan-api@sha256:ab7cf96ea2d5d45767069827b628edbd31273c62d019874de63fd2f98e991980
