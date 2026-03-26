@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: matplan-frontend
   namespace: matplan
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   replicas: 1
   selector:
@@ -15,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/carnufex/matplan-frontend:sha-REPLACE_ME
+          image: ghcr.io/carnufex/matplan-frontend@sha256:238486d34252f35dc8a64fde840a443ccbb626076826a5868c675a194ea4dd22
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

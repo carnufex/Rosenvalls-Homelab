@@ -7,3 +7,9 @@ resources:
   - data-protection-pvc.yaml
   - database-bootstrap-secret.yaml
   - database.yaml
+  - externalsecret.yaml
+  - api-service.yaml
+  - frontend-service.yaml
+  - api-deployment.yaml
+  - frontend-deployment.yaml
+  - httproute.yaml

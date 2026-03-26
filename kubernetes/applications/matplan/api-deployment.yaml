@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: matplan-api
   namespace: matplan
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   replicas: 1
   selector:
@@ -15,7 +17,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/carnufex/matplan-api:sha-REPLACE_ME
+          image: ghcr.io/carnufex/matplan-api@sha256:ab7cf96ea2d5d45767069827b628edbd31273c62d019874de63fd2f98e991980
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
