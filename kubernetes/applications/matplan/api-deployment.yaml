@@ -20,7 +20,7 @@ spec:
       serviceAccountName: matplan-runtime
       containers:
         - name: api
-          image: ghcr.io/carnufex/matplan-api@sha256:846460a5e51129e89573de1b6b62b02858b6435550028678fe242930ffda4390
+          image: ghcr.io/carnufex/matplan-api@sha256:da2266abbfc77e7359a536acf8b3f7620fcfa37dd0089f7cb7906e685fba06b6
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
