@@ -27,7 +27,8 @@ This directory contains the configuration for Longhorn, a distributed block stor
 ## Backup
 
 - Backup target is configured to R2 (`defaultBackupStore`).
-- Longhorn recurring backup job runs daily at 02:00.
+- No recurring Longhorn offsite backup job is enabled by default.
+- R2 stays available as a break-glass/manual backup target.
 
 ## Recovery Expectations
 

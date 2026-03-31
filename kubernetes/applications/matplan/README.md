@@ -37,7 +37,12 @@ If Google sign-in is not enabled yet, the API can still start without a configur
 ## Image Contract
 
 The live manifests use immutable GHCR digests rather than floating tags.
-Update the deployment manifests after each successful publish workflow in `D:\Github\MatPlan`.
+For `carnufex/MatPlan`, the publish workflow updates these deployment manifests automatically
+after a successful GHCR publish and commits the new digests back to this repository using
+a write-enabled deploy key scoped to `Rosenvalls-Homelab`.
+
+If automation is unavailable, update the deployment manifests manually with the new immutable
+GHCR digests and let ArgoCD sync the resulting Git change.
 
 Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PAT`
 from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`

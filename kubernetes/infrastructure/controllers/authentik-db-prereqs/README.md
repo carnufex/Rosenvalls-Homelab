@@ -19,5 +19,6 @@ Backup path contract:
 - normal live cluster backups write to `s3://rosenvall-homelab-backup/authentik/live/`
 - the DR overlay restores from that live path
 - a cluster running in DR mode writes to `s3://rosenvall-homelab-backup/authentik/dr/`
+- the live cluster keeps a `7d` CNPG retention policy and compresses both base backups and WAL archives with `gzip`
 
 Do not reuse the same backup prefix for a fresh `initdb` cluster and a DR-restored cluster. Mixing archive histories can cause WAL replay conflicts during recovery.
