@@ -18,7 +18,7 @@ spec:
       serviceAccountName: matplan-runtime
       containers:
         - name: frontend
-          image: ghcr.io/carnufex/matplan-frontend@sha256:93046e4f00447b0e24f129e1511680461f0504605df69b6b7a973cd2bdedea8f
+          image: ghcr.io/carnufex/matplan-frontend@sha256:2ffa5671fa3c069602b486cc13d4b382cbb31efe036d2c7eebbed46752332e21
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
