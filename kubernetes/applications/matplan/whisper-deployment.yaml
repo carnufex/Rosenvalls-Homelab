@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matplan-whisper
+  namespace: matplan
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: matplan-whisper
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: matplan-whisper
+    spec:
+      serviceAccountName: matplan-runtime
+      containers:
+        - name: whisper
+          image: ghcr.io/ggml-org/whisper.cpp:main
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: WHISPER_MODEL
+              value: kb-large
+            - name: WHISPER_PORT
+              value: "8080"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: 1
+              memory: 2Gi
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: whisper-models
+              mountPath: /models
+      initContainers:
+        - name: whisper-model-bootstrap
+          image: ghcr.io/ggml-org/whisper.cpp:main
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -lc
+            - >-
+              set -euo pipefail;
+              model="${WHISPER_MODEL:-kb-large}";
+              model_path="/models/ggml-${model}.bin";
+              if [ -f "${model_path}" ]; then
+                echo "Whisper model already exists: ${model_path}";
+                exit 0;
+              fi;
+              mkdir -p /models;
+              if [ "${model}" = "kb-large" ]; then
+                echo "Downloading Whisper model kb-large...";
+                curl -L --fail "https://huggingface.co/KBLab/kb-whisper-large/resolve/main/ggml-model.bin" -o "${model_path}";
+              else
+                echo "Downloading Whisper model ${model}...";
+                /app/models/download-ggml-model.sh "${model}" /models;
+              fi
+          env:
+            - name: WHISPER_MODEL
+              value: kb-large
+          volumeMounts:
+            - name: whisper-models
+              mountPath: /models
+      volumes:
+        - name: whisper-models
+          persistentVolumeClaim:
+            claimName: matplan-whisper-models

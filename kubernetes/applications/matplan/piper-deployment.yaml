@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matplan-piper
+  namespace: matplan
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: matplan-piper
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: matplan-piper
+    spec:
+      serviceAccountName: matplan-runtime
+      containers:
+        - name: piper
+          image: ghcr.io/carnufex/matplan-piper:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+              name: http
+          env:
+            - name: PIPER_VOICE
+              value: sv_SE-nst-high
+            - name: PIPER_FALLBACK_VOICE
+              value: sv_SE-nst-medium
+            - name: PIPER_PORT
+              value: "5000"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /voices
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /voices
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /voices
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          command:
+            - /bin/bash
+            - -lc
+            - >-
+              set -euo pipefail;
+              primary="${PIPER_VOICE:-sv_SE-nst-high}";
+              fallback="${PIPER_FALLBACK_VOICE:-sv_SE-nst-medium}";
+              ensure_voice () {
+                local voice="$1";
+                if [ -f "/data/${voice}.onnx" ]; then
+                  return 0;
+                fi;
+                echo "Downloading piper voice ${voice} to /data";
+                python3 -m piper.download_voices --data-dir /data "${voice}";
+              };
+              if ensure_voice "${primary}"; then
+                active="${primary}";
+              else
+                echo "Primary voice ${primary} unavailable, trying fallback ${fallback}";
+                if ensure_voice "${fallback}"; then
+                  active="${fallback}";
+                else
+                  echo "No Piper voice available (tried ${primary}, ${fallback}).";
+                  exit 1;
+                fi;
+              fi;
+              echo "Using Piper voice ${active}";
+              exec python3 -m piper.http_server --host 0.0.0.0 --port ${PIPER_PORT:-5000} --data-dir /data -m "${active}"
+          volumeMounts:
+            - name: piper-data
+              mountPath: /data
+      volumes:
+        - name: piper-data
+          persistentVolumeClaim:
+            claimName: matplan-piper-data

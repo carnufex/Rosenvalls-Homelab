@@ -5,6 +5,8 @@ resources:
   - ns.yaml
   - configmap.yaml
   - data-protection-pvc.yaml
+  - whisper-pvc.yaml
+  - piper-pvc.yaml
   - database-bootstrap-secret.yaml
   - database.yaml
   - ghcr-image-pull-secret.yaml
@@ -12,6 +14,10 @@ resources:
   - serviceaccount.yaml
   - api-service.yaml
   - frontend-service.yaml
+  - whisper-service.yaml
+  - piper-service.yaml
   - api-deployment.yaml
   - frontend-deployment.yaml
+  - whisper-deployment.yaml
+  - piper-deployment.yaml
   - httproute.yaml

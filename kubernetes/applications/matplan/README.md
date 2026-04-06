@@ -9,6 +9,7 @@ The folder contains:
 - namespace, config map, runtime secret sync, services, deployments, route
 - `database.yaml` for the application PostgreSQL cluster
 - `data-protection-pvc.yaml` for ASP.NET Data Protection keys
+- `whisper-*` and `piper-*` manifests for internal voice services used by the API
 
 ## Secret Contract
 
@@ -34,6 +35,20 @@ These values are configuration, not secrets, and belong in `configmap.yaml`:
 
 If Google sign-in is not enabled yet, the API can still start without a configured Google client.
 
+## Voice Runtime
+
+`matplan-whisper` runs the `ghcr.io/ggml-org/whisper.cpp:main` image and stores the
+downloaded `kb-large` model in `matplan-whisper-models`.
+
+`matplan-piper` runs a GHCR image built from `docker/piper/Dockerfile` and stores
+downloaded voices in `matplan-piper-data`.
+
+Both services are cluster-internal only. `matplan-config` points the API to:
+
+- `http://matplan-whisper:8080`
+- `http://matplan-piper:5000`
+- `http://ollama.ollama.svc.cluster.local:11434`
+
 ## Image Contract
 
 The live manifests use immutable GHCR digests rather than floating tags.
@@ -47,6 +62,10 @@ GHCR digests and let ArgoCD sync the resulting Git change.
 Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PAT`
 from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`
 secret for `ServiceAccount/matplan-runtime`.
+
+`matplan-piper` is currently a placeholder image reference until the Dockerfile has
+been published to GHCR and pinned to a digest. The deployment is wired for that future
+image contract, but it will not become Ready until the image exists.
 
 ## Runtime Assumptions
 

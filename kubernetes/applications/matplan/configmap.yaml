@@ -3,10 +3,16 @@ kind: ConfigMap
 metadata:
   name: matplan-config
   namespace: matplan
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
 data:
   ASPNETCORE_ENVIRONMENT: Staging
   ASPNETCORE_URLS: http://+:8080
   Cors__AllowedOrigins__0: https://matplan.rosenvall.se
+  Ollama__BaseUrl: http://ollama.ollama.svc.cluster.local:11434
+  AiChat__Ollama__BaseUrl: http://ollama.ollama.svc.cluster.local:11434
+  Voice__Whisper__BaseUrl: http://matplan-whisper:8080
+  Voice__Piper__BaseUrl: http://matplan-piper:5000
   Database__ApplyMigrations: "true"
   Database__SeedDemoData: "false"
   DataProtection__KeysPath: /var/lib/matplan/dpkeys
