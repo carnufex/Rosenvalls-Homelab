@@ -1,42 +1,61 @@
 # Rosenvalls-Homelab
 
-A Talos-based Kubernetes homelab on Proxmox, managed with GitOps through ArgoCD.
+A Proxmox-hosted Talos Kubernetes homelab managed through GitOps.
 
-## Architecture
+The design goal is simple: rebuild the platform from code, keep manual dependencies explicit, and make day-2 operations predictable instead of tribal knowledge.
 
-This repository manages the full stack:
+## Design Goals
 
-- OpenTofu provisions the Proxmox VMs.
-- Talos Linux provides the immutable Kubernetes nodes.
-- ArgoCD syncs `kubernetes/` from this repository.
-- Cilium provides CNI and Gateway API support.
-- Cloudflare Tunnel forwards `*.rosenvall.se` to the external Gateway.
-- External Secrets syncs runtime secrets from Bitwarden.
-- Longhorn provides persistent storage.
+- Keep infrastructure, cluster config, and app manifests in Git.
+- Make cluster bootstrap deterministic from `tofu/` and `bootstrap.ps1`.
+- Prefer documented break-glass paths over hidden one-off fixes.
+- Keep recovery posture honest: document what is easy, what is manual, and what is not proven yet.
 
-Cloudflare caveat:
+## Explore The Docs
 
-- the current tunnel is token-managed, so published application routes and origin parameters are still controlled in the Cloudflare dashboard
-- the repo manages the in-cluster connector and secrets, but not the dashboard-side wildcard route contract yet
+- [Docs index](docs/README.md)
+- [Getting started](docs/getting-started/README.md)
+- [Architecture](docs/architecture/README.md)
+- [Operations](docs/operations/README.md)
+- [Disaster recovery](docs/disaster-recovery/README.md)
+- [Scaling](docs/scaling/README.md)
+- [Networking](docs/networking/README.md)
+- [Storage and backups](docs/storage-and-backups/README.md)
 
-Node disk layout matters:
+## Platform Snapshot
 
-- The Talos boot disk backs the `EPHEMERAL` volume used by kubelet, containerd, logs, and CNPG init jobs.
-- The separate worker `longhorn` disk only backs Longhorn data under `/var/lib/longhorn`.
-- New nodes default to a `64 GiB` boot disk via `boot_disk_size_gib` so stateful bootstrap jobs do not compete for a tiny root disk.
+| Layer | Choice | Notes |
+| --- | --- | --- |
+| Hypervisor | Proxmox VE | OpenTofu provisions the Talos VMs |
+| OS | Talos Linux | Immutable Kubernetes nodes |
+| GitOps | ArgoCD | Syncs `kubernetes/` from `origin` |
+| Networking | Cilium + Gateway API | Internal and external ingress split by gateway |
+| Public access | Cloudflare Tunnel | Forwards to `gateway/external` |
+| Secrets | External Secrets + Bitwarden | Runtime secrets depend on one manual bootstrap token |
+| Storage | Longhorn + Cloudflare R2 | Longhorn for volumes, R2 for configured backup targets |
+| Databases | CloudNativePG | Authentik has a documented restore overlay |
 
-## Bootstrap
+## Topology Snapshot
 
-### Prerequisites
+- The checked-in example variables currently describe one control plane and one worker.
+- Kubernetes API endpoint: `https://192.168.1.200:6443`
+- Public entry point: Cloudflare Tunnel -> `gateway/external`
+- Internal-only entry point: `gateway/internal`
+- Canonical ArgoCD URL: `https://argo.rosenvall.se`
+- Legacy ArgoCD alias: `https://argocd.rosenvall.se`
 
-Install these tools locally:
+This repo models additional nodes declaratively, but the checked-in example shape is not highly available. Stateful Longhorn profiles are tuned for multiple worker failure domains, so treat the example as a bootstrap template rather than a production-sized topology.
 
-- OpenTofu: `winget install opentofu`
-- Talosctl: `winget install siderolabs.talosctl`
-- Kubectl: `winget install kubectl`
-- Helm: `winget install Helm.Helm`
+## Quick Start
 
-### Provision infrastructure
+Install locally:
+
+- OpenTofu
+- `talosctl`
+- `kubectl`
+- Helm
+
+Provision infrastructure:
 
 ```powershell
 Copy-Item .\tofu\terraform.tfvars.example .\tofu\terraform.tfvars
@@ -47,20 +66,7 @@ tofu apply
 cd ..
 ```
 
-`tofu` writes access artifacts into `.\tofu\output\`, so the rest of this README assumes you are back at repo root after the infra step.
-
-Fresh-cluster expectation:
-
-- `tofu plan` should be a clean create-only plan
-- `tofu apply` should create the VMs and generate `tofu/output/kubeconfig` plus `tofu/output/talosconfig`
-
-Day-2 expectation:
-
-- if existing nodes still boot from `20 GiB`, pin `boot_disk_size_gib = 20` per node in the local `terraform.tfvars` before `tofu apply`
-- only remove that pin when you intentionally want a node reprovision or full outage event
-- always read the plan before apply; storage size and shared Talos image drift can otherwise widen the blast radius
-
-Verify the cluster before GitOps bootstrap:
+Verify the fresh cluster before GitOps bootstrap:
 
 ```powershell
 $env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
@@ -71,156 +77,53 @@ $env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
 kubectl get nodes -o wide
 ```
 
-If the cluster already exists and Talos state has drifted, run the cleanup script before re-applying:
-
-```powershell
-$env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
-./cleanup.ps1
-```
-
-If `tofu plan` wants to replace the shared Talos download file, treat that as an infra warning and read the full plan carefully before apply. Running VMs no longer inherit that source-file drift automatically, but a planned reprovision will still consume the newer image.
-
-### Bootstrap GitOps
-
-`bootstrap.ps1` installs ArgoCD, ensures the manual bootstrap secret `bitwarden-access-token`, applies `kubernetes/bootstrap.yaml`, and enforces a strict core health gate.
-
-You can pass the token through an environment variable to avoid an interactive prompt:
+Bootstrap GitOps:
 
 ```powershell
 $env:BITWARDEN_ACCESS_TOKEN = "<token>"
 .\bootstrap.ps1
 ```
 
-That secret is intentionally outside Git. If it is missing, `ClusterSecretStore/bitwarden-secretsmanager` will fail and the cluster will stop minting app secrets, Cloudflare tunnel credentials, and certificate-manager API tokens.
-
-You can run the same gates manually:
+Run the core gates:
 
 ```powershell
 $env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
-./scripts/argocd-health-gate.ps1
-./scripts/preflight-core.ps1
+.\scripts\argocd-health-gate.ps1
+.\scripts\preflight-core.ps1
 ```
 
-## Daily Access
-
-### Kubectl
-
-```powershell
-$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
-kubectl get nodes
-```
-
-### ArgoCD
-
-Canonical URL: `https://argo.rosenvall.se`
-Legacy alias still routed: `https://argocd.rosenvall.se`
-
-Get the bootstrap admin password:
-
-```powershell
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
-```
-
-Local port-forward:
-
-```powershell
-kubectl -n argocd port-forward svc/argocd-server 8080:443
-```
-
-Change the default password after first login:
-
-```powershell
-argocd login argo.rosenvall.se --username admin --grpc-web
-argocd account update-password
-kubectl -n argocd delete secret argocd-initial-admin-secret
-```
-
-### Authentik
-
-Initial setup lives at `https://authentik.rosenvall.se/if/flow/initial-setup/`.
-
-GitOps ownership is split into three apps:
-
-- `authentik-db-prereqs`: namespace, secrets, CNPG cluster
-- `authentik-runtime`: Authentik chart, route, blueprints
-- `authentik-db-ops`: scheduled and manual backups
-
-Default database bootstrap mode is `initdb`; DR restore is opt-in via:
-
-- `kubernetes/infrastructure/controllers/authentik-db-prereqs/overlays/dr-restore`
+The Bitwarden bootstrap secret remains intentionally manual. If it is missing, the external secret chain, Cloudflare tunnel, certificate issuance, and several app runtimes will fail downstream.
 
 ## Repository Layout
 
-- `tofu/`: Proxmox, Talos and generated local outputs.
-- `kubernetes/`: GitOps source of truth.
-- `kubernetes/infrastructure/`: cluster services, controllers and networking.
-- `kubernetes/applications/`: app namespaces managed by the ArgoCD ApplicationSet.
-- `docs/cluster-operations.md`: day-2 recovery and verification commands.
-- `AGENTS.md`: repo-local operating instructions for agents and collaborators.
+- `tofu/`: Proxmox VM provisioning, Talos config generation, local access artifacts
+- `kubernetes/`: GitOps source of truth
+- `kubernetes/infrastructure/`: controllers, networking, storage, monitoring, shared platform pieces
+- `kubernetes/applications/`: per-app ArgoCD applications discovered by the `ApplicationSet`
+- `docs/`: operator-facing wiki and runbooks
+- `scripts/`: health gates and maintenance helpers
 
-## Recovery Notes
+## Recovery Posture
 
-### Secret chain recovery
+Cold rebuild is reasonably strong today:
 
-If External Secrets is broken, recreate the Bitwarden bootstrap secret first:
+- infrastructure is codified in OpenTofu
+- Talos config and Kubernetes access artifacts are generated automatically
+- `bootstrap.ps1` bridges a fresh cluster into GitOps and validates core health
+- Authentik has backup plus an explicit restore overlay
 
-```powershell
-$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
-kubectl create namespace external-secrets --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n external-secrets create secret generic bitwarden-access-token --from-literal=token=<token> --dry-run=client -o yaml | kubectl apply -f -
-kubectl get clustersecretstore bitwarden-secretsmanager
-kubectl get externalsecret -A
-```
+State-preserving recovery is only partially documented:
 
-When this secret is healthy again, these should recover automatically:
+- `bitwarden-access-token` is still manual
+- Cloudflare published routes still live in the Cloudflare dashboard
+- `tofu/output/kubeconfig` and `tofu/output/talosconfig` are local artifacts without a documented off-machine backup policy
+- Longhorn has a backup target, but this repo does not yet define a recurring offsite backup policy
+- MatPlan does not yet have a documented restore story
 
-- `cloudflared-secret` in `cloudflare`
-- `cloudflare-api-token-secret` in `cert-manager`
-- ArgoCD and Authentik runtime secrets
-- Longhorn and CloudNativePG backup secrets
+See [Disaster recovery](docs/disaster-recovery/README.md) for the honest current-state runbook and recovery backlog.
 
-### Routing recovery
+## Current Backlog
 
-Cloudflare Tunnel targets the external Gateway service over HTTPS, not individual app services. Verify the chain in this order:
-
-```powershell
-kubectl get pods -n cloudflare
-kubectl get certificate -n gateway cert-wildcard
-kubectl get gateway -n gateway external -o yaml
-kubectl get httproute -A
-```
-
-If a wildcard host returns Cloudflare `502` while the app and `HTTPRoute` are healthy, check the wildcard published application route in Cloudflare Zero Trust. The route must have `Match SNI to Host` enabled when it forwards to `https://cilium-gateway-external.gateway.svc.cluster.local:443`.
-
-Cloudflare DNS01 token contract for cert-manager:
-
-- Zone scope: `rosenvall.se`
-- Permissions: Zone Read + DNS Edit
-
-### Talos bootstrap drift
-
-If the control-plane node is stuck waiting for bootstrap:
-
-```powershell
-$env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
-talosctl --nodes 192.168.1.201 --endpoints 192.168.1.201 bootstrap
-```
-
-### Storage issues
-
-Grafana has already shown a Longhorn-backed filesystem inconsistency once. Treat PVC repair as a separate recovery step after the secret and routing chain is green. See `docs/cluster-operations.md` for the validation order before making storage changes.
-
-### Node root disk pressure
-
-If stateful workloads fail with `ephemeral-storage` or `DiskPressure`, check the Talos boot disk before blaming Longhorn. Longhorn capacity and kubelet/containerd capacity are separate concerns in this cluster design.
-
-For new nodes, set `boot_disk_size_gib` in `tofu/terraform.tfvars` if you want to override the `64 GiB` default. Existing nodes keep their already-provisioned Talos `EPHEMERAL` volume, so increasing the VM disk in Git is a forward fix; current nodes need a controlled rebuild or reprovisioning event to consume the larger boot disk.
-
-Before rebuilding a worker, run:
-
-```powershell
-$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
-./scripts/preflight-worker-rebuild.ps1 -TargetNode worker-01
-```
-
-The full rolling rebuild procedure lives in `docs/cluster-operations.md`.
+- `P0`: finish a full new-server and stolen-server runbook, including every secret and external dependency needed outside Git
+- `P1`: verify restore coverage per stateful system and standardize naming in examples and runbooks
+- `P2`: harden backup policy, reduce dashboard-only dependencies, and evaluate HA control plane tradeoffs

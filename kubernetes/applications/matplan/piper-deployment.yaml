@@ -7,6 +7,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: matplan-piper
@@ -18,16 +20,16 @@ spec:
       serviceAccountName: matplan-runtime
       containers:
         - name: piper
-          image: ghcr.io/carnufex/matplan-piper:latest
+          image: python:3.12-slim
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
               name: http
           env:
             - name: PIPER_VOICE
-              value: sv_SE-nst-high
-            - name: PIPER_FALLBACK_VOICE
               value: sv_SE-nst-medium
+            - name: PIPER_FALLBACK_VOICE
+              value: sv_SE-lisa-medium
             - name: PIPER_PORT
               value: "5000"
           resources:
@@ -42,7 +44,7 @@ spec:
               path: /voices
               port: http
             periodSeconds: 5
-            failureThreshold: 60
+            failureThreshold: 120
           livenessProbe:
             httpGet:
               path: /voices
@@ -62,8 +64,9 @@ spec:
             - -lc
             - >-
               set -euo pipefail;
-              primary="${PIPER_VOICE:-sv_SE-nst-high}";
-              fallback="${PIPER_FALLBACK_VOICE:-sv_SE-nst-medium}";
+              python3 -m pip install --no-cache-dir piper-tts flask;
+              primary="${PIPER_VOICE:-sv_SE-nst-medium}";
+              fallback="${PIPER_FALLBACK_VOICE:-sv_SE-lisa-medium}";
               ensure_voice () {
                 local voice="$1";
                 if [ -f "/data/${voice}.onnx" ]; then

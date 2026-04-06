@@ -1,34 +1,62 @@
 # AI Instructions & Context
 
 ## Project Goal
-Build a resilient, production-grade Kubernetes homelab on Proxmox using GitOps principles based on [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab). The source is available in this workspace under theepicsaxguy/homelab.
-The ultimate goal is to learn and understand while setting up a replica of the [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab) project.
 
-## Reference Architecture
-This project is inspired by and modeled after: [theepicsaxguy/homelab](https://github.com/theepicsaxguy/homelab)
-Documentation available at: https://homelab.orkestack.com/docs/getting-started/detailed-setup
+Build and operate a resilient Kubernetes homelab on Proxmox using OpenTofu, Talos, and GitOps.
 
-## Technology Stack
-- **Hypervisor**: Proxmox VE
-- **Infrastructure Provisioning**: OpenTofu
-- **Operating System**: Talos Linux
-- **GitOps**: ArgoCD
-- **Networking**: Cilium, Gateway API, Cloudflared
-- **Storage**: Longhorn
-- **Authentication**: Authentik
+The repository should prioritize:
 
-## Workflow
-1. **Infrastructure**: Defined in `tofu/`.
-2. **OS Configuration**: Defined in `tofu/talos/`.
-3. **Kubernetes Manifests**: Defined in `kubernetes/`.
-4. **Bootstrap Secrets**: `bitwarden-access-token` is created manually in `external-secrets` and is intentionally not committed.
-5. **Changes**: Local edits do not affect the cluster until they are pushed to `origin`, because ArgoCD syncs `https://github.com/carnufex/Rosenvalls-Homelab.git`.
+- predictable cluster rebuilds
+- explicit source-of-truth boundaries
+- honest documentation of manual dependencies and recovery gaps
+- Git-managed changes that can be applied safely through ArgoCD
 
-## Current Routing
+## Source Of Truth
+
+- Infrastructure is defined in `tofu/`
+- Talos configuration is generated from `tofu/talos/`
+- Kubernetes manifests live under `kubernetes/`
+- ArgoCD syncs `https://github.com/carnufex/Rosenvalls-Homelab.git`
+- Local edits do not change the cluster until they are pushed to `origin`
+- `bootstrap.ps1` is the imperative bridge from a fresh cluster into GitOps
+
+## Current Architecture
+
+- Hypervisor: Proxmox VE
+- Infrastructure provisioning: OpenTofu
+- Operating system: Talos Linux
+- GitOps: ArgoCD
+- Networking: Cilium, Gateway API, Cloudflare Tunnel
+- Storage: Longhorn
+- Databases: CloudNativePG
+- Secrets: External Secrets Operator backed by Bitwarden
+
+## Critical Manual Dependency
+
+`bitwarden-access-token` in the `external-secrets` namespace is intentionally manual and outside Git.
+
+If it is missing, expect failures in:
+
+- `ClusterSecretStore/bitwarden-secretsmanager`
+- `ExternalSecret` reconciliation
+- `cloudflared`
+- cert-manager DNS validation
+- runtime secrets for ArgoCD, Authentik, and backup jobs
+
+## Routing Model
+
 - Public ArgoCD URL: `https://argo.rosenvall.se`
 - Legacy ArgoCD alias: `https://argocd.rosenvall.se`
-- Cloudflare Tunnel forwards `*.rosenvall.se` to the external Gateway service over HTTPS.
+- Cloudflare Tunnel forwards public traffic to the external gateway service
+- Monitoring routes should stay internal unless there is an explicit reason to publish them
+
+## Documentation
+
+- Root `README.md` is the public landing page
+- `docs/` is the active operator wiki
+- Component README files under `kubernetes/` are implementation notes close to the manifests
 
 ## User Preferences
-- **Editor**: VS Code
-- **Communication**: Explain the "Why" and "How". Focus on teaching Infrastructure as Code concepts.
+
+- Editor: VS Code
+- Communication: Explain the why and how when it adds value, but keep the repo grounded in current truth rather than aspirational architecture

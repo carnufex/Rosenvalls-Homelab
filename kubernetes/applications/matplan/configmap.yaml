@@ -13,6 +13,8 @@ data:
   AiChat__Ollama__BaseUrl: http://ollama.ollama.svc.cluster.local:11434
   Voice__Whisper__BaseUrl: http://matplan-whisper:8080
   Voice__Piper__BaseUrl: http://matplan-piper:5000
+  Voice__Piper__DefaultVoiceId: sv_SE-nst-medium
+  Voice__Piper__FallbackVoiceId: sv_SE-lisa-medium
   Database__ApplyMigrations: "true"
   Database__SeedDemoData: "false"
   DataProtection__KeysPath: /var/lib/matplan/dpkeys

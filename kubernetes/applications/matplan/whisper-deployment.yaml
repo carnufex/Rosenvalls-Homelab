@@ -7,6 +7,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: matplan-whisper
@@ -16,10 +18,28 @@ spec:
         app.kubernetes.io/name: matplan-whisper
     spec:
       serviceAccountName: matplan-runtime
+      nodeSelector:
+        kubernetes.io/hostname: worker-01
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
       containers:
         - name: whisper
           image: ghcr.io/ggml-org/whisper.cpp:main
           imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -lc
+            - >-
+              set -euo pipefail;
+              model_path="/models/ggml-${WHISPER_MODEL:-kb-large}.bin";
+              if [ ! -f "${model_path}" ]; then
+                echo "Missing whisper model at ${model_path}.";
+                exit 1;
+              fi;
+              echo "Using whisper model ${WHISPER_MODEL:-kb-large}";
+              exec whisper-server --host 0.0.0.0 --port ${WHISPER_PORT:-8080} --convert -m "${model_path}"
           ports:
             - containerPort: 8080
               name: http
@@ -30,16 +50,16 @@ spec:
               value: "8080"
           resources:
             requests:
-              cpu: 250m
-              memory: 1Gi
-            limits:
-              cpu: 1
+              cpu: 500m
               memory: 2Gi
+            limits:
+              cpu: 2
+              memory: 4Gi
           startupProbe:
             tcpSocket:
               port: http
             periodSeconds: 5
-            failureThreshold: 24
+            failureThreshold: 120
           livenessProbe:
             tcpSocket:
               port: http
