@@ -2,6 +2,12 @@
 
 This app contains the Authentik namespace, runtime secrets, and CloudNativePG cluster.
 
+## Current Stability Posture
+
+The live cluster currently runs Authentik PostgreSQL as a single-instance cluster with
+`20Gi` of WAL storage to prioritize service recovery over database HA. Restore a second
+instance only after the primary is healthy and WAL growth is confirmed stable.
+
 ## Default Mode
 
 The default manifest uses `initdb` for deterministic new cluster bootstrap.
