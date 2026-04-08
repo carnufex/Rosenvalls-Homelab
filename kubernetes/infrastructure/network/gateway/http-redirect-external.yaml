@@ -9,8 +9,10 @@ spec:
       namespace: gateway
       sectionName: http
   hostnames:
-    - "*.rosenvall.se"
-    - rosenvall.se
+    - argo.rosenvall.se
+    - argocd.rosenvall.se
+    - authentik.rosenvall.se
+    - matplan.rosenvall.se
   rules:
     - matches:
         - path:

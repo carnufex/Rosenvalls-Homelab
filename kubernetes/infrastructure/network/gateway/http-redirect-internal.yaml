@@ -9,8 +9,19 @@ spec:
       namespace: gateway
       sectionName: http
   hostnames:
-    - "*.rosenvall.local"
-    - rosenvall.local
+    - authentik.rosenvall.local
+    - deluge.rosenvall.local
+    - grafana.rosenvall.local
+    - homeassistant.rosenvall.local
+    - hub-central.rosenvall.local
+    - jackett.rosenvall.local
+    - longhorn.rosenvall.local
+    - overseerr.rosenvall.local
+    - plex.rosenvall.local
+    - prometheus.rosenvall.local
+    - radarr.rosenvall.local
+    - ragflow.rosenvall.local
+    - sonarr.rosenvall.local
   rules:
     - matches:
         - path:
