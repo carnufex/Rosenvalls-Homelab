@@ -8,11 +8,6 @@ spec:
     - name: external
       namespace: gateway
       sectionName: http
-  hostnames:
-    - argo.rosenvall.se
-    - argocd.rosenvall.se
-    - authentik.rosenvall.se
-    - matplan.rosenvall.se
   rules:
     - matches:
         - path:

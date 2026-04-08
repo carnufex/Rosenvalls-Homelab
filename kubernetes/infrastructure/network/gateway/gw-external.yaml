@@ -24,6 +24,7 @@ spec:
     - protocol: HTTP
       port: 80
       name: http
+      hostname: "*.rosenvall.se"
       allowedRoutes:
         namespaces:
           from: All
