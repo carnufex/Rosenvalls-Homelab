@@ -7,6 +7,7 @@ spec:
   parentRefs:
     - name: external
       namespace: gateway
+      sectionName: https
   hostnames:
     - argo.rosenvall.se
     - argocd.rosenvall.se

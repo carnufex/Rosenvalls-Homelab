@@ -13,5 +13,5 @@
 - `HTTPRoute/hub-central` binds the app to `gateway/internal` on `https://hub-central.rosenvall.local`.
 - Add local DNS on the UDM so LAN clients resolve `*.rosenvall.local` to `192.168.1.220`.
 - Internal HTTPS for `*.rosenvall.local` uses the cluster-local CA managed in the `gateway` namespace.
-- The deployment starts at `replicas: 0` so you can seed or verify runtime configuration before the app is brought live.
+- The deployment runs at `replicas: 1`.
 - No public `HTTPRoute` is created in v1.

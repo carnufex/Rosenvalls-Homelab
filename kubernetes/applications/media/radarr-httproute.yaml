@@ -9,6 +9,7 @@ spec:
   parentRefs:
     - name: internal
       namespace: gateway
+      sectionName: https
   hostnames:
     - radarr.rosenvall.local
   rules:

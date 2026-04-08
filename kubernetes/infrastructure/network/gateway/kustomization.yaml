@@ -9,5 +9,7 @@ resources:
   - cert-local-ca.yaml
   - issuer-local-ca.yaml
   - cert-local-wildcard.yaml
+  - http-redirect-external.yaml
+  - http-redirect-internal.yaml
   - gw-external.yaml
   - gw-internal.yaml
