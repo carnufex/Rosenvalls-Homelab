@@ -5,6 +5,7 @@ metadata:
   namespace: media
   annotations:
     argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   parentRefs:
     - name: internal
