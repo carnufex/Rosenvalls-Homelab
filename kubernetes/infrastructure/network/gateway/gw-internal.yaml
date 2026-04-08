@@ -12,12 +12,12 @@ spec:
     - protocol: HTTPS
       port: 443
       name: https
-      hostname: "*.rosenvall.se"
+      hostname: "*.rosenvall.local"
       tls:
         certificateRefs:
           - group: ""
             kind: Secret
-            name: cert-wildcard
+            name: cert-local-wildcard
       allowedRoutes:
         namespaces:
           from: All

@@ -1,0 +1,28 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: deluge-vpn-egress-lockdown
+  namespace: media
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: deluge-vpn
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Replace this hostname and port with the real WireGuard endpoint from /config/wg0.conf.
+    # Leaving the placeholder in place is intentionally fail-closed.
+    - toFQDNs:
+        - matchName: vpn-endpoint.example.invalid
+      toPorts:
+        - ports:
+            - port: "51820"
+              protocol: UDP

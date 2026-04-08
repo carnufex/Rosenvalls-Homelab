@@ -11,6 +11,7 @@ spec:
       namespace: gateway
   hostnames:
     - authentik.rosenvall.se
+    - authentik.rosenvall.local
   rules:
     - matches:
         - path:

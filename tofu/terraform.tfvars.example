@@ -32,5 +32,8 @@ nodes_config = {
     cpu           = 4
     ram_dedicated = 8192
     igpu          = false
+    extra_labels = {
+      "homelab.rosenvall.se/lan-special" = "true"
+    }
   }
 }

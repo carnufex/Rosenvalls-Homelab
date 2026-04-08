@@ -7,7 +7,7 @@ This directory contains the configuration for Longhorn, a distributed block stor
 - Namespace: `longhorn-system`
 - Default replica policy: `2`
 - Metrics: ServiceMonitor enabled for `kube-prometheus-stack`
-- UI route: `https://longhorn.rosenvall.se` (internal gateway)
+- UI route: `https://longhorn.rosenvall.local` (internal gateway)
 - Failure domain model: single-zone homelab, multi-node storage
 
 ## Storage Profiles

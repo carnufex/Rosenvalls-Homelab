@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gateway-local-ca
+  namespace: gateway
+spec:
+  secretName: gateway-local-ca
+  commonName: gateway-local-ca
+  isCA: true
+  duration: 87600h
+  renewBefore: 720h
+  issuerRef:
+    name: gateway-local-selfsigned
+    kind: Issuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - cert sign
+    - crl sign
+    - digital signature
+    - key encipherment

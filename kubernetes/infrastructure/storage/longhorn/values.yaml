@@ -105,7 +105,7 @@ resources:
 ingress:
   enabled: false
   ingressClassName: cilium
-  host: longhorn.rosenvall.se
+  host: longhorn.rosenvall.local
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
   tls: true

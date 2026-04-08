@@ -32,9 +32,9 @@ resource "proxmox_virtual_environment_vm" "this" {
     interface    = "scsi0"
     # The Talos EPHEMERAL volume lives on the boot disk and backs kubelet/containerd.
     # Keep this independent from the dedicated Longhorn disk mounted at /var/lib/longhorn.
-    size         = each.value.boot_disk_size_gib
-    file_format  = "raw"
-    file_id      = proxmox_virtual_environment_download_file.this[local.node_schematic_key[each.key]].id
+    size        = each.value.boot_disk_size_gib
+    file_format = "raw"
+    file_id     = proxmox_virtual_environment_download_file.this[local.node_schematic_key[each.key]].id
   }
 
   dynamic "disk" {
@@ -67,13 +67,13 @@ resource "proxmox_virtual_environment_vm" "this" {
   # GPU configuration is handled manually in Proxmox GUI due to API permission restrictions
   # The lifecycle block ensures Tofu doesn't try to remove the manually added GPU
   lifecycle {
-     ignore_changes = [
-       hostpci,
-       kvm_arguments,
-       # Once the boot disk is created, a refreshed shared Talos image should not
-       # force every VM to be replaced. Planned reprovisioning still uses -replace.
-       disk[0].file_id
-     ]
+    ignore_changes = [
+      hostpci,
+      kvm_arguments,
+      # Once the boot disk is created, a refreshed shared Talos image should not
+      # force every VM to be replaced. Planned reprovisioning still uses -replace.
+      disk[0].file_id
+    ]
   }
 
   # PCI passthrough configuration commented out to allow manual GUI configuration

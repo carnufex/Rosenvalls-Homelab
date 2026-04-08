@@ -1,10 +1,10 @@
 variable "image" {
   description = "Talos image configuration"
   type = object({
-    factory_url = optional(string, "https://factory.talos.dev")
-    version     = string
-    arch        = optional(string, "amd64")
-    platform    = optional(string, "nocloud")
+    factory_url       = optional(string, "https://factory.talos.dev")
+    version           = string
+    arch              = optional(string, "amd64")
+    platform          = optional(string, "nocloud")
     proxmox_datastore = optional(string, "local")
   })
 }
@@ -23,18 +23,19 @@ variable "cluster" {
 variable "nodes" {
   description = "Configuration for cluster nodes"
   type = map(object({
-    host_node     = string
-    machine_type  = string
+    host_node          = string
+    machine_type       = string
     boot_disk_size_gib = number
-    datastore_id  = optional(string)
-    ip            = string
-    mac_address   = optional(string)
-    vm_id         = optional(number)
-    cpu           = number
-    ram_dedicated = number
+    datastore_id       = optional(string)
+    ip                 = string
+    mac_address        = optional(string)
+    vm_id              = optional(number)
+    cpu                = number
+    ram_dedicated      = number
     igpu               = optional(bool, false)
     gpu_node_exclusive = optional(bool, true)
     gpu_devices        = optional(list(string), [])
+    extra_labels       = optional(map(string), {})
     gpu_device_meta = optional(map(object({
       id           = string
       subsystem_id = string

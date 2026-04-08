@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-central
+  namespace: hub-central
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hub-central
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hub-central
+    spec:
+      serviceAccountName: hub-central-runtime
+      containers:
+        - name: hub-central
+          image: ghcr.io/carnufex/hub-central:sha-1796075
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20

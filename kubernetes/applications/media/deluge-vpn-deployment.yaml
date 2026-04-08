@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deluge-vpn
+  namespace: media
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 0
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: deluge-vpn
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: deluge-vpn
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: wireguard
+          image: lscr.io/linuxserver/wireguard:1.0.20250521@sha256:b199fa09846365caec217ebf9cbf839a22b7bf836acfd367a59ed52b6984f174
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+          envFrom:
+            - configMapRef:
+                name: media-runtime
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - /health/check-wg.sh
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - /health/check-wg.sh
+            periodSeconds: 10
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: health
+              mountPath: /health
+        - name: deluge
+          image: lscr.io/linuxserver/deluge:2.2.0@sha256:617ff555ddd2e10fb8934d12e6372e9e95d7f30dafe341c200d3d535fcead0a2
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: media-runtime
+          ports:
+            - containerPort: 8112
+              name: web
+            - containerPort: 58846
+              name: daemon
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - /health/check-wg.sh
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - /health/check-wg.sh
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            tcpSocket:
+              port: web
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 2
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: library
+              mountPath: /lagring
+            - name: health
+              mountPath: /health
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: deluge-config
+        - name: library
+          persistentVolumeClaim:
+            claimName: media-library
+        - name: health
+          configMap:
+            name: deluge-health
+            defaultMode: 0755

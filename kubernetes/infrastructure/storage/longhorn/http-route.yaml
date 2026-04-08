@@ -8,7 +8,7 @@ spec:
     - name: internal
       namespace: gateway
   hostnames:
-    - longhorn.rosenvall.se
+    - longhorn.rosenvall.local
   rules:
     - matches:
         - path:

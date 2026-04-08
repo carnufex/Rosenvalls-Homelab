@@ -10,7 +10,7 @@ spec:
     - name: internal
       namespace: gateway
   hostnames:
-    - prometheus.rosenvall.se
+    - prometheus.rosenvall.local
   rules:
     - matches:
         - path:

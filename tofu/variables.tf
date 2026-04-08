@@ -43,17 +43,18 @@ variable "proxmox_datastore" {
 variable "nodes_config" {
   description = "Per-node configuration map"
   type = map(object({
-    host_node     = optional(string)
-    machine_type  = string
+    host_node          = optional(string)
+    machine_type       = string
     boot_disk_size_gib = optional(number)
-    ip            = string
-    mac_address   = optional(string)
-    vm_id         = optional(number)
-    ram_dedicated = optional(number)
-    cpu           = optional(number)
+    ip                 = string
+    mac_address        = optional(string)
+    vm_id              = optional(number)
+    ram_dedicated      = optional(number)
+    cpu                = optional(number)
     igpu               = optional(bool)
     gpu_node_exclusive = optional(bool)
     gpu_devices        = optional(list(string))
+    extra_labels       = optional(map(string))
     gpu_device_meta = optional(map(object({
       id           = string
       subsystem_id = string
@@ -69,14 +70,14 @@ variable "nodes_config" {
   }))
   default = {
     "k8s-cp-01" = {
-      machine_type  = "controlplane"
-      ip            = "192.168.1.201"
-      vm_id         = 101
+      machine_type = "controlplane"
+      ip           = "192.168.1.201"
+      vm_id        = 101
     }
     "k8s-worker-01" = {
-      machine_type  = "worker"
-      ip            = "192.168.1.211"
-      vm_id         = 201
+      machine_type = "worker"
+      ip           = "192.168.1.211"
+      vm_id        = 201
     }
   }
 }

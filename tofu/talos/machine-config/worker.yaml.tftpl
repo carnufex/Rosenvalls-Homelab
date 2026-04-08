@@ -11,6 +11,9 @@ machine:
 %{ if igpu }
     gpu: "true"
 %{ endif }
+%{ for label_key, label_value in extra_labels ~}
+    ${label_key}: "${label_value}"
+%{ endfor ~}
 %{ if igpu && gpu_node_exclusive }
   nodeTaints:
     gpu: "true:NoSchedule"

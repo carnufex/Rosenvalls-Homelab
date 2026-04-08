@@ -75,7 +75,7 @@ Validate this chain in order:
 
 ```powershell
 kubectl get pods -n cloudflare
-kubectl get certificate -n gateway cert-wildcard
+kubectl get certificate -n gateway
 kubectl get gateway -n gateway external -o yaml
 kubectl get httproute -A
 ```

@@ -15,6 +15,7 @@ variable "defaults_worker" {
       subsystem_id = string
       iommu_group  = number
     }))
+    extra_labels = map(string)
     disks = map(object({
       device      = string
       size        = string
@@ -33,6 +34,7 @@ variable "defaults_worker" {
     gpu_node_exclusive = false
     gpu_devices        = []
     gpu_device_meta    = {}
+    extra_labels       = {}
     disks = {
       longhorn = {
         device      = "/dev/sdb"
@@ -62,6 +64,7 @@ variable "defaults_controlplane" {
       subsystem_id = string
       iommu_group  = number
     }))
+    extra_labels = map(string)
     disks = map(object({
       device      = string
       size        = string
@@ -80,6 +83,7 @@ variable "defaults_controlplane" {
     gpu_node_exclusive = false
     gpu_devices        = []
     gpu_device_meta    = {}
+    extra_labels       = {}
     disks              = {}
   }
 }

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deluge-health
+  namespace: media
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+data:
+  check-wg.sh: |
+    #!/bin/sh
+    set -eu
+    test -f /config/wg0.conf
+    ip link show wg0 >/dev/null 2>&1
+    ip route | grep -Eq '^default .* dev wg0([[:space:]]|$)'

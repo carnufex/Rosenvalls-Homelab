@@ -18,8 +18,8 @@ Use this order before digging into app-specific symptoms:
 3. `kubectl get clustersecretstore bitwarden-secretsmanager`
 4. `kubectl get externalsecret -A`
 5. `kubectl get pods -n cloudflare`
-6. `kubectl get certificate -n gateway cert-wildcard`
-7. `kubectl get gateway -n gateway external -o yaml`
+6. `kubectl get certificate -n gateway`
+7. `kubectl get gateway -A`
 8. `kubectl get httproute -A`
 
 The goal is to validate the bootstrap secret chain and routing chain before spending time on downstream symptoms.

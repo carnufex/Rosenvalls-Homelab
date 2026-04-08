@@ -17,6 +17,7 @@ data "talos_machine_configuration" "this" {
         gateway            = var.cluster.gateway
         igpu               = each.value.igpu
         gpu_node_exclusive = lookup(each.value, "gpu_node_exclusive", false)
+        extra_labels       = lookup(each.value, "extra_labels", {})
       })
     ],
     # Conditionally add GPU patches for GPU-enabled worker nodes

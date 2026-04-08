@@ -10,7 +10,7 @@ spec:
     - name: internal
       namespace: gateway
   hostnames:
-    - grafana.rosenvall.se
+    - grafana.rosenvall.local
   rules:
     - matches:
         - path:

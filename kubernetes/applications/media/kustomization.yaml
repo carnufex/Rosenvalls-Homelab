@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ns.yaml
+  - media-configmap.yaml
+  - deluge-health-configmap.yaml
+  - media-library-pv.yaml
+  - media-library-pvc.yaml
+  - radarr-config-pvc.yaml
+  - sonarr-config-pvc.yaml
+  - jackett-config-pvc.yaml
+  - deluge-config-pvc.yaml
+  - overseerr-config-pvc.yaml
+  - plex-config-pvc.yaml
+  - radarr-service.yaml
+  - sonarr-service.yaml
+  - jackett-service.yaml
+  - deluge-service.yaml
+  - overseerr-service.yaml
+  - plex-service.yaml
+  - radarr-httproute.yaml
+  - sonarr-httproute.yaml
+  - jackett-httproute.yaml
+  - deluge-httproute.yaml
+  - overseerr-httproute.yaml
+  - plex-httproute.yaml
+  - deluge-vpn-policy.yaml
+  - radarr-deployment.yaml
+  - sonarr-deployment.yaml
+  - jackett-deployment.yaml
+  - deluge-vpn-deployment.yaml
+  - overseerr-deployment.yaml
+  - plex-deployment.yaml

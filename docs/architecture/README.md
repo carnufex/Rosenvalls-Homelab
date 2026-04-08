@@ -28,7 +28,7 @@ This repo manages the full platform lifecycle from VM provisioning to app routin
 - The checked-in example node inventory currently shows one control plane and one worker
 - Control plane VIP: `192.168.1.200`
 - Public routing: Cloudflare Tunnel -> `gateway/external` -> `HTTPRoute` -> Service
-- Internal routing: `gateway/internal` -> `HTTPRoute` -> Service
+- Internal routing: UDM local DNS `*.rosenvall.local` -> `gateway/internal` -> `HTTPRoute` -> Service
 
 The configuration model supports more nodes, but the checked-in example posture is still a non-HA control plane and not a fully redundant worker topology for 2-replica storage classes.
 
