@@ -1,14 +1,16 @@
 locals {
   media_nfs_enabled = var.media_nfs != null
 
-  media_nfs_boot_datastore = local.media_nfs_enabled ? coalesce(try(var.media_nfs.boot_datastore, null), var.proxmox_datastore) : null
+  media_nfs_boot_datastore  = local.media_nfs_enabled ? coalesce(try(var.media_nfs.boot_datastore, null), var.proxmox_datastore) : null
   media_nfs_image_datastore = local.media_nfs_enabled ? coalesce(try(var.media_nfs.image_datastore, null), "local") : null
-  media_nfs_gateway = local.media_nfs_enabled ? coalesce(try(var.media_nfs.gateway, null), var.gateway) : null
+  media_nfs_gateway         = local.media_nfs_enabled ? coalesce(try(var.media_nfs.gateway, null), var.gateway) : null
+  proxmox_api_authority     = trimsuffix(split("//", nonsensitive(var.proxmox.endpoint))[1], "/")
+  proxmox_api_host          = split(":", local.proxmox_api_authority)[0]
   media_nfs_allowed_clients = local.media_nfs_enabled ? coalescelist(
     try(var.media_nfs.allowed_clients, null),
     [
       for _, node in var.nodes_config :
-      "${node.ip}(rw,sync,no_subtree_check)"
+      "${node.ip}(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)"
       if node.machine_type == "worker"
     ]
   ) : []
@@ -24,8 +26,8 @@ resource "proxmox_virtual_environment_download_file" "media_nfs_debian_cloud_ima
   datastore_id = local.media_nfs_image_datastore
   node_name    = var.media_nfs.host_node
 
-  url       = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
-  file_name = "debian-12-genericcloud-amd64.qcow2.img"
+  url       = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2"
+  file_name = "debian-12-generic-amd64.qcow2.img"
 }
 
 resource "proxmox_virtual_environment_file" "media_nfs_user_data" {
@@ -46,13 +48,14 @@ resource "proxmox_virtual_environment_file" "media_nfs_user_data" {
 }
 
 resource "proxmox_virtual_environment_vm" "media_nfs" {
-  count     = local.media_nfs_enabled ? 1 : 0
-  name      = var.media_nfs.name
-  node_name = var.media_nfs.host_node
-  vm_id     = var.media_nfs.vm_id
-  machine   = "q35"
-  on_boot   = true
-  started   = true
+  count         = local.media_nfs_enabled ? 1 : 0
+  name          = var.media_nfs.name
+  node_name     = var.media_nfs.host_node
+  vm_id         = var.media_nfs.vm_id
+  machine       = "q35"
+  scsi_hardware = "virtio-scsi-single"
+  on_boot       = true
+  started       = true
 
   agent {
     enabled = true
@@ -109,7 +112,47 @@ resource "proxmox_virtual_environment_vm" "media_nfs" {
     model  = "virtio"
   }
 
+  serial_device {
+    device = "socket"
+  }
+
   operating_system {
     type = "l26"
   }
+}
+
+resource "terraform_data" "media_nfs_bootstrap" {
+  count = local.media_nfs_enabled ? 1 : 0
+
+  triggers_replace = [
+    tostring(proxmox_virtual_environment_vm.media_nfs[0].vm_id),
+    proxmox_virtual_environment_vm.media_nfs[0].id,
+    sha1(templatefile("${path.module}/templates/media-nfs-user-data.yaml.tftpl", {
+      hostname            = var.media_nfs.name
+      ssh_authorized_keys = local.media_nfs_ssh_public_keys
+      export_path         = "/srv/nfs/media"
+      allowed_clients     = join(" ", local.media_nfs_allowed_clients)
+    })),
+    sha1(join("\n", local.media_nfs_allowed_clients)),
+    sha1(join("\n", local.media_nfs_ssh_public_keys)),
+    var.media_nfs.ip,
+    local.media_nfs_gateway,
+  ]
+
+  provisioner "local-exec" {
+    interpreter = [
+      "PowerShell",
+      "-NoLogo",
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+    ]
+    command = "${path.module}/../scripts/bootstrap-media-nfs.ps1 -ClusterSshHost ${local.proxmox_api_host} -NodeName ${var.media_nfs.host_node} -VmId ${var.media_nfs.vm_id} -VmIp ${var.media_nfs.ip} -HostName ${var.media_nfs.name} -Gateway ${local.media_nfs_gateway}"
+  }
+
+  depends_on = [
+    proxmox_virtual_environment_file.media_nfs_user_data,
+    proxmox_virtual_environment_vm.media_nfs,
+  ]
 }

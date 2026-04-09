@@ -8,6 +8,6 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 4Ti
+      storage: 3500Gi
   storageClassName: ""
   volumeName: media-library

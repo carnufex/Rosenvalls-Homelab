@@ -30,7 +30,7 @@ Expected shape:
 - VM name: `media-nfs-01`
 - IP: `192.168.1.230`
 - boot disk: `32Gi` on `local-lvm`
-- data disk: `4.5T` on `WD-red`
+- data disk: `3600Gi` on `WD-red` (sized to current free space on the backing storage)
 - export path: `/srv/nfs/media`
 - exported directories:
   - `downloads`
@@ -38,7 +38,13 @@ Expected shape:
   - `movies`
   - `familjefilmer`
 
-The cloud-init bootstrap formats the data disk if needed, mounts it, creates the media directories, and exports the share only to worker nodes `192.168.1.211`, `192.168.1.212`, and `192.168.1.213`.
+Because Debian cloud-init detection is unreliable on this Proxmox/image combination, the helper VM is finalized by `.\scripts\bootstrap-media-nfs.ps1` after the VM has been created. The bootstrap script injects static network and SSH access offline, then completes package install, data-disk mount, media directory creation, and the NFS export on first SSH.
+
+Manual rerun if needed:
+
+```powershell
+.\scripts\bootstrap-media-nfs.ps1 -ClusterSshHost 192.168.1.111 -NodeName desktop -VmId 8010 -VmIp 192.168.1.230
+```
 
 ## Seed Commands
 

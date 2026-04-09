@@ -185,20 +185,20 @@ function Sync-DirectoryToPvc {
     $remoteStage = "/seed/$sourceLeaf"
 
     try {
-        Invoke-Kubectl exec -n $Namespace $podName -- sh -lc "mkdir -p /seed /target && find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} +"
+        Invoke-PodShell -Namespace $Namespace -PodName $podName -Script 'mkdir -p /seed /target && find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} +'
 
         $copyResult = & kubectl cp $SourcePath "${Namespace}/${podName}:/seed"
         if ($LASTEXITCODE -ne 0) {
             throw "kubectl cp to $Namespace/$podName failed.`n$($copyResult | Out-String)"
         }
 
-        Invoke-Kubectl exec -n $Namespace $podName -- sh -lc "cp -a $remoteStage/. /target/"
+        Invoke-PodShell -Namespace $Namespace -PodName $podName -Script "cp -a $remoteStage/. /target/"
 
         foreach ($relativePath in $CleanupRelativePaths) {
-            Invoke-Kubectl exec -n $Namespace $podName -- sh -lc "rm -f /target/$relativePath"
+            Invoke-PodShell -Namespace $Namespace -PodName $podName -Script "rm -f /target/$relativePath"
         }
 
-        Invoke-Kubectl exec -n $Namespace $podName -- sh -lc "chown -R $Owner /target"
+        Invoke-PodShell -Namespace $Namespace -PodName $podName -Script "chown -R $Owner /target"
         Write-Host "[OK] Seeded $Namespace/$ClaimName from '$SourcePath'" -ForegroundColor Green
     }
     finally {

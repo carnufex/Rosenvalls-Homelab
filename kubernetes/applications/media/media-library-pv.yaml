@@ -4,7 +4,7 @@ metadata:
   name: media-library
 spec:
   capacity:
-    storage: 4Ti
+    storage: 3500Gi
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain

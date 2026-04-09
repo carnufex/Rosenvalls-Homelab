@@ -42,6 +42,7 @@ Use these after:
 
 ```powershell
 .\scripts\export-local-ca.ps1
+.\scripts\bootstrap-media-nfs.ps1 -ClusterSshHost 192.168.1.111 -NodeName desktop -VmId 8010 -VmIp 192.168.1.230
 .\scripts\seed-homeassistant.ps1
 .\scripts\seed-media-configs.ps1
 .\scripts\verify-local-routes.ps1
@@ -83,6 +84,8 @@ kubectl get volumes.longhorn.io -n longhorn-system
 
 ```powershell
 kubectl get pv media-library -o yaml
+Test-NetConnection 192.168.1.230 -Port 22
+Test-NetConnection 192.168.1.230 -Port 2049
 .\scripts\verify-media-nfs.ps1
 showmount -e 192.168.1.230
 ```

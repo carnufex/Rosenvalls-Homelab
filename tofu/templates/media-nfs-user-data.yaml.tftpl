@@ -63,6 +63,7 @@ write_files:
         "$${export_path}/movies" \
         "$${export_path}/familjefilmer"
 
+      mkdir -p /etc/exports.d
       cat >/etc/exports.d/media.exports <<'EOF'
       ${export_path} ${allowed_clients}
       EOF
