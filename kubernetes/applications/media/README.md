@@ -16,13 +16,13 @@ This app groups the local-only media stack that used to run under Docker Compose
 - The namespace is explicitly marked `pod-security.kubernetes.io/enforce=privileged` because Plex uses `hostNetwork` and the WireGuard sidecar needs elevated network privileges.
 - Plex scheduling requires a worker labeled `homelab.rosenvall.se/lan-special=true`.
 - Internal browser access is handled with `HTTPRoute` resources on `gateway/internal`, so LAN clients should resolve `*.rosenvall.local` to `192.168.1.220` on the UDM.
-- All media deployments start at `replicas: 0` in Git so config can be seeded before traffic is switched.
+- Media configs are seeded from `Downloads\media` before cutover, but the deployments are now managed directly in Git and scaled individually as each app is validated.
 
 ## Deluge VPN Model
 
 - `wireguard` and `deluge` share one pod and therefore one network namespace.
-- `wireguard` is expected to own the pod's default route.
-- `deluge` is only considered healthy when `/config/wg0.conf` exists and the default route points to `wg0`.
+- `wireguard` is expected to install policy routing for table `51820`, with `default dev wg0` in that table and explicit route exceptions for cluster/LAN networks.
+- `deluge` is only considered healthy when `/config/wg_confs/wg0.conf` exists, `wg0` is up, and WireGuard policy routing is present.
 - `CiliumNetworkPolicy/deluge-vpn-egress-lockdown` only allows DNS plus the configured WireGuard endpoint `wireguard.5july.net:48575`.
 
 ## Seeding
@@ -43,7 +43,7 @@ The seed script copies:
 - `Downloads\media\plex\config` -> `PersistentVolumeClaim/plex-config`
 - `Downloads\media\deluge\config` plus `Downloads\media\wireguard\wg0.conf` -> `PersistentVolumeClaim/deluge-config`
 
-It also removes runtime files and applies known pre-boot config fixes for Jackett and Overseerr.
+It also removes runtime files, normalizes the Deluge WireGuard `PostUp`/`PostDown` commands for Kubernetes networking, and applies known pre-boot config fixes for Jackett and Overseerr.
 
 ## Verification
 

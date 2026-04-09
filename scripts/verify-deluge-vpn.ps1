@@ -42,8 +42,10 @@ if (-not $execContainer) {
 
 $checkScript = @"
 set -eu
+test -f /config/wg_confs/wg0.conf
 ip link show wg0 >/dev/null 2>&1
-ip route | grep -Eq '^default .* dev wg0([[:space:]]|$)'
+ip -4 rule show | grep -Eq 'lookup 51820'
+ip -4 route show table 51820 | grep -Eq '^default .* dev wg0([[:space:]]|$)'
 "@
 Invoke-PodShell -Namespace $Namespace -PodName $podName -Container $execContainer -Script $checkScript
 
@@ -66,4 +68,4 @@ if ($LASTEXITCODE -eq 0 -and $stdout) {
     Write-Host "VPN route verified, but curl/wget was unavailable for external IP confirmation." -ForegroundColor Yellow
 }
 
-Write-Host "deluge-vpn pod '$Namespace/$podName' has wg0 and uses it as the default route." -ForegroundColor Green
+Write-Host "deluge-vpn pod '$Namespace/$podName' has wg0 and WireGuard policy routing active in table 51820." -ForegroundColor Green

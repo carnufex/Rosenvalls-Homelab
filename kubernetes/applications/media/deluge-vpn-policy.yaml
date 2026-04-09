@@ -18,7 +18,7 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    # Replace this hostname and port with the real WireGuard endpoint from /config/wg0.conf.
+    # Replace this hostname and port with the real WireGuard endpoint from /config/wg_confs/wg0.conf.
     - toFQDNs:
         - matchName: wireguard.5july.net
       toPorts:
