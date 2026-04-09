@@ -185,11 +185,21 @@ function Sync-DirectoryToPvc {
     $remoteStage = "/seed/$sourceLeaf"
 
     try {
-        Invoke-PodShell -Namespace $Namespace -PodName $podName -Script 'mkdir -p /seed /target && find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} +'
+        Invoke-PodShell -Namespace $Namespace -PodName $podName -Script 'mkdir -p /seed /target && find /target -mindepth 1 -maxdepth 1 -exec rm -rf -- {} + 2>/dev/null || true'
 
-        $copyResult = & kubectl cp $SourcePath "${Namespace}/${podName}:/seed"
-        if ($LASTEXITCODE -ne 0) {
-            throw "kubectl cp to $Namespace/$podName failed.`n$($copyResult | Out-String)"
+        $resolvedSourcePath = (Resolve-Path -LiteralPath $SourcePath).Path
+        $sourceParent = Split-Path -Path $resolvedSourcePath -Parent
+        $sourceLeaf = Split-Path -Path $resolvedSourcePath -Leaf
+
+        Push-Location $sourceParent
+        try {
+            $copyResult = & kubectl cp $sourceLeaf "${Namespace}/${podName}:/seed" 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                throw "kubectl cp to $Namespace/$podName failed.`n$($copyResult | Out-String)"
+            }
+        }
+        finally {
+            Pop-Location
         }
 
         Invoke-PodShell -Namespace $Namespace -PodName $podName -Script "cp -a $remoteStage/. /target/"
