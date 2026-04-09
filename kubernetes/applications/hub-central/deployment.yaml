@@ -18,7 +18,7 @@ spec:
       serviceAccountName: hub-central-runtime
       containers:
         - name: hub-central
-          image: ghcr.io/carnufex/hub-central:sha-07c1f8d
+          image: ghcr.io/carnufex/hub-central:sha-6fead83
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
