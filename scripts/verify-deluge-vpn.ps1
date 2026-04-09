@@ -19,7 +19,15 @@ if (-not $pods -or $pods.Count -eq 0) {
     throw "No running deluge-vpn pod was found in namespace '$Namespace' with selector '$LabelSelector'."
 }
 
-$podName = $pods[0].metadata.name
+$runningPod = $pods |
+    Where-Object { $_.metadata.deletionTimestamp -eq $null -and $_.status.phase -eq "Running" } |
+    Select-Object -First 1
+
+if (-not $runningPod) {
+    throw "No active Running deluge-vpn pod was found in namespace '$Namespace' with selector '$LabelSelector'."
+}
+
+$podName = $runningPod.metadata.name
 $podJson = & kubectl get pod -n $Namespace $podName -o json
 if ($LASTEXITCODE -ne 0 -or -not $podJson) {
     throw "Failed to inspect deluge-vpn pod '$Namespace/$podName'."

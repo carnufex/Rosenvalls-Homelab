@@ -79,6 +79,7 @@ function Update-HomeAssistantConfig {
             $outputLines.Add("http:")
             $outputLines.Add("  use_x_forwarded_for: true")
             $outputLines.Add("  trusted_proxies:")
+            $outputLines.Add("    - 192.168.1.0/24")
             $outputLines.Add("    - 10.0.0.0/8")
             $outputLines.Add("    - 127.0.0.1")
             continue
@@ -100,6 +101,7 @@ function Update-HomeAssistantConfig {
         $outputLines.Add("http:")
         $outputLines.Add("  use_x_forwarded_for: true")
         $outputLines.Add("  trusted_proxies:")
+        $outputLines.Add("    - 192.168.1.0/24")
         $outputLines.Add("    - 10.0.0.0/8")
         $outputLines.Add("    - 127.0.0.1")
     }
