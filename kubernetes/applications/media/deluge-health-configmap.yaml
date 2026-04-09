@@ -12,4 +12,4 @@ data:
     test -f /config/wg_confs/wg0.conf
     ip link show wg0 >/dev/null 2>&1
     ip -4 rule show | grep -Eq 'lookup 51820'
-    ip -4 route show table 51820 | grep -Eq '^default .* dev wg0([[:space:]]|$)'
+    ip -4 route show table 51820 | grep -Eq '^default( .*)? dev wg0([[:space:]]|$)'
