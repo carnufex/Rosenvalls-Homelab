@@ -1,0 +1,75 @@
+#cloud-config
+hostname: ${hostname}
+manage_etc_hosts: true
+timezone: Europe/Stockholm
+package_update: true
+packages:
+  - qemu-guest-agent
+  - nfs-common
+  - nfs-kernel-server
+  - xfsprogs
+  - rsync
+%{ if length(ssh_authorized_keys) > 0 ~}
+users:
+  - default
+  - name: debian
+    gecos: Media NFS Admin
+    groups:
+      - sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+%{ for key in ssh_authorized_keys ~}
+      - ${key}
+%{ endfor ~}
+%{ endif ~}
+write_files:
+  - path: /usr/local/sbin/bootstrap-media-nfs.sh
+    permissions: "0755"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      export_path="${export_path}"
+      root_source="$(findmnt -no SOURCE / || true)"
+      root_disk="$(lsblk -no PKNAME "$${root_source}" 2>/dev/null | head -n1 || true)"
+      data_disk="$(lsblk -dnbo NAME,SIZE,TYPE | awk '$3 == "disk" { print $1" "$2 }' | sort -k2 -nr | awk -v root="$${root_disk}" '$1 != root { print "/dev/"$1; exit }')"
+
+      if [[ -z "$${data_disk}" ]]; then
+        echo "Unable to locate the media data disk" >&2
+        exit 1
+      fi
+
+      mkdir -p "$${export_path}"
+
+      if ! blkid "$${data_disk}" >/dev/null 2>&1; then
+        mkfs.ext4 -F "$${data_disk}"
+      fi
+
+      uuid="$(blkid -s UUID -o value "$${data_disk}")"
+      if ! grep -q "$${uuid}" /etc/fstab; then
+        echo "UUID=$${uuid} $${export_path} ext4 defaults,nofail 0 2" >> /etc/fstab
+      fi
+
+      if ! mountpoint -q "$${export_path}"; then
+        mount "$${export_path}"
+      fi
+
+      install -d -m 0775 -o 1000 -g 1000 \
+        "$${export_path}/downloads" \
+        "$${export_path}/tv" \
+        "$${export_path}/movies" \
+        "$${export_path}/familjefilmer"
+
+      cat >/etc/exports.d/media.exports <<'EOF'
+      ${export_path} ${allowed_clients}
+      EOF
+
+      systemctl enable --now qemu-guest-agent
+      systemctl enable --now nfs-kernel-server
+      exportfs -ra
+      systemctl restart nfs-kernel-server
+runcmd:
+  - [ bash, -lc, "/usr/local/sbin/bootstrap-media-nfs.sh" ]

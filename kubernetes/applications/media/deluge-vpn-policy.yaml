@@ -19,10 +19,9 @@ spec:
             - port: "53"
               protocol: TCP
     # Replace this hostname and port with the real WireGuard endpoint from /config/wg0.conf.
-    # Leaving the placeholder in place is intentionally fail-closed.
     - toFQDNs:
-        - matchName: vpn-endpoint.example.invalid
+        - matchName: wireguard.5july.net
       toPorts:
         - ports:
-            - port: "51820"
+            - port: "48575"
               protocol: UDP

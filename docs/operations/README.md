@@ -5,8 +5,8 @@ Use this page for normal day-2 operations and first-response health checks.
 ## Access
 
 ```powershell
-$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
-$env:TALOSCONFIG = "$PWD/tofu/output/talosconfig"
+$env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
+$env:TALOSCONFIG = "$PWD\tofu\output\talosconfig"
 ```
 
 ## Core Health Order
@@ -27,7 +27,6 @@ The goal is to validate the bootstrap secret chain and routing chain before spen
 ## Core Gates
 
 ```powershell
-$env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
 .\scripts\argocd-health-gate.ps1
 .\scripts\preflight-core.ps1
 ```
@@ -39,24 +38,15 @@ Use these after:
 - any routing incident
 - any secret-chain incident
 
-## Daily Access
-
-Basic node check:
+## Migration And Cutover Scripts
 
 ```powershell
-kubectl get nodes
-```
-
-ArgoCD bootstrap password:
-
-```powershell
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
-```
-
-Local ArgoCD port-forward:
-
-```powershell
-kubectl -n argocd port-forward svc/argocd-server 8080:443
+.\scripts\export-local-ca.ps1
+.\scripts\seed-homeassistant.ps1
+.\scripts\seed-media-configs.ps1
+.\scripts\verify-local-routes.ps1
+.\scripts\verify-media-nfs.ps1
+.\scripts\verify-deluge-vpn.ps1
 ```
 
 ## High-Value Checks
@@ -64,16 +54,62 @@ kubectl -n argocd port-forward svc/argocd-server 8080:443
 ```powershell
 kubectl get pods -A
 kubectl get pvc -A
+kubectl get events -A --field-selector type=Warning
 kubectl get clusters.postgresql.cnpg.io -A
 kubectl get volumes.longhorn.io -n longhorn-system
 kubectl get gateway -A
 kubectl get httproute -A
 ```
 
+## What Broke
+
+### Routing
+
+```powershell
+kubectl get gateway -A
+kubectl get httproute -A
+.\scripts\verify-local-routes.ps1
+```
+
+### PVC Or Longhorn State
+
+```powershell
+kubectl get pvc -A
+kubectl describe pvc -n media media-library
+kubectl get volumes.longhorn.io -n longhorn-system
+```
+
+### NFS Media Library
+
+```powershell
+kubectl get pv media-library -o yaml
+.\scripts\verify-media-nfs.ps1
+showmount -e 192.168.1.230
+```
+
+### Host-Network Apps
+
+```powershell
+kubectl get pod -n media -o wide -l app.kubernetes.io/name=plex
+kubectl get pod -n homeassistant -o wide -l app.kubernetes.io/name=homeassistant
+kubectl logs -n media deploy/plex
+kubectl logs -n homeassistant deploy/homeassistant
+```
+
+### Deluge VPN
+
+```powershell
+kubectl get pod -n media -l app.kubernetes.io/name=deluge-vpn
+kubectl logs -n media deploy/deluge-vpn -c wireguard
+kubectl logs -n media deploy/deluge-vpn -c deluge
+.\scripts\verify-deluge-vpn.ps1
+```
+
 ## Troubleshooting Priorities
 
 - If `bitwarden-secretsmanager` is not ready, restore that first.
 - If public traffic is broken, validate `cloudflared`, the wildcard certificate, and the external gateway before touching app manifests.
+- If internal traffic is broken, validate `gateway/internal`, `HTTPRoute` acceptance, and the local CA trust chain before touching workloads.
 - If storage is degraded, verify the secret chain and routing chain are already green before starting Longhorn repair work.
 - If a node shows `DiskPressure`, inspect the Talos boot disk and `EPHEMERAL` usage before blaming Longhorn.
 
@@ -88,3 +124,4 @@ kubectl get httproute -A
 - [Scaling](../scaling/README.md)
 - [Networking](../networking/README.md)
 - [Storage and backups](../storage-and-backups/README.md)
+- [Migrations and cutover](../migrations/README.md)

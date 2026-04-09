@@ -4,7 +4,7 @@ metadata:
   name: media-library
 spec:
   capacity:
-    storage: 1Ti
+    storage: 4Ti
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
@@ -13,5 +13,5 @@ spec:
     - hard
     - nointr
   nfs:
-    server: 192.168.1.111
+    server: 192.168.1.230
     path: /srv/nfs/media

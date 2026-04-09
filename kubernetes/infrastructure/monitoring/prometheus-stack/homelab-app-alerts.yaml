@@ -1,0 +1,43 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homelab-app-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: homelab-apps
+      rules:
+        - alert: HomelabDeploymentUnavailable
+          expr: kube_deployment_status_replicas_unavailable{namespace=~"hub-central|homeassistant|media",deployment=~"hub-central|homeassistant|deluge-vpn|jackett|overseerr|plex|radarr|sonarr"} > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Homelab deployment has unavailable replicas"
+            description: "{{ $labels.namespace }}/{{ $labels.deployment }} has unavailable replicas for more than 10 minutes."
+        - alert: HomelabPodCrashLooping
+          expr: max by (namespace, pod, container) (kube_pod_container_status_waiting_reason{namespace=~"hub-central|homeassistant|media",reason="CrashLoopBackOff"}) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Homelab pod is crash looping"
+            description: "{{ $labels.namespace }}/{{ $labels.pod }} container {{ $labels.container }} is in CrashLoopBackOff."
+        - alert: HomelabPersistentVolumeClaimPending
+          expr: kube_persistentvolumeclaim_status_phase{namespace=~"homeassistant|media",phase="Pending",persistentvolumeclaim=~"homeassistant-config|deluge-config|jackett-config|media-library|overseerr-config|plex-config|radarr-config|sonarr-config"} > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Homelab PVC is pending"
+            description: "{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} has been pending for more than 10 minutes."
+        - alert: HomelabPodStuckPending
+          expr: kube_pod_status_phase{namespace=~"hub-central|homeassistant|media",phase="Pending"} > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Homelab pod is stuck pending"
+            description: "{{ $labels.namespace }}/{{ $labels.pod }} is still pending after 15 minutes, often due to mount or scheduling failures."

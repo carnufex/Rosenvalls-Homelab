@@ -4,10 +4,10 @@ This page documents the current storage model and the backup posture it enables 
 
 ## Storage Model
 
-- Longhorn is the default persistent storage layer.
+- Longhorn is the default persistent storage layer for app state.
 - Worker nodes are the effective storage failure domains.
 - Talos `EPHEMERAL` storage on the boot disk is separate from the dedicated Longhorn data disk.
-- Disk pressure on a node does not automatically mean Longhorn is the problem.
+- The media library is not stored in Longhorn.
 
 ## Longhorn Profiles
 
@@ -24,50 +24,76 @@ Longhorn keeps:
 - soft zone anti-affinity because this homelab is effectively single-zone
 - `allowVolumeCreationWithDegradedAvailability=false`
 
-## Longhorn Backup Posture
+## Media Library Model
 
-- Backup target is configured to Cloudflare R2.
-- The repo does not currently define a recurring Longhorn offsite backup policy.
-- Treat R2 as configured backup capability, not as proof of a validated restore program.
+The media library now lives on a dedicated helper VM instead of inside Longhorn.
 
-Implementation notes live in:
+Current target:
 
-- [Longhorn component README](../../kubernetes/infrastructure/storage/longhorn/README.md)
+- VM: `media-nfs-01`
+- IP: `192.168.1.230`
+- disk: `WD-red`
+- export path: `/srv/nfs/media`
+- Kubernetes PV: `media-library`
+- Kubernetes PVC: `media/media-library`
 
-## CloudNativePG Posture
+Expected directories:
 
-### Authentik
+- `downloads`
+- `tv`
+- `movies`
+- `familjefilmer`
 
-- Backups are scheduled daily.
-- Base backups and WAL archives are compressed.
-- Restore is explicitly modeled through the `dr-restore` overlay.
-- Live backup path: `s3://rosenvall-homelab-backup/authentik/live/`
-- DR backup path: `s3://rosenvall-homelab-backup/authentik/dr/`
+Radarr, Sonarr, and Deluge keep using `/lagring` inside the container so historical paths continue to work.
 
-Implementation notes live in:
+Plex mounts the same export as:
 
-- [Authentik DB prerequisites README](../../kubernetes/infrastructure/controllers/authentik-db-prereqs/README.md)
+- `/tv`
+- `/movies`
+- `/familjefilmer`
 
-### MatPlan
+## Backup Posture
 
-- A dedicated CNPG cluster exists.
-- This repo does not yet document a backup or restore path for MatPlan.
-- Treat MatPlan database recovery as an explicit gap until that changes.
+### Longhorn-Backed Config PVCs
 
-## Artifact Backups Outside The Cluster
+Longhorn should back up these PVCs:
+
+- `homeassistant/homeassistant-config`
+- `media/jackett-config`
+- `media/radarr-config`
+- `media/sonarr-config`
+- `media/overseerr-config`
+- `media/plex-config`
+- `media/deluge-config`
+
+This repo does not yet define a Longhorn recurring backup resource for each of them, so treat this as an operator requirement and verify the schedule in Longhorn after applying.
+
+### NFS Media Library
+
+The NFS export on `192.168.1.230` is outside Longhorn.
+
+That means:
+
+- Longhorn backups do not protect the media files
+- the NFS VM needs its own file-level backup or `rsync` policy
+- the old Docker host can be treated as the temporary migration source, not as a durable backup
+
+### Cluster Access Artifacts
 
 These are not cluster backups, but they matter for operator recovery:
 
 - `tofu/output/kubeconfig`
 - `tofu/output/talosconfig`
 - local `terraform.tfvars`
+- exported copy of `gateway-local-ca`
 
-This repo currently does not define a secure off-machine storage policy for those artifacts.
+Store them outside Git and outside the cluster.
 
 ## Practical Triage Notes
 
 - Restore the bootstrap secret chain before starting Longhorn repair work.
 - If a node is under `DiskPressure`, inspect the Talos boot disk before assuming Longhorn capacity is the cause.
+- Use `.\scripts\verify-media-nfs.ps1` before blaming app mounts for media-library issues.
 - Snapshot or back up before filesystem repair work on Longhorn-backed workloads.
 
 ## Related Docs
@@ -75,3 +101,4 @@ This repo currently does not define a secure off-machine storage policy for thos
 - [Operations](../operations/README.md)
 - [Disaster recovery](../disaster-recovery/README.md)
 - [Scaling](../scaling/README.md)
+- [Migrations and cutover](../migrations/README.md)

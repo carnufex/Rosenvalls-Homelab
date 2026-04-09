@@ -9,7 +9,19 @@ This cluster uses Cilium Gateway API plus an in-cluster Cloudflare Tunnel.
 
 Monitoring routes should stay on the internal gateway unless there is an explicit reason to expose them publicly.
 
-Internal hostnames use the local DNS zone `*.rosenvall.local`, which should resolve to `192.168.1.220` on the UDM or other LAN DNS.
+## Internal DNS Contract
+
+Internal browser access uses the local zone `rosenvall.local`.
+
+Create these UDM records:
+
+- `rosenvall.local -> 192.168.1.220`
+- `*.rosenvall.local -> 192.168.1.220`
+- `media-nfs.rosenvall.local -> 192.168.1.230`
+
+The canonical internal dashboard URL is `https://rosenvall.local`.
+
+`https://hub-central.rosenvall.local` is a redirect alias back to the apex dashboard.
 
 ## Public Routing Model
 
@@ -29,37 +41,25 @@ This means the public path depends on all of the following:
 - the external gateway listener
 - accepted `HTTPRoute` resources
 
-## Current Manual Contract
-
-The tunnel runtime is Git-managed, but the published application routes are still managed in the Cloudflare dashboard.
-
-For wildcard routing to work, the published route for `*.rosenvall.se` must enable `Match SNI to Host`.
-
 ## Internal Routing Model
 
 The current internal flow is:
 
-1. LAN DNS resolves `*.rosenvall.local` to `192.168.1.220`.
-2. `gateway/internal` terminates TLS with a cluster-local wildcard certificate for `*.rosenvall.local`.
+1. LAN DNS resolves `rosenvall.local` and `*.rosenvall.local` to `192.168.1.220`.
+2. `gateway/internal` terminates TLS with the cluster-local wildcard certificate.
 3. Internal-only `HTTPRoute` objects dispatch traffic to services.
 
-To avoid browser warnings, LAN clients must trust the local CA certificate stored in the `gateway-local-ca` secret in the `gateway` namespace.
-
-## URLs
-
-- ArgoCD canonical URL: `https://argo.rosenvall.se`
-- ArgoCD legacy alias: `https://argocd.rosenvall.se`
-
-Authentik is attached to both internal and external gateways so OIDC can work for public apps.
+Internal HTTP listeners redirect to HTTPS.
 
 ## Internal URLs
 
+- `https://rosenvall.local`
+- `https://hub-central.rosenvall.local`
 - `https://authentik.rosenvall.local`
 - `https://grafana.rosenvall.local`
 - `https://prometheus.rosenvall.local`
 - `https://longhorn.rosenvall.local`
 - `https://ragflow.rosenvall.local`
-- `https://hub-central.rosenvall.local`
 - `https://homeassistant.rosenvall.local`
 - `https://radarr.rosenvall.local`
 - `https://sonarr.rosenvall.local`
@@ -68,11 +68,60 @@ Authentik is attached to both internal and external gateways so OIDC can work fo
 - `https://deluge.rosenvall.local`
 - `https://plex.rosenvall.local`
 
-Export the local CA certificate for client trust distribution:
+## Local CA Export
+
+Export the local CA certificate with:
 
 ```powershell
-kubectl -n gateway get secret gateway-local-ca -o jsonpath="{.data.tls\.crt}" | %{[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_))}
+$env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
+.\scripts\export-local-ca.ps1
 ```
+
+The default export path is `C:\Users\<user>\Downloads\rosenvall-local-ca.cer`.
+
+## Local CA Trust
+
+### Windows
+
+1. Run `.\scripts\export-local-ca.ps1`
+2. Open the exported `.cer` file
+3. Choose `Install Certificate`
+4. Select `Local Machine`
+5. Select `Place all certificates in the following store`
+6. Pick `Trusted Root Certification Authorities`
+7. Finish the wizard
+8. Restart the browser
+
+### macOS
+
+1. Open the exported `.cer` file in Keychain Access
+2. Import it into the `System` keychain
+3. Open the certificate entry
+4. Set `When using this certificate` to `Always Trust`
+5. Restart the browser
+
+### iPhone and iPad
+
+1. Copy the `.cer` file to the device
+2. Open it and install the profile
+3. Go to `Settings -> General -> About -> Certificate Trust Settings`
+4. Enable full trust for the imported root certificate
+
+### Android
+
+1. Copy the `.cer` file to the device
+2. Install it under `Settings -> Security -> Encryption and credentials -> Install a certificate`
+3. Choose `CA certificate`
+4. Import it and reopen the browser
+
+### Firefox
+
+Firefox often ignores the OS trust store by default.
+
+Set:
+
+- `about:config`
+- `security.enterprise_roots.enabled = true`
 
 ## Recovery Checks
 
@@ -85,6 +134,7 @@ kubectl get certificate -n gateway cert-local-wildcard
 kubectl get gateway -n gateway external -o yaml
 kubectl get gateway -n gateway internal -o yaml
 kubectl get httproute -A
+.\scripts\verify-local-routes.ps1
 ```
 
 Useful external checks:
@@ -98,10 +148,11 @@ Invoke-WebRequest -Uri https://argo.rosenvall.se -Method Head
 
 - [Cloudflared component README](../../kubernetes/infrastructure/network/cloudflared/README.md)
 - Gateway manifests live under `kubernetes/infrastructure/network/gateway/`
-- ArgoCD and app-level routes live under their respective manifest directories
+- Argo CD and app-level routes live under their respective manifest directories
 
 ## Related Docs
 
 - [Architecture](../architecture/README.md)
 - [Operations](../operations/README.md)
 - [Disaster recovery](../disaster-recovery/README.md)
+- [Migrations and cutover](../migrations/README.md)

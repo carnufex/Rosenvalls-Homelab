@@ -37,3 +37,22 @@ nodes_config = {
     }
   }
 }
+
+media_nfs = {
+  name               = "media-nfs-01"
+  host_node          = "desktop"
+  ip                 = "192.168.1.230"
+  vm_id              = 8010
+  cpu                = 2
+  ram_dedicated      = 4096
+  boot_disk_size_gib = 32
+  boot_datastore     = "local-lvm"
+  image_datastore    = "local"
+  data_datastore     = "WD-red"
+  data_disk_size_gib = 4500
+  allowed_clients = [
+    "192.168.1.211(rw,sync,no_subtree_check)",
+    "192.168.1.212(rw,sync,no_subtree_check)",
+    "192.168.1.213(rw,sync,no_subtree_check)",
+  ]
+}

@@ -8,6 +8,9 @@ spec:
     - name: internal
       namespace: gateway
       sectionName: http
+    - name: internal
+      namespace: gateway
+      sectionName: http-apex
   rules:
     - matches:
         - path:

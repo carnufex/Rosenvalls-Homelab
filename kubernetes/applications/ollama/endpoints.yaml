@@ -5,7 +5,7 @@ metadata:
   namespace: ollama
 subsets:
   - addresses:
-      - ip: 192.168.1.214
+      - ip: 192.168.1.215
     ports:
       - port: 11434
         protocol: TCP

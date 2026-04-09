@@ -21,10 +21,29 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - protocol: HTTPS
+      port: 443
+      name: https-apex
+      hostname: rosenvall.local
+      tls:
+        certificateRefs:
+          - group: ""
+            kind: Secret
+            name: cert-local-wildcard
+      allowedRoutes:
+        namespaces:
+          from: All
     - protocol: HTTP
       port: 80
       name: http
       hostname: "*.rosenvall.local"
+      allowedRoutes:
+        namespaces:
+          from: All
+    - protocol: HTTP
+      port: 80
+      name: http-apex
+      hostname: rosenvall.local
       allowedRoutes:
         namespaces:
           from: All
