@@ -61,8 +61,15 @@ else
 fi
 "@
 
-$stdout = & kubectl exec -n $Namespace -c $execContainer $podName -- sh -ec $ipCheck 2>$null
-if ($LASTEXITCODE -eq 0 -and $stdout) {
+$stdout = $null
+try {
+    $stdout = Invoke-PodShell -Namespace $Namespace -PodName $podName -Container $execContainer -Script $ipCheck
+}
+catch {
+    $stdout = $null
+}
+
+if ($stdout) {
     Write-Host "External IP via VPN: $stdout" -ForegroundColor Green
 } else {
     Write-Host "VPN route verified, but curl/wget was unavailable for external IP confirmation." -ForegroundColor Yellow
