@@ -7,6 +7,7 @@ resources:
   - deluge-health-configmap.yaml
   - media-library-pv.yaml
   - media-library-pvc.yaml
+  - deluge-wireguard-externalsecret.yaml
   - radarr-config-pvc.yaml
   - sonarr-config-pvc.yaml
   - jackett-config-pvc.yaml

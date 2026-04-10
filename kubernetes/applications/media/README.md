@@ -21,8 +21,9 @@ This app groups the local-only media stack that used to run under Docker Compose
 ## Deluge VPN Model
 
 - `wireguard` and `deluge` share one pod and therefore one network namespace.
+- `wg0.conf` is sourced from Bitwarden Secrets Manager through `ExternalSecret/deluge-wireguard-config`, then mounted read-only as `/config/wg_confs/wg0.conf`.
 - `wireguard` is expected to install policy routing for table `51820`, with `default dev wg0` in that table and explicit route exceptions for cluster/LAN networks.
-- `deluge` is only considered healthy when `/config/wg_confs/wg0.conf` exists, `wg0` is up, and WireGuard policy routing is present.
+- `deluge-vpn` is only considered healthy when `/config/wg_confs/wg0.conf` exists, `wg0` is up, and WireGuard policy routing is present.
 - `CiliumNetworkPolicy/deluge-vpn-egress-lockdown` only allows DNS plus the configured WireGuard endpoint `wireguard.5july.net:48575`.
 
 ## Seeding
@@ -41,9 +42,9 @@ The seed script copies:
 - `Downloads\media\sonarr\config` -> `PersistentVolumeClaim/sonarr-config`
 - `Downloads\media\overseerr\config` -> `PersistentVolumeClaim/overseerr-config`
 - `Downloads\media\plex\config` -> `PersistentVolumeClaim/plex-config`
-- `Downloads\media\deluge\config` plus `Downloads\media\wireguard\wg0.conf` -> `PersistentVolumeClaim/deluge-config`
+- `Downloads\media\deluge\config` -> `PersistentVolumeClaim/deluge-config`
 
-It also removes runtime files, normalizes the Deluge WireGuard `PostUp`/`PostDown` commands for Kubernetes networking, and applies known pre-boot config fixes for Jackett and Overseerr.
+It also removes runtime files and applies known pre-boot config fixes for Jackett and Overseerr. WireGuard configuration is intentionally not copied from the seed payload anymore; update the Bitwarden secret backing `ExternalSecret/deluge-wireguard-config` instead.
 
 ## Verification
 

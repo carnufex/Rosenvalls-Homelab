@@ -109,41 +109,6 @@ function Update-HomeAssistantConfig {
     Set-Content -LiteralPath $Path -Value $outputLines -Encoding utf8
 }
 
-function Invoke-PvcPostSeedMutation {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Namespace,
-        [Parameter(Mandatory = $true)]
-        [string]$ClaimName,
-        [Parameter(Mandatory = $true)]
-        [scriptblock]$Action
-    )
-
-    $podName = New-PvcHelperPod -Namespace $Namespace -ClaimName $ClaimName
-    try {
-        & $Action $podName
-    }
-    finally {
-        Remove-PvcHelperPod -Namespace $Namespace -PodName $podName
-    }
-}
-
-function Get-RenderedDelugeWireGuardConfig {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Path
-    )
-
-    $content = Get-Content -LiteralPath $Path -Raw
-    $postUp = "PostUp = LAN_GW=`$(ip -4 route list default | awk 'NR==1{print `$3}'); ip route replace 10.96.0.0/12 via `$LAN_GW dev eth0; ip route replace 10.244.0.0/16 via `$LAN_GW dev eth0; ip route replace 192.168.1.0/24 via `$LAN_GW dev eth0"
-    $postDown = "PostDown = LAN_GW=`$(ip -4 route list default | awk 'NR==1{print `$3}'); ip route del 10.96.0.0/12 via `$LAN_GW dev eth0 || true; ip route del 10.244.0.0/16 via `$LAN_GW dev eth0 || true; ip route del 192.168.1.0/24 via `$LAN_GW dev eth0 || true"
-
-    $content = [regex]::Replace($content, '(?m)^PostUp\s*=.*$', $postUp)
-    $content = [regex]::Replace($content, '(?m)^PostDown\s*=.*$', $postDown)
-
-    return $content
-}
-
 $definitions = @(
     @{
         Name = "jackett"
@@ -203,34 +168,8 @@ $definitions = @(
         Claim = "deluge-config"
         Mount = "/config"
         Prepare = {
-            param($StageRoot, $SourceRootPath)
-            $wg0Source = Join-Path $SourceRootPath "wireguard\wg0.conf"
-            if (-not (Test-Path -LiteralPath $wg0Source -PathType Leaf)) {
-                throw "WireGuard config '$wg0Source' was not found."
-            }
-
+            param($StageRoot)
             Remove-RuntimeFiles -Path $StageRoot
-        }
-        PostSeed = {
-            param($NamespaceName, $ClaimName, $SourceRootPath)
-
-            $wg0Source = Join-Path $SourceRootPath "wireguard\wg0.conf"
-            $wg0Content = Get-RenderedDelugeWireGuardConfig -Path $wg0Source
-            $wg0Base64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($wg0Content))
-
-            Invoke-PvcPostSeedMutation -Namespace $NamespaceName -ClaimName $ClaimName -Action {
-                param($PodName)
-
-                $script = @"
-mkdir -p /target/wg_confs /target/templates /target/coredns
-printf '%s' '$wg0Base64' | base64 -d > /target/wg_confs/wg0.conf
-chown -R 1000:1000 /target/wg_confs /target/templates /target/coredns
-rm -f /target/wg0.conf
-chown 1000:1000 /target/wg_confs/wg0.conf
-chmod 600 /target/wg_confs/wg0.conf
-"@
-                Invoke-PodShell -Namespace $NamespaceName -PodName $PodName -Script $script | Out-Null
-            }
         }
     }
 )
@@ -247,9 +186,6 @@ foreach ($definition in $definitions) {
         & $definition.Prepare $stagePath $SourceRoot
 
         Seed-DirectoryToPvc -Namespace $Namespace -PvcName $definition.Claim -SourcePath $stagePath -MountPath $definition.Mount
-        if ($definition.ContainsKey("PostSeed") -and $definition.PostSeed) {
-            & $definition.PostSeed $Namespace $definition.Claim $SourceRoot
-        }
         Write-Host "Seeded $($definition.Name) from '$sourcePath'." -ForegroundColor Green
     }
     finally {

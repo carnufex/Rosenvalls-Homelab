@@ -19,6 +19,22 @@ spec:
     spec:
       securityContext:
         fsGroup: 1000
+      initContainers:
+        - name: prepare-wireguard-config-dir
+          image: lscr.io/linuxserver/wireguard:1.0.20250521@sha256:b199fa09846365caec217ebf9cbf839a22b7bf836acfd367a59ed52b6984f174
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              mkdir -p /config/wg_confs /config/templates /config/coredns
+              rm -f /config/wg0.conf
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: wireguard
           image: lscr.io/linuxserver/wireguard:1.0.20250521@sha256:b199fa09846365caec217ebf9cbf839a22b7bf836acfd367a59ed52b6984f174
@@ -57,6 +73,10 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: wireguard-config
+              mountPath: /config/wg_confs/wg0.conf
+              subPath: wg0.conf
+              readOnly: true
             - name: health
               mountPath: /health
         - name: deluge
@@ -111,3 +131,7 @@ spec:
           configMap:
             name: deluge-health
             defaultMode: 0755
+        - name: wireguard-config
+          secret:
+            secretName: deluge-wireguard-config
+            defaultMode: 0600
