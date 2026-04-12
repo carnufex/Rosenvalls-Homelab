@@ -6,6 +6,7 @@ resources:
   - grafana-http-route.yaml
   - prometheus-http-route.yaml
   - homelab-app-alerts.yaml
+  - homelab-app-status-dashboard.yaml
 
 helmCharts:
   - name: kube-prometheus-stack

@@ -18,7 +18,7 @@ spec:
       serviceAccountName: hub-central-runtime
       containers:
         - name: hub-central
-          image: ghcr.io/carnufex/hub-central:sha-6fead83
+          image: ghcr.io/carnufex/hub-central:sha-fcd725f
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
@@ -30,6 +30,11 @@ spec:
             limits:
               cpu: 250m
               memory: 256Mi
+          startupProbe:
+            tcpSocket:
+              port: http
+            failureThreshold: 30
+            periodSeconds: 5
           readinessProbe:
             tcpSocket:
               port: http
