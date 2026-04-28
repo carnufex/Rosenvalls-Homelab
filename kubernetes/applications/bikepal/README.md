@@ -19,7 +19,7 @@ The folder contains:
 
 ## Secret Contract
 
-BikePal uses a dedicated Bitwarden-backed secret store:
+BikePal uses a dedicated Bitwarden-backed secret store for runtime secrets:
 
 - `ClusterSecretStore/bitwarden-secretsmanager-bikepal`
 - `ExternalSecret/bikepal-secrets`
@@ -34,7 +34,8 @@ The intended runtime secret keys are:
 The PostgreSQL bootstrap secret is derived from the same `Database__ConnectionString` value through
 `database-bootstrap-secret.yaml`, so the CNPG owner password and the application connection string stay aligned.
 
-Private GHCR pulls use `ExternalSecret/bikepal-ghcr`, which renders the `bikepal-ghcr` docker config secret for
+Private GHCR pulls use the shared Homelab `ClusterSecretStore/bitwarden-secretsmanager`.
+`ExternalSecret/bikepal-ghcr` renders the `bikepal-ghcr` docker config secret for
 `ServiceAccount/bikepal-runtime`.
 
 ## Routing Contract
@@ -71,18 +72,19 @@ paths as local Docker:
 
 ## Runbook
 
-### 1. Fill in placeholders before first sync
+### 1. Keep secret references and image digests current
 
-Update these manifests with real values before enabling ArgoCD sync:
+When rotating secrets or publishing new images, keep these manifests aligned:
 
-- `externalsecret.yaml`: replace the placeholder Bitwarden item IDs
-- `database-bootstrap-secret.yaml`: replace the placeholder connection string item ID
+- `externalsecret.yaml`: runtime secret item IDs for BikePal
+- `database-bootstrap-secret.yaml`: the connection-string item ID used to derive the CNPG bootstrap secret
+- `ghcr-image-pull-secret.yaml`: the shared Homelab `GHCR_PAT` reference
 - `api-deployment.yaml`
 - `frontend-deployment.yaml`
 - `worker-deployment.yaml`
 
-The deployment manifests currently use explicit `:replace-me` image placeholders and should be pinned to immutable GHCR
-digests by the BikePal publish workflow once it is enabled.
+The deployment manifests should stay pinned to immutable GHCR digests and be updated by the BikePal publish workflow
+when new images are published.
 
 The production frontend image is expected to come from `apps/bikepal-app/Dockerfile.prod`, not the local-development Vite
 server image contract in `apps/bikepal-app/Dockerfile`.
