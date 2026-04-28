@@ -22,11 +22,11 @@ spec:
         - CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 
   storage:
-    size: 30Gi
+    size: 10Gi
     storageClass: longhorn-critical
 
   walStorage:
-    size: 5Gi
+    size: 2Gi
     storageClass: longhorn-critical
 
   resources:
