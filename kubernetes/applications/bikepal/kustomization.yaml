@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ns.yaml
+  - configmap.yaml
+  - data-protection-pvc.yaml
+  - road-network-pvc.yaml
+  - database-bootstrap-secret.yaml
+  - database.yaml
+  - ghcr-image-pull-secret.yaml
+  - externalsecret.yaml
+  - serviceaccount.yaml
+  - api-service.yaml
+  - frontend-service.yaml
+  - api-deployment.yaml
+  - frontend-deployment.yaml
+  - worker-deployment.yaml
+  - httproute.yaml

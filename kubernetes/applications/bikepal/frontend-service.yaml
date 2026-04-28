@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bikepal-frontend
+  namespace: bikepal
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  selector:
+    app.kubernetes.io/name: bikepal-frontend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

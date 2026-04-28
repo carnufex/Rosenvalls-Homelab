@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bikepal-worker
+  namespace: bikepal
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bikepal-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bikepal-worker
+    spec:
+      serviceAccountName: bikepal-runtime
+      containers:
+        - name: worker
+          image: ghcr.io/carnufex/bikepal-worker:replace-me
+          imagePullPolicy: Always
+          env:
+            - name: JobRunner__WorkerName
+              value: bikepal-worker
+          envFrom:
+            - configMapRef:
+                name: bikepal-config
+            - secretRef:
+                name: bikepal-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data-protection-keys
+              mountPath: /var/bikepal/data-protection
+            - name: road-network-files
+              mountPath: /data/road-network
+              readOnly: true
+      volumes:
+        - name: data-protection-keys
+          persistentVolumeClaim:
+            claimName: bikepal-data-protection
+        - name: road-network-files
+          persistentVolumeClaim:
+            claimName: bikepal-road-network
