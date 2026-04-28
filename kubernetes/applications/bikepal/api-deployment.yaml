@@ -20,7 +20,7 @@ spec:
       serviceAccountName: bikepal-runtime
       containers:
         - name: api
-          image: ghcr.io/carnufex/bikepal-api:replace-me
+          image: ghcr.io/carnufex/bikepal-api@sha256:75384edb94e81bd971e5e7076a9579fd24f87517a1267dd7800f2ab321a2704d
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
