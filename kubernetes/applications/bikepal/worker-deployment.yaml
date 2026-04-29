@@ -20,7 +20,7 @@ spec:
       serviceAccountName: bikepal-runtime
       containers:
         - name: worker
-          image: ghcr.io/carnufex/bikepal-worker@sha256:2c7f66014ee4ad1bab0dc17b13fc0c37ef12d4cc70cd8a09750ceed540825039
+          image: ghcr.io/carnufex/bikepal-worker@sha256:64726bb31e515097e89eddba86ced1f384246b04bc0ae3a334bf0acfc14feeb0
           imagePullPolicy: Always
           env:
             - name: JobRunner__WorkerName
