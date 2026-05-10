@@ -37,13 +37,14 @@ If Google sign-in is not enabled yet, the API can still start without a configur
 
 ## Voice Runtime
 
-`matplan-whisper` runs the `ghcr.io/ggml-org/whisper.cpp:main` image with an explicit
-`whisper-server` startup command and stores the downloaded `kb-large` model in
+`matplan-whisper` runs `ghcr.io/ggml-org/whisper.cpp` by immutable digest with an explicit
+`whisper-server` startup command. Its init container downloads `kb-large` from a pinned
+Hugging Face revision and verifies the model SHA256 before serving it from
 `matplan-whisper-models`.
 
-`matplan-piper` mirrors the current `docker/piper/Dockerfile` contract from the MatPlan
-repo by bootstrapping `piper-tts` and `flask` on top of `python:3.12-slim`, then storing
-downloaded voices in `matplan-piper-data`.
+`matplan-piper` runs `rhasspy/wyoming-piper` by immutable digest. Its init container
+hydrates `matplan-piper-data` with the pinned `sv_SE-nst-medium` voice and verifies the
+voice model SHA256 before starting the internal HTTP endpoint.
 
 Both services are cluster-internal only. `matplan-config` points the API to:
 
@@ -65,9 +66,10 @@ Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PA
 from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`
 secret for `ServiceAccount/matplan-runtime`.
 
-`matplan-piper` no longer depends on an unpublished GHCR image. The cluster installs the
-same Python runtime dependencies at startup and uses `sv_SE-nst-medium` with
-`sv_SE-lisa-medium` as fallback, matching the currently valid Piper voice catalog.
+The voice services are part of the same immutable-artifact contract: live manifests must
+pin container images by digest and must pin runtime model downloads to a revision plus
+SHA256 verification. Floating tags and unchecked runtime downloads are not allowed in
+GitOps-managed MatPlan voice workloads.
 
 ## Runtime Assumptions
 
