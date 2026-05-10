@@ -54,12 +54,14 @@ Both services are cluster-internal only. `matplan-config` points the API to:
 ## Image Contract
 
 The live manifests use immutable GHCR digests rather than floating tags.
-For `carnufex/MatPlan`, the publish workflow updates these deployment manifests automatically
-after a successful GHCR publish and commits the new digests back to this repository using
-a write-enabled deploy key scoped to `Rosenvalls-Homelab`.
+For `carnufex/MatPlan`, digest automation must not hold a write-enabled deploy key
+or any other credential that can push directly to `Rosenvalls-Homelab`. Because this
+repository is the ArgoCD source of truth, MatPlan image updates should be proposed as
+a pull request for review and merge in this repository, or applied manually by a
+maintainer, before ArgoCD syncs the resulting Git change.
 
 If automation is unavailable, update the deployment manifests manually with the new immutable
-GHCR digests and let ArgoCD sync the resulting Git change.
+GHCR digests and let ArgoCD sync the reviewed Git change.
 
 Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PAT`
 from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`
