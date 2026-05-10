@@ -6,13 +6,16 @@ metadata:
 spec:
   description: User applications
   sourceRepos:
-  - '*'
+  - https://github.com/carnufex/Rosenvalls-Homelab.git
+  - https://github.com/infiniflow/ragflow.git
   destinations:
   - namespace: '*'
-    server: '*'
+    server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-  - group: '*'
-    kind: '*'
+  - group: ''
+    kind: Namespace
+  - group: ''
+    kind: PersistentVolume
   namespaceResourceWhitelist:
   - group: '*'
     kind: '*'
