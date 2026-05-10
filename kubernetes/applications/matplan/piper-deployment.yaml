@@ -18,9 +18,10 @@ spec:
         app.kubernetes.io/name: matplan-piper
     spec:
       serviceAccountName: matplan-runtime
+      automountServiceAccountToken: false
       containers:
         - name: piper
-          image: python:3.12-slim
+          image: ghcr.io/carnufex/matplan-piper:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
@@ -64,7 +65,6 @@ spec:
             - -lc
             - >-
               set -euo pipefail;
-              python3 -m pip install --no-cache-dir piper-tts flask;
               primary="${PIPER_VOICE:-sv_SE-nst-medium}";
               fallback="${PIPER_FALLBACK_VOICE:-sv_SE-lisa-medium}";
               ensure_voice () {
