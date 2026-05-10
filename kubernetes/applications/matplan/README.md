@@ -41,9 +41,9 @@ If Google sign-in is not enabled yet, the API can still start without a configur
 `whisper-server` startup command and stores the downloaded `kb-large` model in
 `matplan-whisper-models`.
 
-`matplan-piper` mirrors the current `docker/piper/Dockerfile` contract from the MatPlan
-repo by bootstrapping `piper-tts` and `flask` on top of `python:3.12-slim`, then storing
-downloaded voices in `matplan-piper-data`.
+`matplan-piper` runs the prebuilt MatPlan Piper image from GHCR, which contains the
+Piper Python runtime dependencies at image build time. The pod only downloads voice
+files into `matplan-piper-data` when they are missing.
 
 Both services are cluster-internal only. `matplan-config` points the API to:
 
@@ -65,9 +65,11 @@ Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PA
 from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`
 secret for `ServiceAccount/matplan-runtime`.
 
-`matplan-piper` no longer depends on an unpublished GHCR image. The cluster installs the
-same Python runtime dependencies at startup and uses `sv_SE-nst-medium` with
-`sv_SE-lisa-medium` as fallback, matching the currently valid Piper voice catalog.
+`matplan-piper` must not install Python dependencies during pod startup. Publish the
+prebuilt Piper runtime image from MatPlan and update this manifest when moving away
+from the temporary `latest` tag to an immutable GHCR digest. The deployment uses
+`sv_SE-nst-medium` with `sv_SE-lisa-medium` as fallback, matching the currently valid
+Piper voice catalog.
 
 ## Runtime Assumptions
 
