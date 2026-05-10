@@ -4,13 +4,13 @@ Home Assistant is treated as a special-case workload in v1.
 
 ## Runtime Contract
 
-- The namespace is explicitly marked `pod-security.kubernetes.io/enforce=privileged` because the workload uses `hostNetwork` and a privileged container to stay close to the current Docker contract.
+- The namespace is marked `pod-security.kubernetes.io/enforce=baseline` so Home Assistant can run without privileged or host-network access.
 - Scheduling requires a worker labeled `homelab.rosenvall.se/lan-special=true`.
 - `Service/homeassistant` exists so the app can be reached through `gateway/internal` on `https://homeassistant.rosenvall.local`.
 - LAN clients should resolve `*.rosenvall.local` to `192.168.1.220` on the UDM.
 - Internal HTTPS uses the cluster-local CA managed in the `gateway` namespace.
-- The deployment starts at `replicas: 0` so the copied Home Assistant config can be seeded before first boot.
-- Because the pod still uses `hostNetwork`, direct node access on `worker-01:8123` remains a valid fallback while debugging discovery issues.
+- The deployment starts at `replicas: 1` after the copied Home Assistant config has been seeded.
+- Home Assistant is reachable through `Service/homeassistant` and the internal Gateway route; direct node binding is intentionally disabled.
 
 ## Seeding
 
