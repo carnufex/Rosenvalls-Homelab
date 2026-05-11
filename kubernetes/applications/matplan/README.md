@@ -67,11 +67,11 @@ Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PA
 from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`
 secret for `ServiceAccount/matplan-runtime`.
 
-`matplan-piper` must not install Python dependencies during pod startup. Publish the
-prebuilt Piper runtime image from MatPlan and update this manifest when moving away
-from the temporary `latest` tag to an immutable GHCR digest. The deployment uses
-`sv_SE-nst-medium` with `sv_SE-lisa-medium` as fallback, matching the currently valid
-Piper voice catalog.
+`matplan-piper` must not install Python dependencies during pod startup. The
+prebuilt Piper runtime image from MatPlan is pinned by immutable GHCR digest so
+ArgoCD-visible Git changes are required before the cluster runs a different image.
+The deployment uses `sv_SE-nst-medium` with `sv_SE-lisa-medium` as fallback,
+matching the currently valid Piper voice catalog.
 
 ## Runtime Assumptions
 
