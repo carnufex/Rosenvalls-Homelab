@@ -10,7 +10,11 @@ instance only after the primary is healthy and WAL growth is confirmed stable.
 
 ## Default Mode
 
-The default manifest uses `initdb` for deterministic new cluster bootstrap.
+The default manifest uses `initdb` for deterministic new cluster bootstrap. The
+`authentik-core-secrets` Bitwarden item must include `bootstrap-password`,
+`bootstrap-token`, and `bootstrap-email` custom fields so Authentik pre-creates
+the `akadmin` account during first startup instead of leaving the public
+first-run setup flow claimable.
 
 ## DR Restore Mode (opt-in)
 
