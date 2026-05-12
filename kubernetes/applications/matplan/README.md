@@ -37,8 +37,9 @@ If Google sign-in is not enabled yet, the API can still start without a configur
 
 ## Voice Runtime
 
-`matplan-whisper` runs the `ghcr.io/ggml-org/whisper.cpp:main` image with an explicit
-`whisper-server` startup command and stores the downloaded `kb-large` model in
+`matplan-whisper` runs `ghcr.io/ggml-org/whisper.cpp` by immutable digest with an explicit
+`whisper-server` startup command. Its init container downloads `kb-large` from a pinned
+Hugging Face revision and verifies the model SHA256 before serving it from
 `matplan-whisper-models`.
 
 `matplan-piper` runs the prebuilt MatPlan Piper image from GHCR, which contains the

@@ -26,11 +26,20 @@ spec:
           ports:
             - containerPort: 5000
               name: http
+          args:
+            - --voice
+            - sv_SE-nst-medium
+            - --uri
+            - tcp://0.0.0.0:10200
+            - --data-dir
+            - /data
+            - --download-dir
+            - /data
           env:
             - name: PIPER_VOICE
               value: sv_SE-nst-medium
             - name: PIPER_FALLBACK_VOICE
-              value: sv_SE-lisa-medium
+              value: sv_SE-nst-medium
             - name: PIPER_PORT
               value: "5000"
           resources:
@@ -41,21 +50,18 @@ spec:
               cpu: 500m
               memory: 512Mi
           startupProbe:
-            httpGet:
-              path: /voices
+            tcpSocket:
               port: http
             periodSeconds: 5
             failureThreshold: 120
           livenessProbe:
-            httpGet:
-              path: /voices
+            tcpSocket:
               port: http
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
           readinessProbe:
-            httpGet:
-              path: /voices
+            tcpSocket:
               port: http
             periodSeconds: 10
             timeoutSeconds: 3

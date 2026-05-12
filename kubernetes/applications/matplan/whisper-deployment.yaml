@@ -26,7 +26,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: whisper
-          image: ghcr.io/ggml-org/whisper.cpp:main
+          image: ghcr.io/ggml-org/whisper.cpp@sha256:d42a7ca69f54f4760492e57d3ced6afaa653b8d75cfd6dcb4014cf0cc87a0754
           imagePullPolicy: IfNotPresent
           command:
             - /bin/bash
@@ -77,7 +77,7 @@ spec:
               mountPath: /models
       initContainers:
         - name: whisper-model-bootstrap
-          image: ghcr.io/ggml-org/whisper.cpp:main
+          image: ghcr.io/ggml-org/whisper.cpp@sha256:d42a7ca69f54f4760492e57d3ced6afaa653b8d75cfd6dcb4014cf0cc87a0754
           imagePullPolicy: IfNotPresent
           command:
             - /bin/bash
@@ -88,15 +88,17 @@ spec:
               model_path="/models/ggml-${model}.bin";
               if [ -f "${model_path}" ]; then
                 echo "Whisper model already exists: ${model_path}";
+                echo "b66f2dda369a88f6c03fe37326d7cc37aa216f6f34e6fc1be686e497ba9c2f39  ${model_path}" | sha256sum -c -;
                 exit 0;
               fi;
               mkdir -p /models;
               if [ "${model}" = "kb-large" ]; then
                 echo "Downloading Whisper model kb-large...";
-                curl -L --fail "https://huggingface.co/KBLab/kb-whisper-large/resolve/main/ggml-model.bin" -o "${model_path}";
+                curl -L --fail "https://huggingface.co/KBLab/kb-whisper-large/resolve/45842886f11c9731145752f27f61d2663dd73445/ggml-model.bin" -o "${model_path}";
+                echo "b66f2dda369a88f6c03fe37326d7cc37aa216f6f34e6fc1be686e497ba9c2f39  ${model_path}" | sha256sum -c -;
               else
-                echo "Downloading Whisper model ${model}...";
-                /app/models/download-ggml-model.sh "${model}" /models;
+                echo "Only the pinned kb-large Whisper model is supported in GitOps.";
+                exit 1;
               fi
           env:
             - name: WHISPER_MODEL
