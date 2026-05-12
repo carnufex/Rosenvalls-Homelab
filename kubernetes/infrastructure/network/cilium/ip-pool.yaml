@@ -3,6 +3,17 @@ kind: CiliumLoadBalancerIPPool
 metadata:
   name: first-pool
 spec:
+  serviceSelector:
+    matchExpressions:
+      - key: io.kubernetes.service.namespace
+        operator: In
+        values:
+          - gateway
+      - key: io.kubernetes.service.name
+        operator: In
+        values:
+          - cilium-gateway-external
+          - cilium-gateway-internal
   blocks:
     - start: 192.168.1.220
       stop: 192.168.1.230

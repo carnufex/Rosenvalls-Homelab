@@ -42,9 +42,9 @@ If Google sign-in is not enabled yet, the API can still start without a configur
 Hugging Face revision and verifies the model SHA256 before serving it from
 `matplan-whisper-models`.
 
-`matplan-piper` runs `rhasspy/wyoming-piper` by immutable digest. Its init container
-hydrates `matplan-piper-data` with the pinned `sv_SE-nst-medium` voice and verifies the
-voice model SHA256 before starting the internal HTTP endpoint.
+`matplan-piper` runs the prebuilt MatPlan Piper image from GHCR, which contains the
+Piper Python runtime dependencies at image build time. The pod only downloads voice
+files into `matplan-piper-data` when they are missing.
 
 Both services are cluster-internal only. `matplan-config` points the API to:
 
@@ -55,21 +55,24 @@ Both services are cluster-internal only. `matplan-config` points the API to:
 ## Image Contract
 
 The live manifests use immutable GHCR digests rather than floating tags.
-For `carnufex/MatPlan`, the publish workflow updates these deployment manifests automatically
-after a successful GHCR publish and commits the new digests back to this repository using
-a write-enabled deploy key scoped to `Rosenvalls-Homelab`.
+For `carnufex/MatPlan`, digest automation must not hold a write-enabled deploy key
+or any other credential that can push directly to `Rosenvalls-Homelab`. Because this
+repository is the ArgoCD source of truth, MatPlan image updates should be proposed as
+a pull request for review and merge in this repository, or applied manually by a
+maintainer, before ArgoCD syncs the resulting Git change.
 
 If automation is unavailable, update the deployment manifests manually with the new immutable
-GHCR digests and let ArgoCD sync the resulting Git change.
+GHCR digests and let ArgoCD sync the reviewed Git change.
 
 Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PAT`
 from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`
 secret for `ServiceAccount/matplan-runtime`.
 
-The voice services are part of the same immutable-artifact contract: live manifests must
-pin container images by digest and must pin runtime model downloads to a revision plus
-SHA256 verification. Floating tags and unchecked runtime downloads are not allowed in
-GitOps-managed MatPlan voice workloads.
+`matplan-piper` must not install Python dependencies during pod startup. The
+prebuilt Piper runtime image from MatPlan is pinned by immutable GHCR digest so
+ArgoCD-visible Git changes are required before the cluster runs a different image.
+The deployment uses `sv_SE-nst-medium` with `sv_SE-lisa-medium` as fallback,
+matching the currently valid Piper voice catalog.
 
 ## Runtime Assumptions
 

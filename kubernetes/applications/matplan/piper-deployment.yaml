@@ -18,36 +18,10 @@ spec:
         app.kubernetes.io/name: matplan-piper
     spec:
       serviceAccountName: matplan-runtime
-      initContainers:
-        - name: piper-voice-bootstrap
-          image: ghcr.io/ggml-org/whisper.cpp@sha256:d42a7ca69f54f4760492e57d3ced6afaa653b8d75cfd6dcb4014cf0cc87a0754
-          imagePullPolicy: IfNotPresent
-          command:
-            - /bin/bash
-            - -lc
-            - >-
-              set -euo pipefail;
-              voice="sv_SE-nst-medium";
-              voice_base="https://huggingface.co/rhasspy/piper-voices/resolve/87e544f8852c43702201f2820228009df782c956/sv/sv_SE/nst/medium";
-              mkdir -p /data;
-              if [ ! -f "/data/${voice}.onnx" ]; then
-                echo "Downloading pinned Piper voice ${voice} to /data";
-                curl -L --fail "${voice_base}/${voice}.onnx" -o "/data/${voice}.onnx";
-                echo "df011f56825a59dd1efc080c38a65a1ef70407e60f63050e9246f43a3d7e471e  /data/${voice}.onnx" | sha256sum -c -;
-              else
-                echo "Piper voice already exists: /data/${voice}.onnx";
-                echo "df011f56825a59dd1efc080c38a65a1ef70407e60f63050e9246f43a3d7e471e  /data/${voice}.onnx" | sha256sum -c -;
-              fi;
-              if [ ! -f "/data/${voice}.onnx.json" ]; then
-                echo "Downloading pinned Piper voice config ${voice} to /data";
-                curl -L --fail "${voice_base}/${voice}.onnx.json" -o "/data/${voice}.onnx.json";
-              fi
-          volumeMounts:
-            - name: piper-data
-              mountPath: /data
+      automountServiceAccountToken: false
       containers:
         - name: piper
-          image: rhasspy/wyoming-piper@sha256:659be31324ce981b03a906197e0dfdb519b84e5e4960f746d08ba217c013519f
+          image: ghcr.io/carnufex/matplan-piper@sha256:22d66f6a1b5f2a8f4e7e5b21f7b9c3f11c7ad8b63c8bbecb0eec5a6a2dc7a5a1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
@@ -92,6 +66,34 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          command:
+            - /bin/bash
+            - -lc
+            - >-
+              set -euo pipefail;
+              primary="${PIPER_VOICE:-sv_SE-nst-medium}";
+              fallback="${PIPER_FALLBACK_VOICE:-sv_SE-lisa-medium}";
+              ensure_voice () {
+                local voice="$1";
+                if [ -f "/data/${voice}.onnx" ]; then
+                  return 0;
+                fi;
+                echo "Downloading piper voice ${voice} to /data";
+                python3 -m piper.download_voices --data-dir /data "${voice}";
+              };
+              if ensure_voice "${primary}"; then
+                active="${primary}";
+              else
+                echo "Primary voice ${primary} unavailable, trying fallback ${fallback}";
+                if ensure_voice "${fallback}"; then
+                  active="${fallback}";
+                else
+                  echo "No Piper voice available (tried ${primary}, ${fallback}).";
+                  exit 1;
+                fi;
+              fi;
+              echo "Using Piper voice ${active}";
+              exec python3 -m piper.http_server --host 0.0.0.0 --port ${PIPER_PORT:-5000} --data-dir /data -m "${active}"
           volumeMounts:
             - name: piper-data
               mountPath: /data
