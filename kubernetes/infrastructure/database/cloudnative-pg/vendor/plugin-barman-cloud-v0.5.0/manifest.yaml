@@ -269,7 +269,7 @@ metadata:
   name: plugin-barman-cloud-8tfddg42gf
   namespace: cnpg-system
 stringData:
-  SIDECAR_IMAGE: ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar-testing:main
+  SIDECAR_IMAGE: ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar:v0.5.0@sha256:24207d32fdbf8e5795311fb0a3086670d6df00971ef0b89739700bda2204cbe2
 type: Opaque
 ---
 apiVersion: v1
@@ -326,7 +326,7 @@ spec:
                 secretKeyRef:
                   key: SIDECAR_IMAGE
                   name: plugin-barman-cloud-8tfddg42gf
-          image: ghcr.io/cloudnative-pg/plugin-barman-cloud-testing:main
+          image: ghcr.io/cloudnative-pg/plugin-barman-cloud:v0.5.0@sha256:d84794c09178e8a39944dce04ca234a14e1551f914af90f1768c1222733438a6
           name: barman-cloud
           ports:
             - containerPort: 9090
