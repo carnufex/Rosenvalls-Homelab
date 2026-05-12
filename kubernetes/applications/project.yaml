@@ -34,6 +34,15 @@ spec:
     kind: Application
   - group: argoproj.io
     kind: ApplicationSet
+  - https://github.com/infiniflow/ragflow.git
+  destinations:
+  - namespace: '*'
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  - group: ''
+    kind: PersistentVolume
   namespaceResourceWhitelist:
   - group: '*'
     kind: '*'
