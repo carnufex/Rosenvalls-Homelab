@@ -7,6 +7,33 @@ spec:
   description: User applications
   sourceRepos:
   - https://github.com/carnufex/Rosenvalls-Homelab.git
+  destinations:
+  - namespace: bikepal
+    server: https://kubernetes.default.svc
+  - namespace: homeassistant
+    server: https://kubernetes.default.svc
+  - namespace: hub-central
+    server: https://kubernetes.default.svc
+  - namespace: matplan
+    server: https://kubernetes.default.svc
+  - namespace: media
+    server: https://kubernetes.default.svc
+  - namespace: ollama
+    server: https://kubernetes.default.svc
+  - namespace: ragflow
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ""
+    kind: Namespace
+  - group: ""
+    kind: PersistentVolume
+  namespaceResourceBlacklist:
+  - group: argoproj.io
+    kind: AppProject
+  - group: argoproj.io
+    kind: Application
+  - group: argoproj.io
+    kind: ApplicationSet
   - https://github.com/infiniflow/ragflow.git
   destinations:
   - namespace: '*'

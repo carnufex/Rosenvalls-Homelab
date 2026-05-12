@@ -6,3 +6,4 @@ resources:
   - infrastructure/application-set.yaml
   - applications/project.yaml
   - applications/application-set.yaml
+  - infrastructure/ragflow-helm-application.yaml

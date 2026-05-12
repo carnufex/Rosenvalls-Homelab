@@ -3,8 +3,10 @@ kind: Application
 metadata:
   name: ragflow-helm
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
-  project: applications
+  project: infrastructure
   source:
     repoURL: https://github.com/infiniflow/ragflow.git
     targetRevision: v0.24.0
