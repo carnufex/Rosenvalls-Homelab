@@ -24,7 +24,7 @@ spec:
   - bitwarden-sdk-server.external-secrets
   - bitwarden-sdk-server.external-secrets.svc
   - bitwarden-sdk-server.external-secrets.svc.cluster.local
-  isCA: false
+  isCA: true
   privateKey:
     algorithm: ECDSA
     size: 256
