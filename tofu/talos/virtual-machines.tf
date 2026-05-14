@@ -33,6 +33,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     # The Talos EPHEMERAL volume lives on the boot disk and backs kubelet/containerd.
     # Keep this independent from the dedicated Longhorn disk mounted at /var/lib/longhorn.
     size        = each.value.boot_disk_size_gib
+    discard     = "on"
     file_format = "raw"
     file_id     = proxmox_virtual_environment_download_file.this[local.node_schematic_key[each.key]].id
   }
@@ -43,6 +44,7 @@ resource "proxmox_virtual_environment_vm" "this" {
       datastore_id = each.value.datastore_id
       interface    = "${disk.value.type}${disk.value.unit_number}"
       size         = tonumber(replace(disk.value.size, "G", ""))
+      discard      = "on"
       file_format  = "raw"
     }
   }
