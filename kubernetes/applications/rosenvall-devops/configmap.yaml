@@ -21,6 +21,7 @@ data:
   Ai__RequestTimeoutSeconds: "120"
   Ai__Codex__Path: codex
   Ai__Codex__Home: /app/codex-home
+  Ai__Codex__ImplementationBypassSandbox: "true"
   Ai__Codex__Model: gpt-5.4
   Ai__Codex__AvailableModels__0: gpt-5.4
   Ai__Codex__AvailableModels__1: gpt-5.3-codex
