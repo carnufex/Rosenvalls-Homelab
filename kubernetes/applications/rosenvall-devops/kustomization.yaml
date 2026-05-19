@@ -5,6 +5,7 @@ resources:
   - ns.yaml
   - configmap.yaml
   - state-pvc.yaml
+  - codex-home-pvc.yaml
   - ghcr-image-pull-secret.yaml
   - serviceaccount.yaml
   - preview-rbac.yaml

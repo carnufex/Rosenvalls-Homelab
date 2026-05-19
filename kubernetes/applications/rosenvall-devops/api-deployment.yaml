@@ -54,7 +54,12 @@ spec:
           volumeMounts:
             - name: state
               mountPath: /app/data
+            - name: codex-home
+              mountPath: /app/codex-home
       volumes:
         - name: state
           persistentVolumeClaim:
             claimName: rosenvall-devops-state
+        - name: codex-home
+          persistentVolumeClaim:
+            claimName: rosenvall-devops-codex-home
