@@ -9,6 +9,8 @@ spec:
   - https://github.com/carnufex/Rosenvalls-Homelab.git
   - https://github.com/infiniflow/ragflow.git
   destinations:
+  - namespace: rosenvall-devops
+    server: https://kubernetes.default.svc
   - namespace: bikepal
     server: https://kubernetes.default.svc
   - namespace: homeassistant
@@ -28,6 +30,10 @@ spec:
     kind: Namespace
   - group: ""
     kind: PersistentVolume
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
   namespaceResourceBlacklist:
   - group: argoproj.io
     kind: AppProject
