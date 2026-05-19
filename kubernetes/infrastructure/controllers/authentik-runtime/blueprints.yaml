@@ -64,3 +64,38 @@ data:
           group: !Find [authentik_core.group, [name, "ArgoCD Viewers"]]
         attrs:
           order: 2
+  apps-rosenvall-devops.yaml: |
+    version: 1
+    metadata:
+      name: Apps - Rosenvall DevOps
+    entries:
+      - id: rosenvall_devops_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: rosenvall.se/devops
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          client_type: public
+          client_id: rosenvall-devops
+          redirect_uris:
+            - url: https://devops.rosenvall.se/auth/callback
+              matching_mode: strict
+          access_code_validity: minutes=1
+          access_token_validity: hours=1
+          refresh_token_validity: days=1
+          sub_mode: hashed_user_id
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "OAuth mapping: OpenID 'email' with mailPrimaryAddress"]]
+      - id: rosenvall_devops_application
+        model: authentik_core.application
+        identifiers:
+          slug: rosenvall-devops
+        attrs:
+          name: Rosenvall DevOps
+          group: Applications
+          provider: !KeyOf rosenvall_devops_provider
+          policy_engine_mode: any

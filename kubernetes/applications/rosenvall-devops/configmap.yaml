@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rosenvall-devops-config
+  namespace: rosenvall-devops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+data:
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://+:8080
+  Authentication__Authority: https://authentik.rosenvall.se/application/o/rosenvall-devops/
+  Authentication__Audience: rosenvall-devops
+  Frontend__AllowedOrigins__0: https://devops.rosenvall.se
+  Storage__SqlitePath: /app/data/devops-state.db
+  Ai__DefaultProvider: ollama
+  Ai__DefaultModel: qwen3.5:latest
+  Ai__AvailableModels__0: qwen3.5:latest
+  Ai__AvailableModels__1: llama3.1:8b
+  Ai__AvailableModels__2: mistral:7b
+  Ai__OllamaEndpoint: http://ollama.ollama.svc.cluster.local:11434/api
+  Ai__RequestTimeoutSeconds: "120"
+  Preview__KubectlPath: kubectl
+  Preview__KubeconfigPath: ""
