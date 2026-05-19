@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rosenvall-devops-api
+  name: devops-api
   namespace: rosenvall-devops
   annotations:
     argocd.argoproj.io/sync-wave: "0"
