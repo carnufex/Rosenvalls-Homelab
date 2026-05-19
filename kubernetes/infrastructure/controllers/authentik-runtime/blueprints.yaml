@@ -42,7 +42,7 @@ data:
           property_mappings:
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
-            - !Find [authentik_core.propertymapping, [name, "OAuth mapping: OpenID 'email' with mailPrimaryAddress"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
       - id: argocd_application
         model: authentik_core.application
         identifiers:
@@ -89,7 +89,7 @@ data:
           property_mappings:
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
-            - !Find [authentik_core.propertymapping, [name, "OAuth mapping: OpenID 'email' with mailPrimaryAddress"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
       - id: rosenvall_devops_application
         model: authentik_core.application
         identifiers:
