@@ -18,7 +18,16 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    # Replace this hostname and port with the real WireGuard endpoint from /config/wg_confs/wg0.conf.
+    # linuxserver/wireguard applies the DNS servers from wg0.conf to the shared pod namespace.
+    - toCIDRSet:
+        - cidr: 98.128.186.86/32
+        - cidr: 155.4.89.136/32
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
     - toFQDNs:
         - matchName: wireguard.5july.net
       toPorts:
