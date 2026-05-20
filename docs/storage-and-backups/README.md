@@ -26,14 +26,15 @@ Longhorn keeps:
 
 ## Media Library Model
 
-The media library now lives on a dedicated helper VM instead of inside Longhorn.
+The media library is outside Longhorn and is served over NFS from the physical host that owns the media disk.
 
 Current target:
 
-- VM: `media-nfs-01`
+- Proxmox host: `host1`
 - IP: `192.168.1.230`
-- disk: `WD-red`
-- export path: `/srv/nfs/media`
+- disk/storage: `lagring` on `host1`
+- source path: the existing media root on that disk, normally under `/mnt/pve/lagring`
+- export path: `/srv/nfs/media`, bind-mounted to the source path
 - Kubernetes PV: `media-library`
 - Kubernetes PVC: `media/media-library`
 
@@ -75,7 +76,7 @@ The NFS export on `192.168.1.230` is outside Longhorn.
 That means:
 
 - Longhorn backups do not protect the media files
-- the NFS VM needs its own file-level backup or `rsync` policy
+- the media disk needs its own file-level backup or `rsync` policy
 - the old Docker host can be treated as the temporary migration source, not as a durable backup
 
 ### Cluster Access Artifacts

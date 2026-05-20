@@ -31,9 +31,18 @@ $env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
 .\scripts\preflight-core.ps1
 ```
 
+For the current two-Proxmox-host topology, the first expansion step should be a
+worker on `host1`, for example `worker-04` on `192.168.1.214`. This adds useful
+capacity and a second physical failure domain without changing etcd quorum.
+
 ## Add A Control Plane Node
 
 The repo can model more control plane nodes, but this should be treated as an advanced change until it is proven and documented in a dedicated HA runbook.
+
+Do not add a second control plane and call the cluster HA. Kubernetes/etcd
+control-plane HA normally needs three control-plane members for quorum. With two
+physical Proxmox hosts, a three-member control plane still has an unavoidable
+2/1 placement tradeoff.
 
 Use this posture today:
 

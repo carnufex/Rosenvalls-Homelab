@@ -36,23 +36,23 @@ nodes_config = {
       "homelab.rosenvall.se/lan-special" = "true"
     }
   }
+  # Example second physical host capacity node.
+  # "worker-04" = {
+  #   host_node          = "host1"
+  #   machine_type       = "worker"
+  #   boot_disk_size_gib = 64
+  #   ip                 = "192.168.1.214"
+  #   vm_id              = 8005
+  #   cpu                = 4
+  #   ram_dedicated      = 8192
+  #   igpu               = false
+  #   extra_labels = {
+  #     "homelab.rosenvall.se/proxmox-host" = "host1"
+  #   }
+  # }
 }
 
-media_nfs = {
-  name               = "media-nfs-01"
-  host_node          = "desktop"
-  ip                 = "192.168.1.230"
-  vm_id              = 8010
-  cpu                = 2
-  ram_dedicated      = 4096
-  boot_disk_size_gib = 32
-  boot_datastore     = "local-lvm"
-  image_datastore    = "local"
-  data_datastore     = "WD-red"
-  data_disk_size_gib = 3600
-  allowed_clients = [
-    "192.168.1.211(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
-    "192.168.1.212(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
-    "192.168.1.213(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
-  ]
-}
+# The current production media library is exported directly from the Proxmox
+# host that owns the existing media disk. Keep the helper-VM module disabled
+# unless you intentionally want a blank helper VM with a virtual media disk.
+media_nfs = null

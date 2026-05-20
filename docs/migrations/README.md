@@ -7,8 +7,8 @@ This page is the runbook for the Docker-to-Kubernetes app migration.
 - Internal portal: `https://rosenvall.local`
 - Internal wildcard zone: `*.rosenvall.local`
 - Internal gateway IP: `192.168.1.220`
-- Media NFS helper VM: `media-nfs-01` on `192.168.1.230`
-- Media export path: `/srv/nfs/media`
+- Media NFS endpoint: `media-nfs.rosenvall.local` / `192.168.1.230`
+- Media export path: `192.168.1.230:/srv/nfs/media`
 - Legacy Docker host kept for rollback: `192.168.1.112`
 
 ## UDM DNS Records
@@ -23,24 +23,41 @@ Keep legacy `*.server.home` records only during the migration window.
 
 ## NFS Provisioning
 
-`tofu/media-nfs.tf` provisions a small Debian 12 helper VM on the Proxmox node `desktop`.
+The active media library should be exported from `host1`, because that host owns
+the existing 8TB `lagring` disk with the Plex media files. Do not create a new
+blank virtual disk for this data.
 
 Expected shape:
 
-- VM name: `media-nfs-01`
+- Proxmox host: `host1`
 - IP: `192.168.1.230`
-- boot disk: `32Gi` on `local-lvm`
-- data disk: `3600Gi` on `WD-red` (sized to current free space on the backing storage)
-- export path: `/srv/nfs/media`
+- storage: `lagring`
+- source path: auto-detected by `scripts/configure-host1-media-nfs.ps1`, normally under `/mnt/pve/lagring`
+- export path: `/srv/nfs/media`, bind-mounted to the detected source path so the Kubernetes PV does not change
 - exported directories:
   - `downloads`
   - `tv`
   - `movies`
   - `familjefilmer`
 
-Because Debian cloud-init detection is unreliable on this Proxmox/image combination, the helper VM is finalized by `.\scripts\bootstrap-media-nfs.ps1` after the VM has been created. The bootstrap script injects static network and SSH access offline, then completes package install, data-disk mount, media directory creation, and the NFS export on first SSH.
+Configure `host1` after stopping the old `media-nfs-01` VM so that the stable
+NFS IP is not present in two places:
 
-Manual rerun if needed:
+```powershell
+$env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
+kubectl get ciliumloadbalancerippool first-pool -o jsonpath='{.spec.blocks[0].stop}'
+.\scripts\configure-host1-media-nfs.ps1
+.\scripts\verify-media-nfs.ps1
+```
+
+The Cilium pool stop value must be `192.168.1.229` or lower before assigning
+`192.168.1.230` to `host1`.
+
+The old `tofu/media-nfs.tf` helper VM model is retained for reference, but it
+should not be used for the existing 8TB media disk unless the physical disk is
+explicitly passed through to that VM.
+
+Legacy helper-VM rerun if needed:
 
 ```powershell
 .\scripts\bootstrap-media-nfs.ps1 -ClusterSshHost 192.168.1.111 -NodeName desktop -VmId 8010 -VmIp 192.168.1.230

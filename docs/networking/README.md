@@ -21,6 +21,10 @@ Create these UDM records:
 
 The canonical internal dashboard URL is `https://rosenvall.local`.
 
+`192.168.1.230` is reserved for media NFS and must stay outside the Cilium
+LoadBalancer IP pool. The internal and external Gateway services currently use
+`192.168.1.220` and `192.168.1.222`.
+
 `https://hub-central.rosenvall.local` is a redirect alias back to the apex dashboard.
 
 ## Public Routing Model
