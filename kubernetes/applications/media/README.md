@@ -11,10 +11,11 @@ This app groups the local-only media stack that used to run under Docker Compose
 
 ## Runtime Contract
 
-- `PersistentVolume/media-library` and `PersistentVolumeClaim/media-library` represent the shared NFS export on `192.168.1.230:/srv/nfs/media`. The planned target is `host1`, where `/srv/nfs/media` is mounted from VM `100`'s existing qcow2 media disk on the `lagring` storage.
+- `PersistentVolume/media-library` and `PersistentVolumeClaim/media-library` represent the shared NFS export on `192.168.1.230:/srv/nfs/media`. The active target is VM `media-nfs-01` (`8010`) on `host1`, where `/srv/nfs/media` is mounted from VM `100`'s existing qcow2 media disk on the `lagring` storage.
 - Each app keeps its own Longhorn-backed config PVC.
 - The namespace is explicitly marked `pod-security.kubernetes.io/enforce=privileged` because Plex uses `hostNetwork` and the WireGuard sidecar needs elevated network privileges.
 - Plex scheduling requires a worker labeled `homelab.rosenvall.se/lan-special=true`.
+- Radarr, Sonarr, Jackett, Overseerr, and Deluge-VPN prefer workers labeled `homelab.rosenvall.se/proxmox-host=host1`; this keeps non-hostNetwork media workloads close to the NFS VM without making scheduling impossible if `host1` is down.
 - Internal browser access is handled with `HTTPRoute` resources on `gateway/internal`, so LAN clients should resolve `*.rosenvall.local` to `192.168.1.220` on the UDM.
 - Media configs are seeded from `Downloads\media` before cutover, but the deployments are now managed directly in Git and scaled individually as each app is validated.
 

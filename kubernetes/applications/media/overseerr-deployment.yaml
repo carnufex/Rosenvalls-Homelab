@@ -17,6 +17,16 @@ spec:
       labels:
         app.kubernetes.io/name: overseerr
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              preference:
+                matchExpressions:
+                  - key: homelab.rosenvall.se/proxmox-host
+                    operator: In
+                    values:
+                      - host1
       containers:
         - name: overseerr
           image: lscr.io/linuxserver/overseerr:1.35.0@sha256:6108ed066d4a919c05251d9dab041c1e55e67ff7247e7b31be97b65ffcbaeeb1

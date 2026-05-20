@@ -17,6 +17,16 @@ spec:
       labels:
         app.kubernetes.io/name: deluge-vpn
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              preference:
+                matchExpressions:
+                  - key: homelab.rosenvall.se/proxmox-host
+                    operator: In
+                    values:
+                      - host1
       securityContext:
         fsGroup: 1000
       initContainers:

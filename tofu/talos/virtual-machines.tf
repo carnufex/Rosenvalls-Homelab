@@ -35,7 +35,11 @@ resource "proxmox_virtual_environment_vm" "this" {
     size        = each.value.boot_disk_size_gib
     discard     = "on"
     file_format = "raw"
-    file_id     = proxmox_virtual_environment_download_file.this[local.node_schematic_key[each.key]].id
+    file_id = each.value.host_node == local.proxmox_image_node ? (
+      proxmox_virtual_environment_download_file.this[local.node_schematic_key[each.key]].id
+      ) : (
+      proxmox_virtual_environment_download_file.per_node["${local.node_schematic_key[each.key]}|${each.value.host_node}"].id
+    )
   }
 
   dynamic "disk" {

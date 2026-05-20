@@ -26,15 +26,17 @@ Longhorn keeps:
 
 ## Media Library Model
 
-The media library is outside Longhorn and is served over NFS from the physical host that owns the media disk.
+The media library is outside Longhorn and is served over NFS from a dedicated VM on the Proxmox host that owns the media disk.
 
 Current target:
 
 - Proxmox host: `host1`
+- VM: `media-nfs-01`
+- VMID: `8010`
 - IP: `192.168.1.230`
 - disk/storage: `lagring` on `host1`
-- source disk: VM `100`'s qcow2 media disk at `/media/lagring/images/100/vm-100-disk-0.qcow2`
-- export path: `/srv/nfs/media`, mounted from the qcow2 partition
+- data disk: existing VM `100` qcow2 disk `lagring:100/vm-100-disk-0.qcow2`, attached to `media-nfs-01` as `scsi1`
+- export path: `/srv/nfs/media`, mounted from the existing ext4 partition
 - Kubernetes PV: `media-library`
 - Kubernetes PVC: `media/media-library`
 
@@ -78,6 +80,7 @@ That means:
 - Longhorn backups do not protect the media files
 - the media disk needs its own file-level backup or `rsync` policy
 - the old Docker host can be treated as the temporary migration source, not as a durable backup
+- do not destroy VM `100` with "destroy unreferenced disks" while it still has an `unused` reference to the media qcow2
 
 ### Cluster Access Artifacts
 

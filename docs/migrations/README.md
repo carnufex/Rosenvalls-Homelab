@@ -23,53 +23,55 @@ Keep legacy `*.server.home` records only during the migration window.
 
 ## NFS Provisioning
 
-The active media library should be exported from `host1`, because that host owns
-the existing 8TB `lagring` storage. In the current Proxmox layout the media
-files are inside VM `100`'s qcow2 data disk, not directly under
-`/media/lagring` on the Proxmox host. Do not create a new blank virtual disk for
-this data.
+The active media library is exported by a dedicated `media-nfs-01` VM on
+`host1`, because that Proxmox host owns the existing 8TB `lagring` storage.
+The media files remain inside VM `100`'s existing qcow2 data disk. Do not copy,
+format, or replace that disk.
 
 Expected shape:
 
 - Proxmox host: `host1`
+- VM: `media-nfs-01`
+- VMID: `8010`
 - IP: `192.168.1.230`
 - storage: `lagring`
-- source disk: `/media/lagring/images/100/vm-100-disk-0.qcow2`
-- source partition: `/dev/nbd15p1` through `qemu-nbd`
-- export path: `/srv/nfs/media`, mounted from the qcow2 partition so the Kubernetes PV does not change
+- data disk: `lagring:100/vm-100-disk-0.qcow2`, attached as `scsi1`
+- export path: `/srv/nfs/media`, mounted from the existing ext4 data partition so the Kubernetes PV does not change
 - exported directories:
   - `downloads`
   - `tv`
   - `movies`
   - `familjefilmer`
 
-Configure `host1` after stopping the old `media-nfs-01` VM and shutting down VM
-`100` so that the stable NFS IP and qcow2 filesystem are not active in two
-places:
+Provision or re-bootstrap the NFS VM with:
 
 ```powershell
 $env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
 kubectl get ciliumloadbalancerippool first-pool -o jsonpath='{.spec.blocks[0].stop}'
-ssh root@192.168.1.111 "qm shutdown 100 --timeout 300 && qm stop 8010"
-.\scripts\configure-host1-qcow2-media-nfs.ps1
+ssh root@192.168.1.111 "qm shutdown 100 --timeout 300 || true; qm set 100 --onboot 0; qm config 8010"
+.\scripts\provision-host1-media-nfs-vm.ps1
 .\scripts\verify-media-nfs.ps1
 ```
 
-The Cilium pool stop value must be `192.168.1.229` or lower before assigning
-`192.168.1.230` to `host1`.
+The Cilium pool stop value must be `192.168.1.229` or lower. `192.168.1.230`
+must be owned only by `media-nfs-01`, never by a host-level alias and the VM at
+the same time.
 
-`scripts/configure-host1-media-nfs.ps1` remains available for the simpler case
-where the media root is already a normal host directory. It is not the right
-script for the current VM-100 qcow2 layout.
+The old host-level scripts `scripts/configure-host1-media-nfs.ps1` and
+`scripts/configure-host1-qcow2-media-nfs.ps1` are deprecated. They require an
+explicit escape-hatch flag and should only be used for a deliberate rollback or
+one-off recovery.
 
-The old `tofu/media-nfs.tf` helper VM model is retained for reference, but it
-should not be used for the existing 8TB media disk unless the physical disk is
-explicitly passed through to that VM.
+The old `tofu/media-nfs.tf` helper VM model is disabled with `media_nfs = null`.
+The current production NFS VM is provisioned by `scripts/provision-host1-media-nfs-vm.ps1`
+so it can attach the existing qcow2 disk without formatting it.
 
-Legacy helper-VM rerun if needed:
+Worker expansion to `host1`:
 
 ```powershell
-.\scripts\bootstrap-media-nfs.ps1 -ClusterSshHost 192.168.1.111 -NodeName desktop -VmId 8010 -VmIp 192.168.1.230
+$env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
+kubectl get node worker-04 --show-labels
+kubectl top nodes
 ```
 
 ## Seed Commands

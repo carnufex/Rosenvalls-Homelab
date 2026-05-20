@@ -12,10 +12,15 @@ param(
         "192.168.1.212(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
         "192.168.1.213(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
         "192.168.1.214(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)"
-    )
+    ),
+    [switch]$AllowDeprecatedHostLevelNfs
 )
 
 $ErrorActionPreference = "Stop"
+
+if (-not $AllowDeprecatedHostLevelNfs) {
+    throw "Deprecated host-level NFS path. Use .\scripts\provision-host1-media-nfs-vm.ps1 for the current media-nfs-01 VM design, or pass -AllowDeprecatedHostLevelNfs for an intentional rollback."
+}
 
 if (Test-Path env:KUBECONFIG) {
     $poolStop = & kubectl get ciliumloadbalancerippool first-pool -o jsonpath='{.spec.blocks[0].stop}' 2>$null

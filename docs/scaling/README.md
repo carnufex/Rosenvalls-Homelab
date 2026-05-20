@@ -31,9 +31,13 @@ $env:KUBECONFIG = "$PWD/tofu/output/kubeconfig"
 .\scripts\preflight-core.ps1
 ```
 
-For the current two-Proxmox-host topology, the first expansion step should be a
-worker on `host1`, for example `worker-04` on `192.168.1.214`. This adds useful
-capacity and a second physical failure domain without changing etcd quorum.
+For the current two-Proxmox-host topology, `worker-04` on `host1`
+(`192.168.1.214`) is the first expansion worker. It adds useful capacity and a
+second physical failure domain without changing etcd quorum.
+
+When adding workers on a Proxmox host that is not the default image node, the
+Talos module downloads the Talos image to that node's local ISO storage as well.
+This is required because Proxmox `local` storage is node-local.
 
 ## Add A Control Plane Node
 

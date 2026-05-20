@@ -40,12 +40,21 @@ nodes_config = {
   # "worker-04" = {
   #   host_node          = "host1"
   #   machine_type       = "worker"
-  #   boot_disk_size_gib = 64
+  #   boot_disk_size_gib = 32
   #   ip                 = "192.168.1.214"
   #   vm_id              = 8005
   #   cpu                = 4
   #   ram_dedicated      = 8192
   #   igpu               = false
+  #   disks = {
+  #     longhorn = {
+  #       device      = "/dev/sdb"
+  #       size        = "30G"
+  #       type        = "scsi"
+  #       mountpoint  = "/var/lib/longhorn"
+  #       unit_number = 1
+  #     }
+  #   }
   #   extra_labels = {
   #     "homelab.rosenvall.se/proxmox-host" = "host1"
   #   }

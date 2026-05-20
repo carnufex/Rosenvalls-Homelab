@@ -17,6 +17,16 @@ spec:
       labels:
         app.kubernetes.io/name: jackett
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              preference:
+                matchExpressions:
+                  - key: homelab.rosenvall.se/proxmox-host
+                    operator: In
+                    values:
+                      - host1
       containers:
         - name: jackett
           image: lscr.io/linuxserver/jackett:0.24.1552@sha256:40406afa16eb4ce1ce130201af04aa50a721fcb674301d9ebb2d41dbd5731eb0

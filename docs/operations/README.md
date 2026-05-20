@@ -42,7 +42,7 @@ Use these after:
 
 ```powershell
 .\scripts\export-local-ca.ps1
-.\scripts\configure-host1-qcow2-media-nfs.ps1
+.\scripts\provision-host1-media-nfs-vm.ps1
 .\scripts\seed-homeassistant.ps1
 .\scripts\seed-media-configs.ps1
 .\scripts\verify-local-routes.ps1
@@ -116,13 +116,18 @@ Test-NetConnection 192.168.1.230 -Port 2049
 showmount -e 192.168.1.230
 ```
 
-The Cilium pool stop value must be `192.168.1.229` or lower before moving the
-media NFS IP to `host1`.
+The Cilium pool stop value must be `192.168.1.229` or lower. `192.168.1.230`
+should be owned by VM `8010` (`media-nfs-01`) on `host1`.
 
-In the current host1 layout, the media data is inside VM `100`'s qcow2 disk.
-Use `.\scripts\configure-host1-qcow2-media-nfs.ps1` only after VM `100` and the
-old `media-nfs-01` VM are stopped. Use `.\scripts\configure-host1-media-nfs.ps1`
-only if the media root has first been made available as a normal host directory.
+In the current host1 layout, the media data is inside VM `100`'s qcow2 disk,
+attached to `media-nfs-01` as `scsi1`. VM `100` must stay stopped with
+`onboot: 0` while `media-nfs-01` owns the disk. Do not destroy VM `100` with
+"destroy unreferenced disks" while it still references the media qcow2 as an
+unused disk.
+
+Use `.\scripts\provision-host1-media-nfs-vm.ps1` to recreate or re-bootstrap
+the VM. The older host-level NFS scripts are deprecated and require an explicit
+escape-hatch flag.
 
 ### Host-Network Apps
 
