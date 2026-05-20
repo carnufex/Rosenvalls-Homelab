@@ -33,8 +33,8 @@ Current target:
 - Proxmox host: `host1`
 - IP: `192.168.1.230`
 - disk/storage: `lagring` on `host1`
-- source path: the existing media root on that disk, normally under `/mnt/pve/lagring`
-- export path: `/srv/nfs/media`, bind-mounted to the source path
+- source disk: VM `100`'s qcow2 media disk at `/media/lagring/images/100/vm-100-disk-0.qcow2`
+- export path: `/srv/nfs/media`, mounted from the qcow2 partition
 - Kubernetes PV: `media-library`
 - Kubernetes PVC: `media/media-library`
 
