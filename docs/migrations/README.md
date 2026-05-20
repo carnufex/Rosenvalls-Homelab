@@ -54,6 +54,25 @@ Export kubeconfig first:
 $env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
 ```
 
+Final app config seed should use the live Docker host at `192.168.1.112`, not an older local export, unless SSH is unavailable.
+
+Use `docker inspect` on the Docker host to discover the actual bind mounts for:
+
+- `homeassistant`
+- `jackett`
+- `radarr`
+- `sonarr`
+- `overseerr`
+- `plex`
+- `deluge`
+- `wireguard`
+
+Stage live configs under a dated local directory such as `C:\Users\Crille\Downloads\media-live-YYYYMMDD`. Treat `.env` and any copied secret files as sensitive and keep them out of Git.
+
+For SQLite-backed apps, take an initial copy while Docker is running, then stop the corresponding Docker container and take a final delta before seeding the Kubernetes PVC. This avoids partially copied databases.
+
+WireGuard stays sourced from Bitwarden through `ExternalSecret/deluge-wireguard-config`; do not seed `wg0.conf` into the Deluge PVC.
+
 Seed Home Assistant:
 
 ```powershell
@@ -86,7 +105,8 @@ Current automatic seed adjustments:
   - sets `applicationUrl` to `https://overseerr.rosenvall.local`
   - rewrites Radarr, Sonarr, and Plex hosts to in-cluster service DNS
 - Deluge:
-  - copies `wireguard/wg0.conf` into the same PVC as `/config/wg0.conf`
+  - seeds only Deluge app config
+  - WireGuard config stays in Bitwarden and is mounted as a Secret
 
 ## Verification Commands
 

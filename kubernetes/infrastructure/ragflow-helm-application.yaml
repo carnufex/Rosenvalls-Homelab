@@ -38,9 +38,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: ragflow
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     syncOptions:
       - CreateNamespace=false
       - ServerSideApply=true

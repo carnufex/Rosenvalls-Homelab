@@ -62,6 +62,31 @@ kubectl get gateway -A
 kubectl get httproute -A
 ```
 
+## App Status And Node Pressure
+
+Use Grafana as the primary app status view:
+
+- `https://grafana.rosenvall.local/d/homelab-app-status/homelab-app-status`
+
+Fast terminal checks:
+
+```powershell
+kubectl top nodes
+kubectl top pods -A --sort-by=memory
+kubectl get pods -A --field-selector status.phase=Failed
+kubectl get events -A --sort-by=.lastTimestamp
+```
+
+If Metrics API is unavailable, query Prometheus directly until `metrics-server` has reconciled:
+
+```powershell
+$pod = kubectl -n monitoring get pod -l app.kubernetes.io/name=prometheus -o jsonpath='{.items[0].metadata.name}'
+$query = [uri]::EscapeDataString('1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes')
+kubectl -n monitoring exec $pod -c prometheus -- wget -qO- "http://127.0.0.1:9090/api/v1/query?query=$query"
+```
+
+During Docker cutover, `ragflow` and `matplan-whisper` may be intentionally paused to keep worker memory below eviction pressure. Re-enable them only after media and Home Assistant have run in Kubernetes without new evictions for at least one day.
+
 ## What Broke
 
 ### Routing

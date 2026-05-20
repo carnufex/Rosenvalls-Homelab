@@ -41,3 +41,27 @@ spec:
           annotations:
             summary: "Homelab pod is stuck pending"
             description: "{{ $labels.namespace }}/{{ $labels.pod }} is still pending after 15 minutes, often due to mount or scheduling failures."
+        - alert: HomelabNodeMemoryHigh
+          expr: 1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes > 0.85
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Homelab node memory usage is high"
+            description: "{{ $labels.instance }} has used more than 85% memory for more than 15 minutes."
+        - alert: HomelabNodeReadyFlapping
+          expr: changes(kube_node_status_condition{condition="Ready",status="true"}[1h]) > 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Homelab node Ready condition is flapping"
+            description: "{{ $labels.node }} changed Ready state more than once in the last hour."
+        - alert: HomelabPodEvicted
+          expr: kube_pod_status_reason{reason="Evicted"} > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Homelab pod was evicted"
+            description: "{{ $labels.namespace }}/{{ $labels.pod }} is in Evicted state."

@@ -1,0 +1,14 @@
+image:
+  repository: registry.k8s.io/metrics-server/metrics-server
+  tag: v0.8.0
+
+args:
+  - --kubelet-insecure-tls
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
