@@ -65,6 +65,7 @@ defaultBackupStore:
   pollInterval: 180
 
 defaultSettings:
+  allowRecurringJobWhileVolumeDetached: true
   createDefaultDiskLabeledNodes: true
   defaultReplicaCount: 2
   guaranteedEngineManagerCPU: 0.2
