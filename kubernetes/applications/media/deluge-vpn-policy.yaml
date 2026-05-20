@@ -34,3 +34,9 @@ spec:
         - ports:
             - port: "48575"
               protocol: UDP
+    - toCIDRSet:
+        - cidr: 98.128.186.116/32
+      toPorts:
+        - ports:
+            - port: "48575"
+              protocol: UDP
