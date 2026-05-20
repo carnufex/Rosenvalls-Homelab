@@ -57,6 +57,12 @@ Plex mounts the same export as:
 
 ## Backup Posture
 
+Persistence and backup are intentionally separate concerns:
+
+- a pod restart or node reboot should not lose settings because app state lives on Longhorn PVCs
+- a single worker failure should not lose settings because Longhorn keeps two replicas on worker disks
+- a full Longhorn loss, accidental volume deletion, ransomware, or operator mistake still requires restore from backup
+
 ### Longhorn-Backed Config PVCs
 
 Longhorn should back up these PVCs:
@@ -69,7 +75,12 @@ Longhorn should back up these PVCs:
 - `media/plex-config`
 - `media/deluge-config`
 
-This repo does not yet define a Longhorn recurring backup resource for each of them, so treat this as an operator requirement and verify the schedule in Longhorn after applying.
+Longhorn is configured with:
+
+- hourly local snapshots for the `default` recurring-job group, retained for 24 snapshots
+- daily offsite backups to the configured Cloudflare R2 backup target, retained for 14 backups
+
+Existing Longhorn volumes are expected to carry `recurring-job-group.longhorn.io/default=enabled`. Verify this in Longhorn after applying if a PVC is especially important.
 
 ### NFS Media Library
 

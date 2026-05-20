@@ -26,9 +26,10 @@ This directory contains the configuration for Longhorn, a distributed block stor
 
 ## Backup
 
-- Backup target is configured to R2 (`defaultBackupStore`).
-- No recurring Longhorn offsite backup job is enabled by default.
-- R2 stays available as a break-glass/manual backup target.
+- Backup target is configured to Cloudflare R2 (`defaultBackupStore`).
+- `RecurringJob/default-hourly-snapshot` keeps 24 hourly local snapshots for volumes in the `default` group.
+- `RecurringJob/default-daily-backup` keeps 14 daily offsite backups in R2 for volumes in the `default` group.
+- Existing Longhorn volumes are expected to carry `recurring-job-group.longhorn.io/default=enabled`.
 
 ## Recovery Expectations
 

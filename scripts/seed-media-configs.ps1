@@ -1,6 +1,7 @@
 param(
     [string]$SourceRoot = "C:\Users\Crille\Downloads\media",
-    [string]$Namespace = "media"
+    [string]$Namespace = "media",
+    [string[]]$Apps = @()
 )
 
 . (Join-Path $PSScriptRoot "pvc-seed-utils.ps1")
@@ -174,7 +175,21 @@ $definitions = @(
     }
 )
 
+$selectedApps = $Apps | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { $_.ToLowerInvariant() }
+if ($selectedApps.Count -gt 0) {
+    $knownApps = $definitions | ForEach-Object { $_.Name }
+    foreach ($app in $selectedApps) {
+        if ($knownApps -notcontains $app) {
+            throw "Unknown media app '$app'. Known apps: $($knownApps -join ', ')."
+        }
+    }
+}
+
 foreach ($definition in $definitions) {
+    if ($selectedApps.Count -gt 0 -and $selectedApps -notcontains $definition.Name) {
+        continue
+    }
+
     $sourcePath = Join-Path $SourceRoot $definition.Source
     if (-not (Test-Path -LiteralPath $sourcePath -PathType Container)) {
         throw "Source path '$sourcePath' does not exist."
