@@ -66,7 +66,12 @@ else
 fi
 
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nfs-kernel-server nfs-common qemu-utils
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nfs-kernel-server nfs-common
+
+if [[ ! -x /usr/bin/qemu-nbd ]]; then
+  echo "/usr/bin/qemu-nbd is missing. On Proxmox it should be provided by pve-qemu-kvm; refusing to install Debian qemu-utils automatically." >&2
+  exit 1
+fi
 
 cat >/etc/systemd/system/media-nfs-ip.service <<EOF
 [Unit]
@@ -145,6 +150,8 @@ for dir in downloads tv movies familjefilmer; do
     echo "Expected ${export_path}/${dir} to exist after mounting ${partition_path}." >&2
     exit 1
   fi
+  chown 1000:1000 "${export_path}/${dir}"
+  chmod 0775 "${export_path}/${dir}"
 done
 
 qm set "${source_vm_id}" --onboot 0 >/dev/null
@@ -176,6 +183,7 @@ $remote = $remote.Replace("__NBD_DEVICE__", $NbdDevice)
 $remote = $remote.Replace("__PARTITION_PATH__", $PartitionPath)
 $remote = $remote.Replace("__EXPORT_PATH__", $ExportPath)
 $remote = $remote.Replace("__ALLOWED_CLIENTS__", $allowedClientsJoined)
+$remote = $remote.Replace("`r`n", "`n")
 
 $tempScript = [System.IO.Path]::GetTempFileName()
 try {

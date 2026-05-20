@@ -205,6 +205,7 @@ $remote = $remote.Replace("__STORAGE_PATH__", $StoragePath)
 $remote = $remote.Replace("__SOURCE_PATH__", $SourcePath)
 $remote = $remote.Replace("__EXPORT_PATH__", $ExportPath)
 $remote = $remote.Replace("__ALLOWED_CLIENTS__", $allowedClientsJoined)
+$remote = $remote.Replace("`r`n", "`n")
 
 $tempScript = [System.IO.Path]::GetTempFileName()
 try {
