@@ -34,8 +34,10 @@ spec:
         - ports:
             - port: "48575"
               protocol: UDP
+    # wireguard.5july.net rotates between provider endpoints; only the WireGuard UDP port is allowed.
     - toCIDRSet:
-        - cidr: 98.128.186.116/32
+        - cidr: 98.128.186.0/24
+        - cidr: 94.254.51.0/24
       toPorts:
         - ports:
             - port: "48575"
