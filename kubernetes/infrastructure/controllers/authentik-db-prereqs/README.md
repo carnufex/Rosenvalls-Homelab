@@ -10,14 +10,17 @@ instance only after the primary is healthy and WAL growth is confirmed stable.
 
 ## Default Mode
 
-The default manifest uses `initdb` for deterministic new cluster bootstrap. The
-`authentik-core-secrets` Bitwarden item must include `bootstrap-password`,
-`bootstrap-token`, and `bootstrap-email` custom fields so Authentik pre-creates
-the `akadmin` account during first startup instead of leaving the public
-first-run setup flow claimable.
+The default manifest uses `initdb` for deterministic new cluster bootstrap.
+The Homelab Bitwarden Secrets Manager project must contain these separate
+secrets so Authentik pre-creates the `akadmin` account during first startup
+instead of leaving the public first-run setup flow claimable:
 
-Do not sync this change to the live cluster until those Bitwarden custom fields
-exist. If any field is missing, External Secrets cannot render
+- `authentik-bootstrap-password`
+- `authentik-bootstrap-token`
+- `authentik-bootstrap-email`
+
+Do not sync this change to the live cluster until those Bitwarden secrets exist.
+If any secret is missing, External Secrets cannot render
 `Secret/authentik-core-secrets`.
 
 ## DR Restore Mode (opt-in)
