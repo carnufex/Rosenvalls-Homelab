@@ -10,10 +10,15 @@ config:
   inCluster: true
   inClusterContextName: rosenvall-homelab
   oidc:
+    callbackURL: https://headlamp.rosenvall.local/oidc-callback
+    validatorClientID: headlamp
+    validatorIssuerURL: https://authentik.rosenvall.se/application/o/headlamp/
+    usePKCE: true
     secret:
       create: false
     externalSecret:
-      enabled: false
+      enabled: true
+      name: headlamp-oidc
 
 serviceAccount:
   create: true

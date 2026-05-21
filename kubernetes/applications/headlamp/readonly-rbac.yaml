@@ -111,9 +111,8 @@ kind: ClusterRoleBinding
 metadata:
   name: headlamp-readonly
 subjects:
-  - kind: ServiceAccount
-    name: headlamp
-    namespace: headlamp
+  - kind: Group
+    name: "authentik:Kubernetes Viewers"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
+  - grafana-oauth-externalsecret.yaml
   - grafana-http-route.yaml
   - prometheus-http-route.yaml
   - homelab-app-alerts.yaml

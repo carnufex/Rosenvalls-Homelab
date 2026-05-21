@@ -99,3 +99,185 @@ data:
           group: Applications
           provider: !KeyOf rosenvall_devops_provider
           policy_engine_mode: any
+  apps-grafana.yaml: |
+    version: 1
+    metadata:
+      name: Apps - Grafana
+    entries:
+      - id: grafana-admin-group
+        model: authentik_core.group
+        identifiers:
+          name: Grafana Admins
+        attrs:
+          name: Grafana Admins
+      - id: grafana-editor-group
+        model: authentik_core.group
+        identifiers:
+          name: Grafana Editors
+        attrs:
+          name: Grafana Editors
+      - id: grafana-viewer-group
+        model: authentik_core.group
+        identifiers:
+          name: Grafana Viewers
+        attrs:
+          name: Grafana Viewers
+      - id: grafana_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: rosenvall.local/grafana
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          client_type: confidential
+          redirect_uris:
+            - url: https://grafana.rosenvall.local/login/generic_oauth
+              matching_mode: strict
+          client_id: !Env GRAFANA_CLIENT_ID
+          client_secret: !Env GRAFANA_CLIENT_SECRET
+          access_code_validity: minutes=1
+          access_token_validity: hours=1
+          refresh_token_validity: days=1
+          sub_mode: hashed_user_id
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'groups'"]]
+      - id: grafana_application
+        model: authentik_core.application
+        identifiers:
+          slug: grafana
+        attrs:
+          name: Grafana
+          group: Infrastructure
+          provider: !KeyOf grafana_provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf grafana_application
+          group: !Find [authentik_core.group, [name, "Grafana Admins"]]
+        attrs:
+          order: 1
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf grafana_application
+          group: !Find [authentik_core.group, [name, "Grafana Editors"]]
+        attrs:
+          order: 2
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf grafana_application
+          group: !Find [authentik_core.group, [name, "Grafana Viewers"]]
+        attrs:
+          order: 3
+  apps-headlamp.yaml: |
+    version: 1
+    metadata:
+      name: Apps - Headlamp
+    entries:
+      - id: kubernetes-admin-group
+        model: authentik_core.group
+        identifiers:
+          name: Kubernetes Admins
+        attrs:
+          name: Kubernetes Admins
+      - id: kubernetes-viewer-group
+        model: authentik_core.group
+        identifiers:
+          name: Kubernetes Viewers
+        attrs:
+          name: Kubernetes Viewers
+      - id: headlamp_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: k8s.rosenvall.local/headlamp
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          client_type: confidential
+          redirect_uris:
+            - url: https://headlamp.rosenvall.local/oidc-callback
+              matching_mode: strict
+          client_id: !Env HEADLAMP_CLIENT_ID
+          client_secret: !Env HEADLAMP_CLIENT_SECRET
+          access_code_validity: minutes=1
+          access_token_validity: hours=1
+          refresh_token_validity: days=1
+          sub_mode: hashed_user_id
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'groups'"]]
+      - id: headlamp_application
+        model: authentik_core.application
+        identifiers:
+          slug: headlamp
+        attrs:
+          name: Headlamp
+          group: Infrastructure
+          provider: !KeyOf headlamp_provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf headlamp_application
+          group: !Find [authentik_core.group, [name, "Kubernetes Admins"]]
+        attrs:
+          order: 1
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf headlamp_application
+          group: !Find [authentik_core.group, [name, "Kubernetes Viewers"]]
+        attrs:
+          order: 2
+  apps-ragflow.yaml: |
+    version: 1
+    metadata:
+      name: Apps - RAGFlow
+    entries:
+      - id: ragflow-users-group
+        model: authentik_core.group
+        identifiers:
+          name: RAGFlow Users
+        attrs:
+          name: RAGFlow Users
+      - id: ragflow_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: rosenvall.local/ragflow
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          client_type: confidential
+          redirect_uris:
+            - url: https://ragflow.rosenvall.local/v1/user/oauth/callback/oidc
+              matching_mode: strict
+          client_id: !Env RAGFLOW_CLIENT_ID
+          client_secret: !Env RAGFLOW_CLIENT_SECRET
+          access_code_validity: minutes=1
+          access_token_validity: hours=1
+          refresh_token_validity: days=1
+          sub_mode: hashed_user_id
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+      - id: ragflow_application
+        model: authentik_core.application
+        identifiers:
+          slug: ragflow
+        attrs:
+          name: RAGFlow
+          group: Applications
+          provider: !KeyOf ragflow_provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf ragflow_application
+          group: !Find [authentik_core.group, [name, "RAGFlow Users"]]
+        attrs:
+          order: 1

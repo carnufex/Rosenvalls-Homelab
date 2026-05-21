@@ -4,6 +4,7 @@ namespace: headlamp
 
 resources:
   - ns.yaml
+  - oidc-externalsecret.yaml
   - readonly-rbac.yaml
 
 helmCharts:
