@@ -1,13 +1,11 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   name: rosenvall-devops-preview-manager
+  namespace: rosenvall-devops
   annotations:
     argocd.argoproj.io/sync-wave: "-5"
 rules:
-  - apiGroups: [""]
-    resources: ["namespaces"]
-    verbs: ["get", "list", "create", "delete"]
   - apiGroups: [""]
     resources: ["configmaps", "services"]
     verbs: ["get", "list", "create", "update", "patch", "delete"]
@@ -19,9 +17,10 @@ rules:
     verbs: ["get", "list", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   name: rosenvall-devops-preview-manager
+  namespace: rosenvall-devops
   annotations:
     argocd.argoproj.io/sync-wave: "-5"
 subjects:
@@ -30,5 +29,5 @@ subjects:
     namespace: rosenvall-devops
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: rosenvall-devops-preview-manager
