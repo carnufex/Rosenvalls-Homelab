@@ -35,3 +35,10 @@ terraform.rc
 
 # Claude Code temp files
 tmpclaude-*-cwd
+
+# Generated OpenTofu/Talos artifacts can contain live cluster admin credentials.
+tofu/output/*
+!tofu/output/.gitkeep
+tofu/new_kubeconfig
+tofu/tfplan
+*tfplan*
