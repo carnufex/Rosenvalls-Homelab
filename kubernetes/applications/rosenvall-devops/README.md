@@ -1,6 +1,6 @@
 # Rosenvall DevOps
 
-Rosenvall DevOps is published at `https://devops.rosenvall.se`.
+Rosenvall DevOps is currently routed through the internal gateway at `https://devops.rosenvall.se`.
 
 Runtime shape:
 
