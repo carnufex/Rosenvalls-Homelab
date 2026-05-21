@@ -25,7 +25,8 @@ data:
         continue
       fi
 
-      created_epoch="$(date -u -d "${created}" +%s)"
+      created_for_date="$(echo "${created}" | sed 's/T/ /; s/Z$//')"
+      created_epoch="$(date -u -d "${created_for_date}" +%s)"
       age_seconds="$((now_epoch - created_epoch))"
 
       if [ "${age_seconds}" -lt "${ttl_seconds}" ]; then
