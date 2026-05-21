@@ -32,6 +32,8 @@ spec:
                 - ALL
               add:
                 - CHOWN
+                - SETGID
+                - SETUID
           ports:
             - containerPort: 8080
               name: http
