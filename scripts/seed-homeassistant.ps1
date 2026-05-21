@@ -1,7 +1,8 @@
 param(
     [string]$SourceRoot = "C:\Users\Crille\Downloads\media",
     [string]$Namespace = "homeassistant",
-    [string]$PvcName = "homeassistant-config"
+    [string]$PvcName = "homeassistant-config",
+    [switch]$AllowRunning
 )
 
 . (Join-Path $PSScriptRoot "pvc-seed-utils.ps1")
@@ -9,9 +10,37 @@ param(
 $ErrorActionPreference = "Stop"
 Set-HomelabKubeconfig
 
+function Set-Utf8NoBomContent {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [Parameter(Mandatory = $true)]
+        [string]$Value
+    )
+
+    $encoding = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($Path, $Value, $encoding)
+}
+
 $sourcePath = Join-Path $SourceRoot "homeassistant"
 if (-not (Test-Path -LiteralPath $sourcePath -PathType Container)) {
     throw "Home Assistant source path '$sourcePath' does not exist."
+}
+
+if (-not $AllowRunning) {
+    $replicas = (& kubectl @("-n", $Namespace, "get", "deployment", "homeassistant", "-o", "jsonpath={.spec.replicas}") 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to read deployment '$Namespace/homeassistant'.`n$($replicas | Out-String)"
+    }
+
+    $replicas = ($replicas | Out-String).Trim()
+    if ([string]::IsNullOrWhiteSpace($replicas)) {
+        $replicas = "0"
+    }
+
+    if ([int]$replicas -gt 0) {
+        throw "Refusing to seed 'homeassistant' while it has replicas=$replicas. Scale it to 0 first, or pass -AllowRunning if you intentionally accept the risk."
+    }
 }
 
 $stagePath = New-TemporaryDirectory -Prefix "homeassistant-seed"
@@ -62,17 +91,19 @@ try {
         $outputLines.Add("    - 127.0.0.1")
     }
 
-    Set-Content -LiteralPath $configPath -Value $outputLines -Encoding utf8
+    Set-Utf8NoBomContent -Path $configPath -Value ($outputLines -join [Environment]::NewLine)
 
     $coreConfigPath = Join-Path $stagePath ".storage\core.config"
     if (Test-Path -LiteralPath $coreConfigPath) {
         $coreConfig = Get-Content -LiteralPath $coreConfigPath -Raw | ConvertFrom-Json
         $coreConfig.data.internal_url = "https://homeassistant.rosenvall.local"
         $coreConfig.data.external_url = "https://homeassistant.rosenvall.local"
-        $coreConfig | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $coreConfigPath -Encoding utf8
+        Set-Utf8NoBomContent -Path $coreConfigPath -Value ($coreConfig | ConvertTo-Json -Depth 20)
     }
 
-    Get-ChildItem -LiteralPath $stagePath -Recurse -Force -File -Include ".ha_run.lock","*.pid" | Remove-Item -Force -ErrorAction SilentlyContinue
+    Get-ChildItem -LiteralPath $stagePath -Recurse -Force -File |
+        Where-Object { $_.Name -eq ".ha_run.lock" -or $_.Name -like "*.pid" } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
 
     Seed-DirectoryToPvc -Namespace $Namespace -PvcName $PvcName -SourcePath $stagePath -MountPath "/config"
     Write-Host "Seeded Home Assistant from '$sourcePath' into '$Namespace/$PvcName'." -ForegroundColor Green

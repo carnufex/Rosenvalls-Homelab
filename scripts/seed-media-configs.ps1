@@ -1,7 +1,8 @@
 param(
     [string]$SourceRoot = "C:\Users\Crille\Downloads\media",
     [string]$Namespace = "media",
-    [string[]]$Apps = @()
+    [string[]]$Apps = @(),
+    [switch]$AllowRunning
 )
 
 . (Join-Path $PSScriptRoot "pvc-seed-utils.ps1")
@@ -9,13 +10,54 @@ param(
 $ErrorActionPreference = "Stop"
 Set-HomelabKubeconfig
 
+function Set-Utf8NoBomContent {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [Parameter(Mandatory = $true)]
+        [string]$Value
+    )
+
+    $encoding = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($Path, $Value, $encoding)
+}
+
 function Remove-RuntimeFiles {
     param(
         [Parameter(Mandatory = $true)]
         [string]$Path
     )
 
-    Get-ChildItem -LiteralPath $Path -Recurse -Force -File -Include ".ha_run.lock","*.pid","deluged.pid" | Remove-Item -Force -ErrorAction SilentlyContinue
+    Get-ChildItem -LiteralPath $Path -Recurse -Force -File |
+        Where-Object { $_.Name -eq ".ha_run.lock" -or $_.Name -eq "deluged.pid" -or $_.Name -like "*.pid" } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
+}
+
+function Assert-DeploymentScaledDown {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Namespace,
+        [Parameter(Mandatory = $true)]
+        [string]$DeploymentName
+    )
+
+    if ($AllowRunning) {
+        return
+    }
+
+    $replicas = (& kubectl @("-n", $Namespace, "get", "deployment", $DeploymentName, "-o", "jsonpath={.spec.replicas}") 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to read deployment '$Namespace/$DeploymentName'.`n$($replicas | Out-String)"
+    }
+
+    $replicas = ($replicas | Out-String).Trim()
+    if ([string]::IsNullOrWhiteSpace($replicas)) {
+        $replicas = "0"
+    }
+
+    if ([int]$replicas -gt 0) {
+        throw "Refusing to seed '$DeploymentName' while it has replicas=$replicas. Scale it to 0 first, or pass -AllowRunning if you intentionally accept the risk."
+    }
 }
 
 function Update-JackettConfig {
@@ -27,7 +69,7 @@ function Update-JackettConfig {
     $config = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
     $config.LocalBindAddress = "0.0.0.0"
     $config.AllowExternal = $true
-    $config | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $Path -Encoding utf8
+    Set-Utf8NoBomContent -Path $Path -Value ($config | ConvertTo-Json -Depth 10)
 }
 
 function Update-OverseerrConfig {
@@ -59,7 +101,7 @@ function Update-OverseerrConfig {
         $settings.plex.useSsl = $false
     }
 
-    $settings | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $Path -Encoding utf8
+    Set-Utf8NoBomContent -Path $Path -Value ($settings | ConvertTo-Json -Depth 20)
 }
 
 function Update-HomeAssistantConfig {
@@ -113,6 +155,7 @@ function Update-HomeAssistantConfig {
 $definitions = @(
     @{
         Name = "jackett"
+        Deployment = "jackett"
         Source = "jackett\config"
         Claim = "jackett-config"
         Mount = "/config"
@@ -124,6 +167,7 @@ $definitions = @(
     },
     @{
         Name = "radarr"
+        Deployment = "radarr"
         Source = "radarr\config"
         Claim = "radarr-config"
         Mount = "/config"
@@ -134,6 +178,7 @@ $definitions = @(
     },
     @{
         Name = "sonarr"
+        Deployment = "sonarr"
         Source = "sonarr\config"
         Claim = "sonarr-config"
         Mount = "/config"
@@ -144,6 +189,7 @@ $definitions = @(
     },
     @{
         Name = "overseerr"
+        Deployment = "overseerr"
         Source = "overseerr\config"
         Claim = "overseerr-config"
         Mount = "/config"
@@ -155,6 +201,7 @@ $definitions = @(
     },
     @{
         Name = "plex"
+        Deployment = "plex"
         Source = "plex\config"
         Claim = "plex-config"
         Mount = "/config"
@@ -165,6 +212,7 @@ $definitions = @(
     },
     @{
         Name = "deluge"
+        Deployment = "deluge-vpn"
         Source = "deluge\config"
         Claim = "deluge-config"
         Mount = "/config"
@@ -194,6 +242,8 @@ foreach ($definition in $definitions) {
     if (-not (Test-Path -LiteralPath $sourcePath -PathType Container)) {
         throw "Source path '$sourcePath' does not exist."
     }
+
+    Assert-DeploymentScaledDown -Namespace $Namespace -DeploymentName $definition.Deployment
 
     $stagePath = New-TemporaryDirectory -Prefix "$($definition.Name)-seed"
     try {

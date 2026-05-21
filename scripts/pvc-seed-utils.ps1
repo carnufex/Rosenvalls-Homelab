@@ -175,34 +175,25 @@ function Sync-DirectoryToPvc {
     )
 
     Set-HomelabKubeconfig
+    Assert-Command -Name "tar"
+    Assert-Command -Name "cmd.exe"
 
     if (-not (Test-Path -LiteralPath $SourcePath -PathType Container)) {
         throw "Source path '$SourcePath' does not exist."
     }
 
     $podName = New-PvcHelperPod -Namespace $Namespace -ClaimName $ClaimName
-    $sourceLeaf = Split-Path -Path (Resolve-Path -LiteralPath $SourcePath) -Leaf
-    $remoteStage = "/seed/$sourceLeaf"
 
     try {
         Invoke-PodShell -Namespace $Namespace -PodName $podName -Script 'mkdir -p /seed /target && find /target -mindepth 1 -maxdepth 1 -exec rm -rf -- {} + 2>/dev/null || true'
 
         $resolvedSourcePath = (Resolve-Path -LiteralPath $SourcePath).Path
-        $sourceParent = Split-Path -Path $resolvedSourcePath -Parent
-        $sourceLeaf = Split-Path -Path $resolvedSourcePath -Leaf
-
-        Push-Location $sourceParent
-        try {
-            $copyResult = & kubectl cp $sourceLeaf "${Namespace}/${podName}:/seed" 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                throw "kubectl cp to $Namespace/$podName failed.`n$($copyResult | Out-String)"
-            }
+        # Avoid kubectl cp here: on Windows it can copy directory entries while dropping file payloads.
+        $streamCommand = 'tar -C "' + $resolvedSourcePath + '" -cf - . | kubectl -n ' + $Namespace + ' exec -i ' + $podName + ' -- tar -C /target -xf -'
+        $streamResult = & cmd.exe /d /s /c $streamCommand 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            throw "tar stream to $Namespace/$podName failed.`n$($streamResult | Out-String)"
         }
-        finally {
-            Pop-Location
-        }
-
-        Invoke-PodShell -Namespace $Namespace -PodName $podName -Script "cp -a $remoteStage/. /target/"
 
         foreach ($relativePath in $CleanupRelativePaths) {
             Invoke-PodShell -Namespace $Namespace -PodName $podName -Script "rm -f /target/$relativePath"
