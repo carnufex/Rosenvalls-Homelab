@@ -69,6 +69,8 @@ Verify Deluge VPN after it is live:
 .\scripts\verify-deluge-vpn.ps1
 ```
 
+This verifies the WireGuard interface, policy routing, external IP through the tunnel, the Cilium egress policy, and that a forced direct `eth0` request cannot bypass the tunnel. A stronger destructive fail-closed test is to bring `wg0` down temporarily and confirm the pod becomes unready and cannot reach the internet, but only do that during a maintenance window because it interrupts active torrents.
+
 ## Access Model
 
 - All browser UIs stay local-only in v1 and are attached directly to `gateway/internal`.

@@ -1,6 +1,8 @@
 param(
     [string]$Namespace = "media",
-    [string]$LabelSelector = "app.kubernetes.io/name=deluge-vpn"
+    [string]$LabelSelector = "app.kubernetes.io/name=deluge-vpn",
+    [string]$PolicyName = "deluge-vpn-egress-lockdown",
+    [switch]$SkipDirectEgressTest
 )
 
 . (Join-Path $PSScriptRoot "pvc-seed-utils.ps1")
@@ -8,6 +10,47 @@ param(
 $ErrorActionPreference = "Stop"
 Set-HomelabKubeconfig
 Assert-Command -Name "kubectl"
+
+function Invoke-CheckedPodShell {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Namespace,
+        [Parameter(Mandatory = $true)]
+        [string]$PodName,
+        [Parameter(Mandatory = $true)]
+        [string]$Container,
+        [Parameter(Mandatory = $true)]
+        [string]$Script
+    )
+
+    $normalizedScript = (($Script -replace "`r`n", "`n") -replace "`n", "; ").Trim()
+    if ($normalizedScript.Contains('"')) {
+        throw "Invoke-CheckedPodShell does not support double quotes in script payloads."
+    }
+
+    $command = 'kubectl exec -n "' + $Namespace + '" -c "' + $Container + '" "' + $PodName + '" -- sh -lc "' + $normalizedScript + '"'
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $output = & cmd.exe /d /s /c $command 2>&1
+    $ErrorActionPreference = $previousErrorActionPreference
+    if ($LASTEXITCODE -ne 0) {
+        $rendered = ($output | Out-String).Trim()
+        throw $rendered
+    }
+
+    return $output
+}
+
+$policyJson = & kubectl get ciliumnetworkpolicy -n $Namespace $PolicyName -o json 2>&1
+if ($LASTEXITCODE -ne 0 -or -not $policyJson) {
+    throw "Failed to inspect CiliumNetworkPolicy '$Namespace/$PolicyName'.`n$($policyJson | Out-String)"
+}
+
+$policy = $policyJson | ConvertFrom-Json
+$validCondition = @($policy.status.conditions) | Where-Object { $_.type -eq "Valid" } | Select-Object -First 1
+if (-not $validCondition -or $validCondition.status -ne "True") {
+    throw "CiliumNetworkPolicy '$Namespace/$PolicyName' is not valid."
+}
 
 $podsJson = & kubectl get pod -n $Namespace -l $LabelSelector -o json
 if ($LASTEXITCODE -ne 0 -or -not $podsJson) {
@@ -40,6 +83,8 @@ if (-not $execContainer) {
     throw "The deluge-vpn pod '$Namespace/$podName' has no containers."
 }
 
+$curlContainer = if ($containerNames -contains "deluge") { "deluge" } else { $execContainer }
+
 $checkScript = @"
 set -eu
 test -f /config/wg_confs/wg0.conf
@@ -47,23 +92,13 @@ ip link show wg0 >/dev/null 2>&1
 ip -4 rule show | grep -Eq 'lookup 51820'
 ip -4 route show table 51820 | grep -Eq '^default( .*)? dev wg0([[:space:]]|$)'
 "@
-Invoke-PodShell -Namespace $Namespace -PodName $podName -Container $execContainer -Script $checkScript
+Invoke-CheckedPodShell -Namespace $Namespace -PodName $podName -Container $execContainer -Script $checkScript
 
-$ipCheck = @"
-set -eu
-if command -v curl >/dev/null 2>&1; then
-  curl -fsSL https://api.ipify.org || curl -fsSL https://ifconfig.me
-elif command -v wget >/dev/null 2>&1; then
-  wget -qO- https://api.ipify.org || wget -qO- https://ifconfig.me
-else
-  echo "curl or wget not found; skipping external IP check." >&2
-  exit 0
-fi
-"@
+$ipCheck = 'curl -4fsS --max-time 20 https://api.ipify.org || curl -4fsS --max-time 20 https://ifconfig.me'
 
 $stdout = $null
 try {
-    $stdout = Invoke-PodShell -Namespace $Namespace -PodName $podName -Container $execContainer -Script $ipCheck
+    $stdout = Invoke-CheckedPodShell -Namespace $Namespace -PodName $podName -Container $curlContainer -Script $ipCheck
 }
 catch {
     $stdout = $null
@@ -75,4 +110,17 @@ if ($stdout) {
     Write-Host "VPN route verified, but curl/wget was unavailable for external IP confirmation." -ForegroundColor Yellow
 }
 
+if (-not $SkipDirectEgressTest) {
+    $directEgressCheck = 'curl -4fsS --interface eth0 --connect-timeout 5 --max-time 12 https://api.ipify.org >/tmp/direct-egress.out 2>&1 && cat /tmp/direct-egress.out >&2 && exit 1 || echo DIRECT_EGRESS_BLOCKED'
+
+    try {
+        $directOutput = Invoke-CheckedPodShell -Namespace $Namespace -PodName $podName -Container $curlContainer -Script $directEgressCheck
+        $directOutput | ForEach-Object { Write-Host $_ -ForegroundColor Green }
+    }
+    catch {
+        throw "Direct egress test failed. If it says egress succeeded, the kill switch is not safe.`n$($_.Exception.Message)"
+    }
+}
+
+Write-Host "CiliumNetworkPolicy '$Namespace/$PolicyName' is valid and selects deluge-vpn." -ForegroundColor Green
 Write-Host "deluge-vpn pod '$Namespace/$podName' has wg0 and WireGuard policy routing active in table 51820." -ForegroundColor Green
