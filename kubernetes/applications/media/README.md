@@ -47,6 +47,14 @@ The seed script copies:
 
 It also removes runtime files and applies known pre-boot config fixes for Jackett and Overseerr. WireGuard configuration is intentionally not copied from the seed payload anymore; update the Bitwarden secret backing `ExternalSecret/deluge-wireguard-config` instead.
 
+After Radarr and Sonarr are running from restored config, rewrite old Docker endpoints to in-cluster services:
+
+```powershell
+.\scripts\update-media-internal-endpoints.ps1 -Test
+```
+
+This keeps existing API keys and passwords, but changes Deluge clients to `deluge.media.svc.cluster.local:8112` and Jackett Torznab URLs to `jackett.media.svc.cluster.local:9117`.
+
 ## Verification
 
 Verify the shared media PVC before scaling workloads:
