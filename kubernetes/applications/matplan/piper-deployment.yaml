@@ -39,7 +39,7 @@ spec:
             - name: PIPER_VOICE
               value: sv_SE-nst-medium
             - name: PIPER_FALLBACK_VOICE
-              value: sv_SE-nst-medium
+              value: sv_SE-lisa-medium
             - name: PIPER_PORT
               value: "5000"
           resources:
@@ -71,7 +71,6 @@ spec:
             - -lc
             - >-
               set -euo pipefail;
-              python3 -m pip install --no-cache-dir piper-tts flask;
               primary="${PIPER_VOICE:-sv_SE-nst-medium}";
               fallback="${PIPER_FALLBACK_VOICE:-sv_SE-lisa-medium}";
               ensure_voice () {

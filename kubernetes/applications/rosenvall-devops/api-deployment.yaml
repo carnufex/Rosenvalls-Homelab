@@ -19,10 +19,18 @@ spec:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
       serviceAccountName: rosenvall-devops-runtime
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: api
           image: ghcr.io/carnufex/rosenvall-devops-api:main
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           ports:
             - containerPort: 8080
               name: http

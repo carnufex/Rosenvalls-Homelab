@@ -42,10 +42,10 @@ If Google sign-in is not enabled yet, the API can still start without a configur
 Hugging Face revision and verifies the model SHA256 before serving it from
 `matplan-whisper-models`.
 
-`matplan-piper` currently runs a pinned Python slim image and installs the Piper
-runtime dependencies at startup because the reviewed MatPlan Piper GHCR image is
-not yet published. The pod downloads voice files into `matplan-piper-data` when
-they are missing.
+`matplan-piper` runs the reviewed MatPlan Piper image by immutable GHCR digest,
+so the Piper runtime dependencies are built into the reviewed image rather than
+installed from PyPI at pod startup. The pod downloads voice files into
+`matplan-piper-data` when they are missing.
 
 Both services are cluster-internal only. `matplan-config` points the API to:
 
@@ -69,10 +69,6 @@ Private GHCR pulls use `ExternalSecret/matplan-ghcr`, which sources the `GHCR_PA
 from the Homelab Bitwarden project and renders a `kubernetes.io/dockerconfigjson`
 secret for `ServiceAccount/matplan-runtime`.
 
-Prefer replacing the startup install with a prebuilt MatPlan Piper image pinned by
-immutable GHCR digest once that image exists. Until then, the Python base image is
-pinned by digest so ArgoCD-visible Git changes are required before the cluster
-runs a different base image.
 The deployment uses `sv_SE-nst-medium` with `sv_SE-lisa-medium` as fallback,
 matching the currently valid Piper voice catalog.
 
