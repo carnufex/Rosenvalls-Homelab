@@ -28,7 +28,7 @@ The UI uses the existing Metrics API, so `kubectl top nodes` and `kubectl top po
 Headlamp uses Authentik OIDC with callback `https://headlamp.rosenvall.local/oidc-callback`.
 Kubernetes API authentication must accept the Authentik issuer
 `https://authentik.rosenvall.se/application/o/headlamp/` and map the `groups`
-claim with the `authentik:` prefix.
+claim from the `profile` scope with the `authentik:` prefix.
 
 Read-only access is bound to the Authentik group `Kubernetes Viewers`, which
 appears to Kubernetes as `authentik:Kubernetes Viewers`. The Headlamp service

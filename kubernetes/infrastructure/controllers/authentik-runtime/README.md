@@ -50,7 +50,8 @@ Blueprint-managed groups:
 - `Kubernetes Viewers`
 - `RAGFlow Users`
 
-Headlamp Kubernetes RBAC uses the kube-apiserver OIDC group prefix
+The default `profile` scope mapping includes a `groups` claim. Headlamp
+Kubernetes RBAC uses the kube-apiserver OIDC group prefix
 `authentik:`, so the read-only ClusterRoleBinding references
 `authentik:Kubernetes Viewers`.
 

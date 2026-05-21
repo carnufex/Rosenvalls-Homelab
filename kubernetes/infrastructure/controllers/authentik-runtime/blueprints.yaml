@@ -144,7 +144,6 @@ data:
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
-            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'groups'"]]
       - id: grafana_application
         model: authentik_core.application
         identifiers:
@@ -211,7 +210,6 @@ data:
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
-            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'groups'"]]
       - id: headlamp_application
         model: authentik_core.application
         identifiers:

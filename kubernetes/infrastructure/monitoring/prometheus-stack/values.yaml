@@ -20,7 +20,7 @@ grafana:
       allow_sign_up: true
       client_id: $__env{GRAFANA_CLIENT_ID}
       client_secret: $__env{GRAFANA_CLIENT_SECRET}
-      scopes: openid profile email groups
+      scopes: openid profile email
       auth_url: https://authentik.rosenvall.se/application/o/authorize/
       token_url: https://authentik.rosenvall.se/application/o/token/
       api_url: https://authentik.rosenvall.se/application/o/userinfo/
