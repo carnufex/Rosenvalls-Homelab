@@ -35,3 +35,9 @@ terraform.rc
 
 # Claude Code temp files
 tmpclaude-*-cwd
+
+# Generated local access artifacts and plans
+# These files can contain Kubernetes/Talos administrator credentials or other secrets.
+tofu/output/
+tofu/new_kubeconfig
+*tfplan*
