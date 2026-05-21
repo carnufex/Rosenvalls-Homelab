@@ -29,5 +29,5 @@ Security notes:
 - The preview manager remains a ClusterRole because the current preview flow creates and deletes namespaces.
 - `pods/log` is intentionally not granted. Add it back only if the app has a documented log-viewing feature that needs it.
 - Keep Codex sandbox enforcement enabled; do not set `Ai__Codex__ImplementationBypassSandbox` to `true`.
-- API and frontend containers drop Linux capabilities, disallow privilege escalation, and use the runtime default seccomp profile.
+- API and frontend containers disallow privilege escalation and use the runtime default seccomp profile. The frontend keeps only `CHOWN` because the current nginx entrypoint chowns its cache directories during startup; remove that exception after the image is rebuilt to avoid startup chown.
 - `runAsNonRoot` is not forced yet because the current image user contract is not documented; add it after the GHCR images are verified to run as a non-root UID.

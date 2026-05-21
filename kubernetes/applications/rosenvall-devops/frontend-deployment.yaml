@@ -30,6 +30,8 @@ spec:
             capabilities:
               drop:
                 - ALL
+              add:
+                - CHOWN
           ports:
             - containerPort: 8080
               name: http
