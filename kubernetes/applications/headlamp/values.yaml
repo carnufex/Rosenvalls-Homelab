@@ -1,0 +1,60 @@
+replicaCount: 1
+
+image:
+  registry: ghcr.io
+  repository: headlamp-k8s/headlamp
+  pullPolicy: IfNotPresent
+  tag: "v0.42.0"
+
+config:
+  inCluster: true
+  inClusterContextName: rosenvall-homelab
+  oidc:
+    secret:
+      create: false
+    externalSecret:
+      enabled: false
+
+serviceAccount:
+  create: true
+  name: headlamp
+
+clusterRoleBinding:
+  create: false
+  clusterRoleName: headlamp-readonly
+
+httpRoute:
+  enabled: true
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+  parentRefs:
+    - name: internal
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - headlamp.rosenvall.local
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  privileged: false
+  readOnlyRootFilesystem: true
+  runAsGroup: 101
+  runAsNonRoot: true
+  runAsUser: 100
+  seccompProfile:
+    type: RuntimeDefault

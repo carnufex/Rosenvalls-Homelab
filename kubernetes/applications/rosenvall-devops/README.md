@@ -28,7 +28,16 @@ Security notes:
 
 - The route should stay on `gateway/internal`. Do not attach it to `gateway/external` without a separate review.
 - The preview manager remains a ClusterRole because the current preview flow creates and deletes namespaces.
+- Preview namespaces are cleaned by `CronJob/rosenvall-devops-preview-cleaner` after 24 hours when they carry `app.kubernetes.io/part-of=rosenvall-devops-preview`. The cleaner skips `devops-previews` and any namespace annotated with `rosenvall.devops/keep=true`.
 - `pods/log` is intentionally not granted. Add it back only if the app has a documented log-viewing feature that needs it.
 - Keep Codex sandbox enforcement enabled; do not set `Ai__Codex__ImplementationBypassSandbox` to `true`.
 - API and frontend containers disallow privilege escalation and use the runtime default seccomp profile. The frontend keeps only `CHOWN`, `SETGID`, and `SETUID` because the current nginx entrypoint chowns cache directories and starts workers as UID/GID 101; remove those exceptions after the image is rebuilt to avoid startup chown/setuid.
 - `runAsNonRoot` is not forced yet because the current image user contract is not documented; add it after the GHCR images are verified to run as a non-root UID.
+
+Preview cleanup checks:
+
+```powershell
+kubectl get namespaces -l app.kubernetes.io/part-of=rosenvall-devops-preview
+kubectl -n rosenvall-devops get cronjob rosenvall-devops-preview-cleaner
+kubectl annotate namespace <preview-namespace> rosenvall.devops/keep=true
+```

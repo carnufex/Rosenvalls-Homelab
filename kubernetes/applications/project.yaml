@@ -17,6 +17,8 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: hub-central
     server: https://kubernetes.default.svc
+  - namespace: headlamp
+    server: https://kubernetes.default.svc
   - namespace: matplan
     server: https://kubernetes.default.svc
   - namespace: media

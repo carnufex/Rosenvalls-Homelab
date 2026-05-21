@@ -29,6 +29,7 @@ The goal is to validate the bootstrap secret chain and routing chain before spen
 ```powershell
 .\scripts\argocd-health-gate.ps1
 .\scripts\preflight-core.ps1
+.\scripts\cluster-health-report.ps1
 ```
 
 Use these after:
@@ -37,10 +38,13 @@ Use these after:
 - any rebuild or replace operation
 - any routing incident
 - any secret-chain incident
+- before and after a recovery drill
+- before deleting preview namespaces or PVCs
 
-## Migration And Cutover Scripts
+## Operational Scripts
 
 ```powershell
+.\scripts\cluster-health-report.ps1
 .\scripts\export-local-ca.ps1
 .\scripts\provision-host1-media-nfs-vm.ps1
 .\scripts\seed-homeassistant.ps1
@@ -49,6 +53,8 @@ Use these after:
 .\scripts\verify-media-nfs.ps1
 .\scripts\verify-deluge-vpn.ps1
 ```
+
+`pvc-seed-utils.ps1` is an internal helper used by seeding scripts. Do not run it directly.
 
 ## High-Value Checks
 
@@ -86,6 +92,51 @@ kubectl -n monitoring exec $pod -c prometheus -- wget -qO- "http://127.0.0.1:909
 ```
 
 During Docker cutover, `ragflow` and `matplan-whisper` may be intentionally paused to keep worker memory below eviction pressure. Re-enable them only after media and Home Assistant have run in Kubernetes without new evictions for at least one day.
+
+## Cluster UI
+
+Use Headlamp for live Kubernetes object inspection:
+
+- `https://headlamp.rosenvall.local`
+- internal gateway only
+- read-only cluster role by default
+- shows nodes, namespaces, pods, workload placement, events, PVCs, routes, ArgoCD apps, ExternalSecrets, Longhorn objects, CNPG clusters, and Metrics API CPU/memory data
+
+Use Grafana for history, alerting, and trend dashboards:
+
+- `https://grafana.rosenvall.local/d/homelab-app-status/homelab-app-status`
+
+If Headlamp does not show CPU or memory, verify the Metrics API first:
+
+```powershell
+kubectl top nodes
+kubectl top pods -A
+```
+
+Headlamp is intentionally not an admin console in its first version. Do not grant create, patch, delete, exec, or secret-read permissions without a separate review.
+
+## Rosenvall DevOps Preview Cleanup
+
+Preview namespaces created by `rosenvall-devops` are expected to be temporary.
+
+The cleanup job only targets namespaces with:
+
+- label `app.kubernetes.io/part-of=rosenvall-devops-preview`
+- age greater than 24 hours
+- no annotation `rosenvall.devops/keep=true`
+
+It never deletes the base namespace `devops-previews`. To preserve a preview manually:
+
+```powershell
+kubectl annotate namespace <preview-namespace> rosenvall.devops/keep=true
+```
+
+Report current candidates without deleting anything:
+
+```powershell
+.\scripts\cluster-health-report.ps1
+kubectl get namespaces -l app.kubernetes.io/part-of=rosenvall-devops-preview
+```
 
 ## What Broke
 

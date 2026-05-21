@@ -16,3 +16,7 @@
 - Internal HTTPS uses the cluster-local CA managed in the `gateway` namespace.
 - The deployment runs at `replicas: 1`.
 - No public `HTTPRoute` is created in v1.
+
+## Expected Links
+
+The link list is compiled into the separate `hub-central` image. When that source app is updated, include `https://headlamp.rosenvall.local` next to Grafana, Prometheus, Longhorn, and the other internal operations surfaces.

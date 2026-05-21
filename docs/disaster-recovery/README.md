@@ -2,6 +2,30 @@
 
 This page documents the current recovery posture as it actually exists today.
 
+## Verified, Partial, Missing
+
+Verified from the current cluster health pass:
+
+- Kubernetes API is reachable through the local kubeconfig.
+- 5/5 nodes are `Ready`.
+- No pods were outside `Running` or `Succeeded`.
+- `ClusterSecretStore/bitwarden-secretsmanager` and current `ExternalSecret` resources were `Ready`.
+- `rosenvall-devops` was `Synced Healthy`.
+- Metrics API answered `kubectl top nodes` and `kubectl top pods -A`.
+
+Partially verified:
+
+- `ragflow-helm` was `OutOfSync Healthy` and needs follow-up before the cluster is considered fully clean.
+- Longhorn backup target and recurring groups exist, but a restore drill is still required.
+- Media NFS has verification scripts and documentation, but media files still need a separate file-level backup policy.
+- Authentik has a documented CNPG restore overlay, but restore should be drilled before relying on it in an incident.
+
+Missing or residual risk:
+
+- MatPlan and BikePal runtime manifests exist, but database restore is not yet proven end to end.
+- Talos API CA rotation is not complete until a dry-run and live rotation succeed all the way through.
+- Secure off-machine storage for current kubeconfig, talosconfig, local `terraform.tfvars`, and exported local CA must be maintained outside Git.
+
 ## Recovery Modes
 
 ### Cold Rebuild
@@ -43,6 +67,7 @@ This is only partially documented today. Authentik has a restore story. Several 
 8. Run `.\scripts\argocd-health-gate.ps1` and `.\scripts\preflight-core.ps1`.
 9. Restore application state only where backup and restore paths are documented.
 10. Rotate secrets and external credentials if the old server was stolen or otherwise untrusted.
+11. Run `.\scripts\cluster-health-report.ps1` and resolve every failure before declaring recovery complete.
 
 ## Restore Matrix
 
@@ -55,6 +80,8 @@ This is only partially documented today. Authentik has a restore story. Several 
 | Longhorn volumes | Partial | Backup target exists, recurring offsite backup policy is not codified here |
 | MatPlan data | Weak | Runtime is defined, restore path is not documented |
 | Talos/Kubernetes access artifacts | Weak | Generated locally, no repo-defined off-machine backup policy |
+| Headlamp cluster UI | Internal read-only | Helps inspect recovery state, but is not part of bootstrap |
+| DevOps preview namespaces | Automated TTL cleanup | Non-critical previews older than 24h are deleted by label-based cleanup |
 
 ## Bootstrap Secret Recovery
 
@@ -101,7 +128,35 @@ Do not mix backup prefixes between fresh bootstrap and DR-restored clusters.
 - Cloudflare DNS API token contract
 - R2 credentials
 - local `terraform.tfvars`
-- a secure backup policy for `tofu/output/kubeconfig` and `tofu/output/talosconfig`
+- current `tofu/output/kubeconfig`
+- current `tofu/output/talosconfig`
+- exported `gateway-local-ca`
+
+Store access artifacts in a password manager or encrypted offline recovery bundle. Do not put generated access files back in Git.
+
+## Recovery Drill Checklist
+
+Run this drill after bootstrap changes, Talos/OpenTofu changes, or security cleanup:
+
+```powershell
+$env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
+.\scripts\preflight-core.ps1
+.\scripts\argocd-health-gate.ps1
+.\scripts\cluster-health-report.ps1
+.\scripts\verify-media-nfs.ps1
+.\scripts\verify-deluge-vpn.ps1
+```
+
+For state restore drills, use non-production restore targets first:
+
+- restore one small Longhorn-backed config PVC from backup into a temporary namespace
+- restore Authentik with the documented `dr-restore` overlay in a controlled window
+- verify MatPlan and BikePal CNPG backup/restore before treating those databases as recoverable
+- verify media files through NFS and a separate file-level backup, not through Longhorn
+
+## Talos API CA Status
+
+Kubernetes access artifacts can be regenerated and rotated, but Talos API CA rotation remains a separate item. Do not mark stolen-server recovery complete until Talos API CA rotation has either succeeded or the affected Talos nodes have been rebuilt from trusted configuration.
 
 ## Priority Backlog
 

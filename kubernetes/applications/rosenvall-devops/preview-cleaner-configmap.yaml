@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rosenvall-devops-preview-cleaner
+  namespace: rosenvall-devops
+data:
+  cleanup-preview-namespaces.sh: |
+    #!/bin/sh
+    set -eu
+
+    ttl_hours="${TTL_HOURS:-24}"
+    dry_run="${DRY_RUN:-false}"
+    now_epoch="$(date -u +%s)"
+    ttl_seconds="$((ttl_hours * 3600))"
+    selector="app.kubernetes.io/part-of=rosenvall-devops-preview"
+
+    kubectl get namespaces -l "${selector}" -o go-template='{{range .items}}{{.metadata.name}}{{"\t"}}{{.metadata.creationTimestamp}}{{"\t"}}{{index .metadata.annotations "rosenvall.devops/keep"}}{{"\n"}}{{end}}' |
+    while IFS="$(printf '\t')" read -r name created keep; do
+      if [ -z "${name}" ] || [ "${name}" = "devops-previews" ]; then
+        continue
+      fi
+
+      if [ "${keep}" = "true" ]; then
+        echo "keep ${name}: rosenvall.devops/keep=true"
+        continue
+      fi
+
+      created_epoch="$(date -u -d "${created}" +%s)"
+      age_seconds="$((now_epoch - created_epoch))"
+
+      if [ "${age_seconds}" -lt "${ttl_seconds}" ]; then
+        echo "skip ${name}: younger than ${ttl_hours}h"
+        continue
+      fi
+
+      if [ "${dry_run}" = "true" ]; then
+        echo "dry-run delete namespace/${name}"
+      else
+        echo "delete namespace/${name}"
+        kubectl delete namespace "${name}" --wait=false
+      fi
+    done
+

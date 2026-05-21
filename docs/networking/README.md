@@ -61,6 +61,7 @@ Internal HTTP listeners redirect to HTTPS.
 - `https://hub-central.rosenvall.local`
 - `https://authentik.rosenvall.local`
 - `https://grafana.rosenvall.local`
+- `https://headlamp.rosenvall.local`
 - `https://prometheus.rosenvall.local`
 - `https://longhorn.rosenvall.local`
 - `https://ragflow.rosenvall.local`

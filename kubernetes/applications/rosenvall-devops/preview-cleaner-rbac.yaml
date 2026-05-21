@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rosenvall-devops-preview-cleaner
+  namespace: rosenvall-devops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rosenvall-devops-preview-cleaner
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rosenvall-devops-preview-cleaner
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+subjects:
+  - kind: ServiceAccount
+    name: rosenvall-devops-preview-cleaner
+    namespace: rosenvall-devops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rosenvall-devops-preview-cleaner
+

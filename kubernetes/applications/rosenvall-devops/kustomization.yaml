@@ -9,6 +9,9 @@ resources:
   - ghcr-image-pull-secret.yaml
   - serviceaccount.yaml
   - preview-rbac.yaml
+  - preview-cleaner-rbac.yaml
+  - preview-cleaner-configmap.yaml
+  - preview-cleaner-cronjob.yaml
   - api-service.yaml
   - frontend-service.yaml
   - api-deployment.yaml

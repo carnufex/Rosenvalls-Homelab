@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rosenvall-devops-preview-cleaner
+  namespace: rosenvall-devops
+spec:
+  schedule: "17 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          serviceAccountName: rosenvall-devops-preview-cleaner
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: cleanup
+              image: rancher/kubectl:v1.31.1
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - /scripts/cleanup-preview-namespaces.sh
+              env:
+                - name: TTL_HOURS
+                  value: "24"
+                - name: DRY_RUN
+                  value: "false"
+              volumeMounts:
+                - name: cleaner-script
+                  mountPath: /scripts
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+          volumes:
+            - name: cleaner-script
+              configMap:
+                name: rosenvall-devops-preview-cleaner
+                defaultMode: 0555
