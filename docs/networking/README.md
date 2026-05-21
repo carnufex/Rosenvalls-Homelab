@@ -69,7 +69,8 @@ Internal HTTP listeners redirect to HTTPS.
 - `https://radarr.rosenvall.local`
 - `https://sonarr.rosenvall.local`
 - `https://jackett.rosenvall.local`
-- `https://overseerr.rosenvall.local`
+- `https://seerr.rosenvall.local`
+- `https://overseerr.rosenvall.local` (legacy Seerr alias)
 - `https://deluge.rosenvall.local`
 - `https://plex.rosenvall.local`
 

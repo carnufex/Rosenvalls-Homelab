@@ -90,7 +90,7 @@ Use `docker inspect` on the Docker host to discover the actual bind mounts for:
 - `jackett`
 - `radarr`
 - `sonarr`
-- `overseerr`
+- `overseerr` (legacy config source for Seerr)
 - `plex`
 - `deluge`
 - `wireguard`
@@ -128,9 +128,9 @@ Current automatic seed adjustments:
   - sets `.storage/core.config` internal and external URL to `https://homeassistant.rosenvall.local`
 - Jackett:
   - changes `LocalBindAddress` to `0.0.0.0`
-- Overseerr:
+- Seerr:
   - enables proxy trust
-  - sets `applicationUrl` to `https://overseerr.rosenvall.local`
+  - sets `applicationUrl` to `https://seerr.rosenvall.local`
   - rewrites Radarr, Sonarr, and Plex hosts to in-cluster service DNS
 - Deluge:
   - seeds only Deluge app config
@@ -170,7 +170,7 @@ Bring workloads live in this order:
 2. `radarr`
 3. `sonarr`
 4. `plex`
-5. `overseerr`
+5. `seerr`
 6. `homeassistant`
 7. `deluge-vpn`
 
@@ -217,9 +217,10 @@ After each app is live:
 - Verify the libraries `tv`, `movies`, and `familjefilmer`
 - Verify direct client compatibility on port `32400`
 
-### Overseerr
+### Seerr
 
 - Seed PVC
+- Back up `media/overseerr-config` before the first Seerr startup
 - Scale deployment to `1`
 - Verify it can reach Radarr, Sonarr, and Plex
 - Verify a test request flows through

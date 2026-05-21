@@ -1,7 +1,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: overseerr
+  name: seerr
   namespace: media
   annotations:
     argocd.argoproj.io/sync-wave: "20"
@@ -12,6 +12,7 @@ spec:
       namespace: gateway
       sectionName: https
   hostnames:
+    - seerr.rosenvall.local
     - overseerr.rosenvall.local
   rules:
     - matches:
@@ -19,5 +20,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: overseerr
+        - name: seerr
           port: 5055

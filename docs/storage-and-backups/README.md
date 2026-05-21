@@ -71,7 +71,7 @@ Longhorn should back up these PVCs:
 - `media/jackett-config`
 - `media/radarr-config`
 - `media/sonarr-config`
-- `media/overseerr-config`
+- `media/overseerr-config` (Seerr config PVC, name retained from the Overseerr migration)
 - `media/plex-config`
 - `media/deluge-config`
 

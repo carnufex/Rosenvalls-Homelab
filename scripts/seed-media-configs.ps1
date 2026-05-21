@@ -72,14 +72,14 @@ function Update-JackettConfig {
     Set-Utf8NoBomContent -Path $Path -Value ($config | ConvertTo-Json -Depth 10)
 }
 
-function Update-OverseerrConfig {
+function Update-SeerrConfig {
     param(
         [Parameter(Mandatory = $true)]
         [string]$Path
     )
 
     $settings = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
-    $settings.main.applicationUrl = "https://overseerr.rosenvall.local"
+    $settings.main.applicationUrl = "https://seerr.rosenvall.local"
     $settings.main.trustProxy = $true
 
     foreach ($entry in $settings.radarr) {
@@ -188,14 +188,15 @@ $definitions = @(
         }
     },
     @{
-        Name = "overseerr"
-        Deployment = "overseerr"
+        Name = "seerr"
+        Aliases = @("overseerr")
+        Deployment = "seerr"
         Source = "overseerr\config"
         Claim = "overseerr-config"
-        Mount = "/config"
+        Mount = "/app/config"
         Prepare = {
             param($StageRoot)
-            Update-OverseerrConfig -Path (Join-Path $StageRoot "settings.json")
+            Update-SeerrConfig -Path (Join-Path $StageRoot "settings.json")
             Remove-RuntimeFiles -Path $StageRoot
         }
     },
@@ -225,7 +226,7 @@ $definitions = @(
 
 $selectedApps = $Apps | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { $_.ToLowerInvariant() }
 if ($selectedApps.Count -gt 0) {
-    $knownApps = $definitions | ForEach-Object { $_.Name }
+    $knownApps = $definitions | ForEach-Object { @($_.Name) + @($_.Aliases) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
     foreach ($app in $selectedApps) {
         if ($knownApps -notcontains $app) {
             throw "Unknown media app '$app'. Known apps: $($knownApps -join ', ')."
@@ -234,7 +235,8 @@ if ($selectedApps.Count -gt 0) {
 }
 
 foreach ($definition in $definitions) {
-    if ($selectedApps.Count -gt 0 -and $selectedApps -notcontains $definition.Name) {
+    $definitionNames = @($definition.Name) + @($definition.Aliases)
+    if ($selectedApps.Count -gt 0 -and -not ($selectedApps | Where-Object { $definitionNames -contains $_ })) {
         continue
     }
 

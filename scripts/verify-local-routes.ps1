@@ -5,6 +5,7 @@ param(
         "radarr.rosenvall.local",
         "sonarr.rosenvall.local",
         "jackett.rosenvall.local",
+        "seerr.rosenvall.local",
         "overseerr.rosenvall.local",
         "deluge.rosenvall.local",
         "plex.rosenvall.local",

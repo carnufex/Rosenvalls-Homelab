@@ -5,7 +5,7 @@ This app groups the local-only media stack that used to run under Docker Compose
 - `radarr`
 - `sonarr`
 - `jackett`
-- `overseerr`
+- `seerr`
 - `plex`
 - `deluge-vpn` (`wireguard` + `deluge` in one pod)
 
@@ -15,7 +15,7 @@ This app groups the local-only media stack that used to run under Docker Compose
 - Each app keeps its own Longhorn-backed config PVC.
 - The namespace is explicitly marked `pod-security.kubernetes.io/enforce=privileged` because Plex uses `hostNetwork` and the WireGuard sidecar needs elevated network privileges.
 - Plex scheduling requires a worker labeled `homelab.rosenvall.se/lan-special=true`.
-- Radarr, Sonarr, Jackett, Overseerr, and Deluge-VPN prefer workers labeled `homelab.rosenvall.se/proxmox-host=host1`; this keeps non-hostNetwork media workloads close to the NFS VM without making scheduling impossible if `host1` is down.
+- Radarr, Sonarr, Jackett, Seerr, and Deluge-VPN prefer workers labeled `homelab.rosenvall.se/proxmox-host=host1`; this keeps non-hostNetwork media workloads close to the NFS VM without making scheduling impossible if `host1` is down.
 - Internal browser access is handled with `HTTPRoute` resources on `gateway/internal`, so LAN clients should resolve `*.rosenvall.local` to `192.168.1.220` on the UDM.
 - Media configs are seeded from `Downloads\media` before cutover, but the deployments are now managed directly in Git and scaled individually as each app is validated.
 
@@ -41,11 +41,11 @@ The seed script copies:
 - `Downloads\media\jackett\config` -> `PersistentVolumeClaim/jackett-config`
 - `Downloads\media\radarr\config` -> `PersistentVolumeClaim/radarr-config`
 - `Downloads\media\sonarr\config` -> `PersistentVolumeClaim/sonarr-config`
-- `Downloads\media\overseerr\config` -> `PersistentVolumeClaim/overseerr-config`
+- `Downloads\media\overseerr\config` -> `PersistentVolumeClaim/overseerr-config` for Seerr migration
 - `Downloads\media\plex\config` -> `PersistentVolumeClaim/plex-config`
 - `Downloads\media\deluge\config` -> `PersistentVolumeClaim/deluge-config`
 
-It also removes runtime files and applies known pre-boot config fixes for Jackett and Overseerr. WireGuard configuration is intentionally not copied from the seed payload anymore; update the Bitwarden secret backing `ExternalSecret/deluge-wireguard-config` instead.
+It also removes runtime files and applies known pre-boot config fixes for Jackett and Seerr. WireGuard configuration is intentionally not copied from the seed payload anymore; update the Bitwarden secret backing `ExternalSecret/deluge-wireguard-config` instead.
 
 After Radarr and Sonarr are running from restored config, rewrite old Docker endpoints to in-cluster services:
 
@@ -78,7 +78,8 @@ This verifies the WireGuard interface, policy routing, external IP through the t
   - `https://radarr.rosenvall.local`
   - `https://sonarr.rosenvall.local`
   - `https://jackett.rosenvall.local`
-  - `https://overseerr.rosenvall.local`
+  - `https://seerr.rosenvall.local`
+  - `https://overseerr.rosenvall.local` (legacy alias)
   - `https://deluge.rosenvall.local`
   - `https://plex.rosenvall.local`
 - Plex on the pinned worker's port `32400` remains the primary compatibility path for native clients and discovery traffic.
