@@ -1,8 +1,32 @@
 grafana:
+  envFromSecret: grafana-oauth
+
   admin:
     existingSecret: grafana-admin-credentials
     userKey: admin-user
     passwordKey: admin-password
+
+  grafana.ini:
+    server:
+      root_url: https://grafana.rosenvall.local
+    auth:
+      disable_login_form: true
+      oauth_auto_login: true
+    auth.basic:
+      enabled: false
+    auth.generic_oauth:
+      enabled: true
+      name: Authentik
+      allow_sign_up: true
+      client_id: $__env{GRAFANA_CLIENT_ID}
+      client_secret: $__env{GRAFANA_CLIENT_SECRET}
+      scopes: openid profile email groups
+      auth_url: https://authentik.rosenvall.se/application/o/authorize/
+      token_url: https://authentik.rosenvall.se/application/o/token/
+      api_url: https://authentik.rosenvall.se/application/o/userinfo/
+      use_pkce: true
+      role_attribute_strict: true
+      role_attribute_path: contains(groups[*], 'Grafana Admins') && 'Admin' || contains(groups[*], 'Grafana Editors') && 'Editor' || contains(groups[*], 'Grafana Viewers') && 'Viewer' || 'None'
 
   persistence:
     enabled: false

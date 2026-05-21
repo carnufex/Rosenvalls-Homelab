@@ -115,6 +115,20 @@ kubectl top pods -A
 
 Headlamp is intentionally not an admin console in its first version. Do not grant create, patch, delete, exec, or secret-read permissions without a separate review.
 
+## Authentik Native OIDC
+
+Native OIDC app configuration lives in:
+
+- `kubernetes/infrastructure/controllers/authentik-runtime/README.md`
+- `kubernetes/infrastructure/controllers/authentik-runtime/blueprints.yaml`
+
+Current rollout model:
+
+- ArgoCD and Rosenvall DevOps already use Authentik.
+- Grafana and Headlamp use Authentik after their GitOps sync completes.
+- RAGFlow has an Authentik provider prepared, but app login is not enabled until its OAuth client secret can come from a Kubernetes Secret instead of a ConfigMap.
+- Apps without clean native OIDC support stay unchanged. Do not add duplicate local login plus Authentik as the normal path.
+
 ## Rosenvall DevOps Preview Cleanup
 
 Preview namespaces created by `rosenvall-devops` are expected to be temporary.

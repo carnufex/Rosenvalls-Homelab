@@ -25,6 +25,14 @@ machine:
           ip: ${vip}
 
 cluster:
+  apiServer:
+    extraArgs:
+      oidc-issuer-url: https://authentik.rosenvall.se/application/o/headlamp/
+      oidc-client-id: headlamp
+      oidc-username-claim: email
+      oidc-username-prefix: "authentik:"
+      oidc-groups-claim: groups
+      oidc-groups-prefix: "authentik:"
   network:
     cni:
       name: none

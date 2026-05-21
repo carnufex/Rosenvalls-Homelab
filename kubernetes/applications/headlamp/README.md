@@ -25,7 +25,14 @@ The UI uses the existing Metrics API, so `kubectl top nodes` and `kubectl top po
 
 ## Auth Status
 
-The initial deployment is internal-only and read-only. Authentik/OIDC is intentionally left as a follow-up until the client secret and callback contract are created in Bitwarden/Authenik.
+Headlamp uses Authentik OIDC with callback `https://headlamp.rosenvall.local/oidc-callback`.
+Kubernetes API authentication must accept the Authentik issuer
+`https://authentik.rosenvall.se/application/o/headlamp/` and map the `groups`
+claim with the `authentik:` prefix.
+
+Read-only access is bound to the Authentik group `Kubernetes Viewers`, which
+appears to Kubernetes as `authentik:Kubernetes Viewers`. The Headlamp service
+account is intentionally not bound to cluster read permissions.
 
 Do not switch the chart back to the default `cluster-admin` binding. If write operations are needed later, add a separate admin role bound to a specific Authentik group instead of broadening the default service account.
 

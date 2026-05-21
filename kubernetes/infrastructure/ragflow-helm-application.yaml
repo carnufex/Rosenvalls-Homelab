@@ -17,6 +17,7 @@ spec:
         env:
           # Use Infinity as the doc engine (lighter than Elasticsearch)
           DOC_ENGINE: infinity
+          REGISTER_ENABLED: "0"
           TZ: "Europe/Stockholm"
         ragflow:
           service:
