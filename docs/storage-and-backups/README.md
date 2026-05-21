@@ -78,9 +78,12 @@ Longhorn should back up these PVCs:
 Longhorn is configured with:
 
 - hourly local snapshots for the `default` recurring-job group, retained for 24 snapshots
-- daily offsite backups to the configured Cloudflare R2 backup target, retained for 14 backups
+- daily offsite backups for small config PVCs in the `r2-small-config` group, retained for 3 backups
+- weekly offsite backups for the larger Plex config PVC in the `r2-plex-config` group, retained for 1 backup
 
-Existing Longhorn volumes are expected to carry `recurring-job-group.longhorn.io/default=enabled`. Verify this in Longhorn after applying if a PVC is especially important.
+The R2 backup policy is intentionally sized for the Cloudflare R2 free tier, which is 10 GB-month of Standard storage. Do not add observability, cache, database, or media-library volumes to an R2 backup group unless there is an explicit budget decision.
+
+Config PVCs that should be backed up to R2 must carry `recurring-job.longhorn.io/source=enabled` plus one of the explicit R2 groups above. The broad `default` group is local snapshots only.
 
 ### NFS Media Library
 

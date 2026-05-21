@@ -28,8 +28,9 @@ This directory contains the configuration for Longhorn, a distributed block stor
 
 - Backup target is configured to Cloudflare R2 (`defaultBackupStore`).
 - `RecurringJob/default-hourly-snapshot` keeps 24 hourly local snapshots for volumes in the `default` group.
-- `RecurringJob/default-daily-backup` keeps 14 daily offsite backups in R2 for volumes in the `default` group.
-- Existing Longhorn volumes are expected to carry `recurring-job-group.longhorn.io/default=enabled`.
+- `RecurringJob/r2-small-config-daily-backup` keeps 3 daily offsite backups in R2 for small config volumes in the `r2-small-config` group.
+- `RecurringJob/r2-plex-config-weekly-backup` keeps 1 weekly offsite backup in R2 for the larger Plex config volume in the `r2-plex-config` group.
+- R2 backup groups are explicit so the bucket stays within the Cloudflare R2 free tier. The broad `default` group is local snapshots only.
 
 ## Recovery Expectations
 
