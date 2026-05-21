@@ -12,18 +12,12 @@ data:
   Authentication__Audience: rosenvall-devops
   Frontend__AllowedOrigins__0: https://devops.rosenvall.se
   Storage__SqlitePath: /app/data/devops-state.db
-  Ai__DefaultProvider: codex
+  Ai__DefaultProvider: ollama
   Ai__DefaultModel: qwen3.5:latest
   Ai__AvailableModels__0: qwen3.5:latest
   Ai__AvailableModels__1: llama3.1:8b
   Ai__AvailableModels__2: mistral:7b
   Ai__OllamaEndpoint: http://ollama.ollama.svc.cluster.local:11434/api
   Ai__RequestTimeoutSeconds: "120"
-  Ai__Codex__Path: codex
-  Ai__Codex__Home: /app/codex-home
-  Ai__Codex__Model: gpt-5.4
-  Ai__Codex__AvailableModels__0: gpt-5.4
-  Ai__Codex__AvailableModels__1: gpt-5.3-codex
-  CODEX_HOME: /app/codex-home
   Preview__KubectlPath: kubectl
   Preview__KubeconfigPath: ""
