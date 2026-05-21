@@ -3,6 +3,14 @@ kind: ClusterRole
 metadata:
   name: headlamp-readonly
 rules:
+  - nonResourceURLs:
+      - /api
+      - /apis
+      - /healthz
+      - /livez
+      - /readyz
+      - /version
+    verbs: ["get"]
   - apiGroups: [""]
     resources:
       - configmaps
