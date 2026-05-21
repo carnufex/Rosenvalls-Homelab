@@ -35,3 +35,7 @@ terraform.rc
 
 # Claude Code temp files
 tmpclaude-*-cwd
+
+# Generated cluster access artifacts; keep credentials out of Git.
+tofu/new_kubeconfig
+tofu/output/
