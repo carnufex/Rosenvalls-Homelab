@@ -16,6 +16,7 @@ Storage:
 
 - `rosenvall-devops-state`: `longhorn-critical`, stores SQLite demo state.
 - `rosenvall-devops-codex-home`: `longhorn`, stores runtime Codex home data.
+- The API memory limit is intentionally higher than the request because the current demo document can be large in SQLite; revisit this when the state model moves to CloudNativePG.
 
 Secrets:
 
