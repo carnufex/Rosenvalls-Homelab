@@ -23,6 +23,9 @@ Do not sync this change to the live cluster until those Bitwarden secrets exist.
 If any secret is missing, External Secrets cannot render
 `Secret/authentik-core-secrets`.
 
+The manifest references the Bitwarden Secrets Manager secret IDs directly after
+the bootstrap secrets have been created.
+
 ## DR Restore Mode (opt-in)
 
 To restore from object storage, switch this app to the `dr-restore` overlay in Git and sync:
