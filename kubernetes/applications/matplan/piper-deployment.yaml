@@ -21,7 +21,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: piper
-          image: python@sha256:bf73779de6dbd030f3d189eeeb246286965832761ace318c1518300f76c0840d
+          image: ghcr.io/carnufex/matplan-piper@sha256:152e82884f93ecb6d0c17ac3ab47902ab31be3bf609a3603e689932dd7c6f63c
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
