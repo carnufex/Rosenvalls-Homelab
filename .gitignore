@@ -35,3 +35,17 @@ terraform.rc
 
 # Claude Code temp files
 tmpclaude-*-cwd
+
+# Generated cluster administrator credentials and local access artifacts
+/tofu/output/
+/tofu/**/kubeconfig
+/tofu/**/talosconfig
+/tofu/*kubeconfig*
+/tofu/*talosconfig*
+
+# Terraform/OpenTofu plan files may contain sensitive values
+*.tfplan
+*.tfplan.*
+tfplan
+*tfplan*
+*.plan
