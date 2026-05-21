@@ -21,7 +21,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: piper
-          image: python@sha256:bf73779de6dbd030f3d189eeeb246286965832761ace318c1518300f76c0840d
+          image: ghcr.io/carnufex/matplan-piper@sha256:22d66f6a1b5f2a8f4e7e5b21f7b9c3f11c7ad8b63c8bbecb0eec5a6a2dc7a5a1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
@@ -71,7 +71,6 @@ spec:
             - -lc
             - >-
               set -euo pipefail;
-              python3 -m pip install --no-cache-dir piper-tts flask;
               primary="${PIPER_VOICE:-sv_SE-nst-medium}";
               fallback="${PIPER_FALLBACK_VOICE:-sv_SE-lisa-medium}";
               ensure_voice () {
