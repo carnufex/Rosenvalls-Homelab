@@ -7,6 +7,7 @@ resources:
   - state-pvc.yaml
   - codex-home-pvc.yaml
   - ghcr-image-pull-secret.yaml
+  - github-app-externalsecret.yaml
   - serviceaccount.yaml
   - preview-rbac.yaml
   - preview-cleaner-rbac.yaml

@@ -37,6 +37,25 @@ spec:
           envFrom:
             - configMapRef:
                 name: rosenvall-devops-config
+          env:
+            - name: GitHub__AppId
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-github-app
+                  key: app-id
+                  optional: true
+            - name: GitHub__AppPrivateKey
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-github-app
+                  key: private-key
+                  optional: true
+            - name: GitHub__AppSlug
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-github-app
+                  key: app-slug
+                  optional: true
           resources:
             requests:
               cpu: 100m

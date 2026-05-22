@@ -10,7 +10,7 @@ config:
   inCluster: true
   inClusterContextName: rosenvall-homelab
   oidc:
-    callbackURL: https://headlamp.rosenvall.local/oidc-callback
+    callbackURL: https://headlamp.rosenvall.se/oidc-callback
     validatorClientID: headlamp
     validatorIssuerURL: https://authentik.rosenvall.se/application/o/headlamp/
     usePKCE: true
@@ -36,8 +36,12 @@ httpRoute:
     - name: internal
       namespace: gateway
       sectionName: https
+    - name: external
+      namespace: gateway
+      sectionName: https
   hostnames:
     - headlamp.rosenvall.local
+    - headlamp.rosenvall.se
 
 service:
   type: ClusterIP
