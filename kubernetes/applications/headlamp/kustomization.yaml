@@ -6,6 +6,7 @@ resources:
   - ns.yaml
   - oidc-externalsecret.yaml
   - readonly-rbac.yaml
+  - public-httproute.yaml
 
 helmCharts:
   - name: headlamp

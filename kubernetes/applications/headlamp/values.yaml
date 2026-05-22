@@ -36,12 +36,8 @@ httpRoute:
     - name: internal
       namespace: gateway
       sectionName: https
-    - name: external
-      namespace: gateway
-      sectionName: https
   hostnames:
     - headlamp.rosenvall.local
-    - headlamp.rosenvall.se
 
 service:
   type: ClusterIP
