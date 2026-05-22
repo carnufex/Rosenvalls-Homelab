@@ -8,12 +8,33 @@ metadata:
     argocd.argoproj.io/sync-options: Replace=true
 spec:
   parentRefs:
-    - name: internal
+    - name: external
       namespace: gateway
       sectionName: https
   hostnames:
     - devops.rosenvall.se
   rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: rosenvall-devops-api
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /hubs
+      backendRefs:
+        - name: rosenvall-devops-api
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /integrations/github
+      backendRefs:
+        - name: rosenvall-devops-api
+          port: 8080
     - matches:
         - path:
             type: PathPrefix
