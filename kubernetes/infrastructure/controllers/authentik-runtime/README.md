@@ -14,8 +14,8 @@ creates cluster application providers.
 | Headlamp | Active after sync | `https://headlamp.rosenvall.local/oidc-callback` |
 | RAGFlow | Provider only | `https://ragflow.rosenvall.local/v1/user/oauth/callback/oidc` |
 
-Use native OIDC only. Do not add an Authentik proxy/outpost for these apps
-unless the architecture decision changes.
+Use native OIDC for apps in this table. Proxy-based protection is limited to
+the explicit exceptions below.
 
 ## Secret Contract
 
@@ -32,6 +32,16 @@ Required keys:
 - `HEADLAMP_CLIENT_SECRET`
 - `RAGFLOW_CLIENT_ID`
 - `RAGFLOW_CLIENT_SECRET`
+- `SEERR_CLIENT_ID`
+- `SEERR_CLIENT_SECRET`
+- `PLEX_CLIENT_ID`
+- `PLEX_CLIENT_SECRET`
+
+## Authentik Proxy Apps
+
+Plex and Seerr are protected publicly with `oauth2-proxy` because they do not
+currently run as clean native Authentik-only OIDC clients in this cluster.
+This is an explicit exception from the native-OIDC preference.
 
 If the ExternalSecret is not ready, check the manual
 `bitwarden-access-token` secret in namespace `external-secrets` before

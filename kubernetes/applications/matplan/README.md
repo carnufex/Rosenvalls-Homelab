@@ -6,7 +6,7 @@ MatPlan runtime is enabled in this repo and pinned to immutable GHCR image diges
 
 The folder contains:
 
-- namespace, config map, runtime secret sync, services, deployments, route
+- namespace, config map, runtime secret sync, services, and deployments
 - `database.yaml` for the application PostgreSQL cluster
 - `data-protection-pvc.yaml` for ASP.NET Data Protection keys
 - `whisper-*` and `piper-*` manifests for internal voice services used by the API
@@ -79,6 +79,13 @@ matching the currently valid Piper voice catalog.
 - `GoogleAuth__ClientId` targets the MatPlan production OAuth client
 - `RecipeAssistant` and `VoiceAssistant` start disabled
 - Database schema bootstrap stays enabled until MatPlan gets real migrations (`Database__ApplyMigrations=true`, `Database__SeedDemoData=false`)
+
+## Routing Contract
+
+There is intentionally no public `HTTPRoute` for MatPlan. Public access stays
+disabled until MatPlan has native Authentik/OIDC support or an approved
+Authentik proxy exception. The `.rosenvall.se` Google OAuth settings remain in
+`configmap.yaml` as dormant app config for the future public route.
 
 ## Database Bootstrap
 

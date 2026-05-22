@@ -45,6 +45,10 @@ This means the public path depends on all of the following:
 - the external gateway listener
 - accepted `HTTPRoute` resources
 
+Public `.rosenvall.se` application routes must either use native Authentik/OIDC,
+an explicit Authentik proxy exception, or be removed from GitOps until they can
+be protected. Current proxy exceptions are Seerr and Plex.
+
 ## Internal Routing Model
 
 The current internal flow is:
@@ -149,6 +153,16 @@ Useful external checks:
 Resolve-DnsName argo.rosenvall.se
 Invoke-WebRequest -Uri https://argo.rosenvall.se -Method Head
 ```
+
+## Public URLs
+
+- `https://argo.rosenvall.se` and `https://argocd.rosenvall.se` use native Authentik OIDC.
+- `https://authentik.rosenvall.se` is the identity provider.
+- `https://devops.rosenvall.se` uses native Authentik OIDC.
+- `https://headlamp.rosenvall.se` uses native Authentik OIDC.
+- `https://seerr.rosenvall.se` uses Authentik through `oauth2-proxy`.
+- `https://plex.rosenvall.se` uses Authentik through `oauth2-proxy`.
+- MatPlan and BikePal are not publicly routed until they have native Authentik/OIDC or an approved proxy exception.
 
 ## Implementation Notes
 

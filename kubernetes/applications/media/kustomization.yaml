@@ -14,6 +14,7 @@ resources:
   - deluge-config-pvc.yaml
   - seerr-config-pvc.yaml
   - seerr-oauth2-proxy-externalsecret.yaml
+  - plex-oauth2-proxy-externalsecret.yaml
   - plex-config-pvc.yaml
   - radarr-service.yaml
   - sonarr-service.yaml
@@ -21,6 +22,7 @@ resources:
   - deluge-service.yaml
   - seerr-service.yaml
   - seerr-oauth2-proxy-service.yaml
+  - plex-oauth2-proxy-service.yaml
   - plex-service.yaml
   - radarr-httproute.yaml
   - sonarr-httproute.yaml
@@ -29,6 +31,7 @@ resources:
   - seerr-httproute.yaml
   - seerr-public-httproute.yaml
   - plex-httproute.yaml
+  - plex-public-httproute.yaml
   - deluge-vpn-policy.yaml
   - radarr-deployment.yaml
   - sonarr-deployment.yaml
@@ -36,4 +39,5 @@ resources:
   - deluge-vpn-deployment.yaml
   - seerr-deployment.yaml
   - seerr-oauth2-proxy-deployment.yaml
+  - plex-oauth2-proxy-deployment.yaml
   - plex-deployment.yaml

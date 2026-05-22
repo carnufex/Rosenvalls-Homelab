@@ -16,4 +16,3 @@ resources:
   - api-deployment.yaml
   - frontend-deployment.yaml
   - worker-deployment.yaml
-  - httproute.yaml

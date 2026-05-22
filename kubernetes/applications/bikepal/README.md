@@ -1,6 +1,7 @@
 # BikePal
 
-BikePal is deployed here as a three-workload app behind `https://bikepal.rosenvall.se`:
+BikePal is deployed here as a three-workload app. It is not publicly routed until
+it has native Authentik/OIDC support or an approved Authentik proxy exception:
 
 - `bikepal-frontend` serves `/`
 - `bikepal-api` serves `/api`
@@ -12,7 +13,7 @@ The folder mirrors the `matplan` app structure while adding the storage and Post
 
 The folder contains:
 
-- namespace, config map, runtime secret sync, services, deployments, route
+- namespace, config map, runtime secret sync, services, and deployments
 - `database.yaml` for a dedicated CloudNativePG PostgreSQL/PostGIS cluster
 - `data-protection-pvc.yaml` for shared ASP.NET Data Protection keys
 - `road-network-pvc.yaml` for mounted road-network source files such as GeoJSON and Sweden OSM PBF extracts
@@ -40,13 +41,17 @@ Private GHCR pulls use the shared Homelab `ClusterSecretStore/bitwarden-secretsm
 
 ## Routing Contract
 
-`HTTPRoute/bikepal` publishes the app on `bikepal.rosenvall.se` with:
+There is intentionally no public `HTTPRoute` for BikePal. The manifests still
+keep the production `.rosenvall.se` OAuth and frontend settings so the app can be
+re-enabled without changing app config after Authentik protection is added.
+
+When public access is restored, route:
 
 - `/api` to `Service/bikepal-api`
 - `/` to `Service/bikepal-frontend`
 
-The dedicated standalone frontend is the public root, and the old `/ui` entrypoint is intentionally not part of this
-deployment contract.
+The dedicated standalone frontend is the intended public root, and the old `/ui`
+entrypoint is intentionally not part of this deployment contract.
 
 ## Database Contract
 
@@ -114,7 +119,7 @@ at once, increase `road-network-pvc.yaml` beyond the v1 default of `10Gi` before
 
 ### 4. Queue imports after the app is live
 
-Sample GeoJSON import:
+Sample GeoJSON import after public access is restored:
 
 ```powershell
 Invoke-RestMethod `
@@ -124,7 +129,7 @@ Invoke-RestMethod `
   -Body '{"sourceName":"sample-stockholm"}'
 ```
 
-Whole-Sweden PBF import:
+Whole-Sweden PBF import after public access is restored:
 
 ```powershell
 Invoke-RestMethod `
@@ -134,7 +139,7 @@ Invoke-RestMethod `
   -Body '{"sourceName":"sweden-osm","sourceFormat":"pbf"}'
 ```
 
-Signed-in upload for smaller files:
+Signed-in upload for smaller files after public access is restored:
 
 ```powershell
 $form = @{

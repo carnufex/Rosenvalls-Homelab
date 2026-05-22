@@ -73,7 +73,7 @@ This verifies the WireGuard interface, policy routing, external IP through the t
 
 ## Access Model
 
-- All browser UIs stay local-only in v1 and are attached directly to `gateway/internal`.
+- Media browser UIs are internal by default and attached directly to `gateway/internal`.
 - Included internal hostnames:
   - `https://radarr.rosenvall.local`
   - `https://sonarr.rosenvall.local`
@@ -82,4 +82,6 @@ This verifies the WireGuard interface, policy routing, external IP through the t
   - `https://overseerr.rosenvall.local` (legacy alias)
   - `https://deluge.rosenvall.local`
   - `https://plex.rosenvall.local`
+- Public `https://seerr.rosenvall.se` and `https://plex.rosenvall.se` are explicit Authentik proxy exceptions using `oauth2-proxy`.
 - Plex on the pinned worker's port `32400` remains the primary compatibility path for native clients and discovery traffic.
+- Public Plex browser traffic goes through Authentik first, then `plex-oauth2-proxy` forwards to `plex.media.svc.cluster.local:32400`.

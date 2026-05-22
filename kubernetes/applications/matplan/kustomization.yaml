@@ -20,4 +20,3 @@ resources:
   - frontend-deployment.yaml
   - whisper-deployment.yaml
   - piper-deployment.yaml
-  - httproute.yaml

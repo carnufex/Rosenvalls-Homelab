@@ -41,7 +41,7 @@ spec:
             - name: HOSTNAME
               value: k8s-plex
             - name: ADVERTISE_IP
-              value: https://plex.rosenvall.local:443,http://192.168.1.211:32400
+              value: https://plex.rosenvall.local:443,https://plex.rosenvall.se:443,http://192.168.1.211:32400
             - name: PLEX_UID
               valueFrom:
                 configMapKeyRef:
