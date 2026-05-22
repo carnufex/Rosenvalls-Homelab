@@ -65,6 +65,24 @@ Kubernetes RBAC uses the kube-apiserver OIDC group prefix
 `authentik:`, so the read-only ClusterRoleBinding references
 `authentik:Kubernetes Viewers`.
 
+## User Onboarding
+
+Add users from the Authentik admin UI:
+
+1. Open `https://authentik.rosenvall.se/if/admin/`.
+2. Go to `Directory -> Users -> Create`.
+3. Set username, display name, email, and either an initial password or a reset/invite flow.
+4. Add the user to the minimum required groups:
+   - `authentik Admins` only for Authentik administrators.
+   - `ArgoCD Admins` or `ArgoCD Viewers` for ArgoCD.
+   - `Kubernetes Viewers` or `Kubernetes Admins` for Headlamp/Kubernetes UI access.
+   - `Grafana Admins`, `Grafana Editors`, or `Grafana Viewers` for Grafana.
+   - `RAGFlow Users` for RAGFlow when it is enabled.
+
+Apps with `policy_engine_mode: any` and no group binding are available to any
+authenticated Authentik user. Add policy bindings before granting access to
+broader user populations.
+
 ## RAGFlow Caveat
 
 RAGFlow is not switched to Authentik login yet. The upstream Helm chart writes
