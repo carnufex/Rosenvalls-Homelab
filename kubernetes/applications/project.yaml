@@ -27,6 +27,8 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: ragflow
     server: https://kubernetes.default.svc
+  - namespace: test
+    server: https://kubernetes.default.svc
   clusterResourceWhitelist:
   - group: ""
     kind: Namespace
