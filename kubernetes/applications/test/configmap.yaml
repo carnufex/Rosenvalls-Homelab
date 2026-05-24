@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-nginx-content
+  namespace: test
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="sv">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Test | Rosenvall</title>
+        <style>
+          :root {
+            color-scheme: light dark;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f6f8f9;
+            color: #172126;
+          }
+
+          body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+          }
+
+          main {
+            width: min(680px, calc(100% - 40px));
+          }
+
+          h1 {
+            margin: 0 0 16px;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            line-height: 0.95;
+          }
+
+          p {
+            margin: 0;
+            max-width: 36rem;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            line-height: 1.6;
+          }
+
+          .badge {
+            display: inline-flex;
+            margin-bottom: 24px;
+            padding: 6px 10px;
+            border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+            border-radius: 999px;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+          }
+        </style>
+      </head>
+      <body>
+        <main>
+          <span class="badge">test.rosenvall.se</span>
+          <h1>Hello World</h1>
+          <p>Ny testhemsida hostad med NGINX i Kubernetes-namespacet test.</p>
+        </main>
+      </body>
+    </html>
