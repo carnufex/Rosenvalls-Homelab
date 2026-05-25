@@ -167,12 +167,15 @@ kubectl get httproute -A
 ```powershell
 kubectl get pvc -A
 kubectl describe pvc -n media media-library
+kubectl -n longhorn-system get settings.longhorn.io node-down-pod-deletion-policy orphan-resource-auto-deletion
 kubectl get volumes.longhorn.io -n longhorn-system
 kubectl -n longhorn-system get orphan -o wide
 kubectl get volumeattachment.storage.k8s.io
 ```
 
 After node restarts, Longhorn can leave stale engine instances or stale Kubernetes `VolumeAttachment` objects. For app PVCs stuck in `ContainerCreating`, match the stuck PVC name to `kubectl -n longhorn-system get orphan -o wide` before deleting anything. Delete only orphan resources of type `engine-instance` that match the affected volume, then recreate the stuck workload pod.
+
+For abrupt power loss, Longhorn should keep `node-down-pod-deletion-policy=delete-deployment-pod`. This allows single-replica Deployment workloads with RWO config PVCs to be recreated on a healthy worker when the original node is down. Do not broaden this to StatefulSets without a separate database/storage review.
 
 Prometheus uses bounded local TSDB storage. If it crashloops with `panic: preallocate: no space left on device`, first expand or repair the Prometheus PVC and restart the pod so filesystem resize can complete. Avoid adding observability PVCs to R2 backup groups unless there is an explicit storage budget decision.
 

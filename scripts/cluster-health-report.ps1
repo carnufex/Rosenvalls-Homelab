@@ -108,6 +108,35 @@ if ($failures.Count -eq 0) {
     Write-Ok "All nodes are Ready."
 }
 
+Write-Section "Longhorn Resilience Settings"
+try {
+    $longhornSettings = Invoke-KubectlJson @("get", "settings.longhorn.io", "-n", "longhorn-system")
+    $settingsByName = @{}
+    foreach ($setting in @($longhornSettings.items)) {
+        $settingsByName[$setting.metadata.name] = $setting.value
+    }
+
+    $expectedSettings = @{
+        "node-down-pod-deletion-policy" = "delete-deployment-pod"
+        "orphan-resource-auto-deletion" = "instance"
+        "auto-delete-pod-when-volume-detached-unexpectedly" = "true"
+        "auto-salvage" = "true"
+    }
+
+    foreach ($expected in $expectedSettings.GetEnumerator()) {
+        $actual = $settingsByName[$expected.Key]
+        if ($actual -ne $expected.Value) {
+            Add-Warning "Longhorn setting $($expected.Key) is '$actual', expected '$($expected.Value)' for power-loss recovery."
+        }
+    }
+
+    if ($warnings.Count -eq 0) {
+        Write-Ok "Longhorn power-loss recovery settings match expectations."
+    }
+} catch {
+    Add-Warning "Unable to verify Longhorn resilience settings: $($_.Exception.Message)"
+}
+
 Write-Section "Node Metrics"
 try {
     kubectl top nodes
