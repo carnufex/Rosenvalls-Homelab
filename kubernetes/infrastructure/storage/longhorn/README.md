@@ -49,6 +49,7 @@ For attach failures after a node restart:
 
 ```powershell
 kubectl -n longhorn-system get settings.longhorn.io node-down-pod-deletion-policy orphan-resource-auto-deletion
+kubectl -n longhorn-system get volumes.longhorn.io
 kubectl -n longhorn-system get orphan -o wide
 kubectl -n longhorn-system get volume.longhorn.io <volume-name> -o wide
 kubectl -n longhorn-system get volumeattachments.longhorn.io <volume-name> -o yaml
@@ -56,3 +57,11 @@ kubectl get volumeattachment.storage.k8s.io
 ```
 
 If a workload PVC is stuck in `attaching` and Longhorn reports an `engine-instance` orphan for the same volume, delete only that matching orphan and let Longhorn reconcile. If Kubernetes still holds a stale `VolumeAttachment` for an old node, delete only the stale attachment object after confirming the replacement pod is scheduled elsewhere.
+
+After power returns, run:
+
+```powershell
+.\scripts\post-power-loss-check.ps1
+```
+
+The check fails on stuck Longhorn volumes or engine-instance orphans, warns on degraded attached volumes and replica orphans, and also verifies ArgoCD, ExternalSecrets, routes, media NFS, and Deluge VPN.

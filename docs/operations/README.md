@@ -32,6 +32,15 @@ The goal is to validate the bootstrap secret chain and routing chain before spen
 .\scripts\cluster-health-report.ps1
 ```
 
+After an unplanned power outage or breaker trip:
+
+```powershell
+$env:KUBECONFIG = (Resolve-Path .\tofu\output\kubeconfig)
+.\scripts\post-power-loss-check.ps1
+```
+
+Use `-SkipMediaChecks` only when the NFS media VM or VPN endpoint is intentionally offline.
+
 Use these after:
 
 - first bootstrap
@@ -46,6 +55,7 @@ Use these after:
 ```powershell
 .\scripts\cluster-health-report.ps1
 .\scripts\export-local-ca.ps1
+.\scripts\post-power-loss-check.ps1
 .\scripts\provision-host1-media-nfs-vm.ps1
 .\scripts\seed-homeassistant.ps1
 .\scripts\seed-media-configs.ps1

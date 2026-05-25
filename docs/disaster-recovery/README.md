@@ -10,6 +10,8 @@ Verified from the current cluster health pass:
 - 5/5 nodes are `Ready`.
 - No pods were outside `Running` or `Succeeded`.
 - `ClusterSecretStore/bitwarden-secretsmanager` and current `ExternalSecret` resources were `Ready`.
+- Longhorn power-loss recovery settings matched expectations.
+- Attached Longhorn volumes were healthy with no stuck attaching/detaching volumes or Longhorn orphans.
 - `rosenvall-devops` was `Synced Healthy`.
 - Metrics API answered `kubectl top nodes` and `kubectl top pods -A`.
 
@@ -54,6 +56,23 @@ What Git does not give you:
 Use this when you need more than a fresh rebuild, for example preserving existing access paths, identities, or database history with the least disruption.
 
 This is only partially documented today. Authentik has a restore story. Several other stateful workloads do not.
+
+### Post Power-Loss Restart
+
+Use this after a breaker trip, abrupt node shutdown, or whole-cluster power outage where the hardware comes back and the cluster should recover in place.
+
+```powershell
+$env:KUBECONFIG = (Resolve-Path .\tofu\output\kubeconfig)
+.\scripts\post-power-loss-check.ps1
+```
+
+Expected behavior:
+
+- one worker down: Deployment workloads with RWO Longhorn config PVCs should be recreated on a healthy worker when a healthy replica is available
+- several workers down: apps recover when at least one usable replica for each needed volume is available
+- all nodes down: the cluster is unavailable during the outage, then should recover when the control plane, workers, Longhorn managers, and at least one replica per volume return
+
+The script fails on core bootstrap/routing failures, stuck Longhorn volumes, engine-instance orphans, bad ExternalSecrets, unhealthy core ArgoCD apps, media NFS failure, or Deluge VPN failure. It warns on known non-blocking cleanup candidates such as allowed `ragflow-helm` drift or orphan PVC review candidates.
 
 ## New Server Or Stolen Server Runbook
 

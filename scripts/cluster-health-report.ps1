@@ -137,6 +137,105 @@ try {
     Add-Warning "Unable to verify Longhorn resilience settings: $($_.Exception.Message)"
 }
 
+Write-Section "Longhorn Volume Health"
+try {
+    $longhornVolumes = Invoke-KubectlJson @("get", "volumes.longhorn.io", "-n", "longhorn-system")
+    $stuckVolumes = @()
+    $degradedVolumes = @()
+    $faultedVolumes = @()
+
+    foreach ($volume in @($longhornVolumes.items)) {
+        $state = $volume.status.state
+        $robustness = $volume.status.robustness
+
+        if ($state -ne "attached" -and $state -ne "detached") {
+            $stuckVolumes += [pscustomobject]@{
+                Name       = $volume.metadata.name
+                State      = $state
+                Robustness = $robustness
+                Node       = $volume.status.currentNodeID
+            }
+            continue
+        }
+
+        if ($state -eq "attached") {
+            if ($robustness -eq "faulted") {
+                $faultedVolumes += [pscustomobject]@{
+                    Name       = $volume.metadata.name
+                    State      = $state
+                    Robustness = $robustness
+                    Node       = $volume.status.currentNodeID
+                }
+            } elseif ($robustness -ne "healthy") {
+                $degradedVolumes += [pscustomobject]@{
+                    Name       = $volume.metadata.name
+                    State      = $state
+                    Robustness = $robustness
+                    Node       = $volume.status.currentNodeID
+                }
+            }
+        }
+    }
+
+    if ($stuckVolumes.Count -gt 0) {
+        $stuckVolumes | Sort-Object Name | Format-Table -AutoSize
+        Add-Failure "Found Longhorn volume(s) not attached or detached cleanly."
+    }
+
+    if ($faultedVolumes.Count -gt 0) {
+        $faultedVolumes | Sort-Object Name | Format-Table -AutoSize
+        Add-Failure "Found faulted attached Longhorn volume(s)."
+    }
+
+    if ($degradedVolumes.Count -gt 0) {
+        $degradedVolumes | Sort-Object Name | Format-Table -AutoSize
+        Add-Warning "Found attached Longhorn volume(s) that are not fully healthy."
+    }
+
+    if ($stuckVolumes.Count -eq 0 -and $faultedVolumes.Count -eq 0 -and $degradedVolumes.Count -eq 0) {
+        Write-Ok "All attached Longhorn volumes are healthy and no volumes are stuck attaching/detaching."
+    }
+} catch {
+    Add-Warning "Unable to verify Longhorn volume health: $($_.Exception.Message)"
+}
+
+Write-Section "Longhorn Orphans"
+try {
+    $longhornOrphans = Invoke-KubectlJson @("get", "orphans.longhorn.io", "-n", "longhorn-system")
+    $engineOrphans = @()
+    $replicaOrphans = @()
+
+    foreach ($orphan in @($longhornOrphans.items)) {
+        $row = [pscustomobject]@{
+            Name = $orphan.metadata.name
+            Type = $orphan.orphanType
+            Node = $orphan.nodeID
+        }
+
+        if ($orphan.orphanType -eq "engine-instance") {
+            $engineOrphans += $row
+        } elseif ($orphan.orphanType -eq "replica") {
+            $replicaOrphans += $row
+        }
+    }
+
+    if ($engineOrphans.Count -gt 0) {
+        $engineOrphans | Sort-Object Name | Format-Table -AutoSize
+        Add-Failure "Found Longhorn engine-instance orphan(s), which can block RWO volume attach after power loss."
+    }
+
+    if ($replicaOrphans.Count -gt 0) {
+        $replicaOrphans | Sort-Object Name | Format-Table -AutoSize
+        Add-Warning "Found Longhorn replica orphan(s). Review before deleting; these are not usually immediate attach blockers."
+    }
+
+    if ($engineOrphans.Count -eq 0 -and $replicaOrphans.Count -eq 0) {
+        Write-Ok "No Longhorn orphan resources found."
+    }
+} catch {
+    Add-Warning "Unable to verify Longhorn orphan resources: $($_.Exception.Message)"
+}
+
 Write-Section "Node Metrics"
 try {
     kubectl top nodes
