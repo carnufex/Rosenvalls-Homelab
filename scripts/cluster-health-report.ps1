@@ -206,15 +206,25 @@ try {
     $replicaOrphans = @()
 
     foreach ($orphan in @($longhornOrphans.items)) {
-        $row = [pscustomobject]@{
-            Name = $orphan.metadata.name
-            Type = $orphan.orphanType
-            Node = $orphan.nodeID
+        $orphanType = $orphan.spec.orphanType
+        if (-not $orphanType) {
+            $orphanType = $orphan.orphanType
         }
 
-        if ($orphan.orphanType -eq "engine-instance") {
+        $nodeID = $orphan.spec.nodeID
+        if (-not $nodeID) {
+            $nodeID = $orphan.nodeID
+        }
+
+        $row = [pscustomobject]@{
+            Name = $orphan.metadata.name
+            Type = $orphanType
+            Node = $nodeID
+        }
+
+        if ($orphanType -eq "engine-instance") {
             $engineOrphans += $row
-        } elseif ($orphan.orphanType -eq "replica") {
+        } elseif ($orphanType -eq "replica") {
             $replicaOrphans += $row
         }
     }
