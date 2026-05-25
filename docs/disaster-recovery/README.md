@@ -73,6 +73,9 @@ Expected behavior:
 - all nodes down: the cluster is unavailable during the outage, then should recover when the control plane, workers, Longhorn managers, and at least one replica per volume return
 
 The script fails on core bootstrap/routing failures, stuck Longhorn volumes, engine-instance orphans, bad ExternalSecrets, unhealthy core ArgoCD apps, media NFS failure, or Deluge VPN failure. It warns on known non-blocking cleanup candidates such as allowed `ragflow-helm` drift or orphan PVC review candidates.
+It also removes historical `Failed` pods caused by node shutdown before running the final health report, because replacement workloads are the authoritative recovery signal after an outage.
+
+Drill evidence on 2026-05-25: `worker-04` was rebooted with Talos `--mode powercycle` and no Kubernetes drain while it hosted Radarr, Sonarr, Seerr, Jackett, and Deluge config PVCs. The node moved through `Ready=False/Unknown`, Longhorn media config volumes moved through `attaching/unknown`, and all media pods returned to `Running` with the volumes `attached/healthy` without manual orphan or `VolumeAttachment` cleanup. `post-power-loss-check.ps1` then passed after removing shutdown-generated historical `Failed` pods.
 
 ## New Server Or Stolen Server Runbook
 
