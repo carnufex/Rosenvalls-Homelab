@@ -40,7 +40,7 @@ $env:KUBECONFIG = (Resolve-Path .\tofu\output\kubeconfig)
 ```
 
 Use `-SkipMediaChecks` only when the NFS media VM or VPN endpoint is intentionally offline.
-By default the script removes historical `Failed` pods whose reason is node shutdown before running the final cluster health report. Use `-SkipFailedPodCleanup` when you want to inspect those pod objects manually.
+By default the script removes terminal non-Job controller pods left by node shutdown before running the final cluster health report. This includes `Failed` and `Succeeded` pods owned by ReplicaSets, DaemonSets, StatefulSets, and similar controllers, but leaves Job history intact. Use `-SkipFailedPodCleanup` when you want to inspect those pod objects manually.
 
 Use these after:
 

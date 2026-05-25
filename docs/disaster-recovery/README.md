@@ -73,9 +73,11 @@ Expected behavior:
 - all nodes down: the cluster is unavailable during the outage, then should recover when the control plane, workers, Longhorn managers, and at least one replica per volume return
 
 The script fails on core bootstrap/routing failures, stuck Longhorn volumes, engine-instance orphans, bad ExternalSecrets, unhealthy core ArgoCD apps, media NFS failure, or Deluge VPN failure. It warns on known non-blocking cleanup candidates such as allowed `ragflow-helm` drift or orphan PVC review candidates.
-It also removes historical `Failed` pods caused by node shutdown before running the final health report, because replacement workloads are the authoritative recovery signal after an outage.
+It also removes terminal non-Job controller pods left by node shutdown before running the final health report, because replacement workloads are the authoritative recovery signal after an outage. Job history is left intact.
 
-Drill evidence on 2026-05-25: `worker-04` was rebooted with Talos `--mode powercycle` and no Kubernetes drain while it hosted Radarr, Sonarr, Seerr, Jackett, and Deluge config PVCs. The node moved through `Ready=False/Unknown`, Longhorn media config volumes moved through `attaching/unknown`, and all media pods returned to `Running` with the volumes `attached/healthy` without manual orphan or `VolumeAttachment` cleanup. `post-power-loss-check.ps1` then passed after removing shutdown-generated historical `Failed` pods.
+Drill evidence on 2026-05-25: `worker-04` was rebooted with Talos `--mode powercycle` and no Kubernetes drain while it hosted Radarr, Sonarr, Seerr, Jackett, and Deluge config PVCs. The node moved through `Ready=False/Unknown`, Longhorn media config volumes moved through `attaching/unknown`, and all media pods returned to `Running` with the volumes `attached/healthy` without manual orphan or `VolumeAttachment` cleanup. `post-power-loss-check.ps1` then passed after removing shutdown-generated terminal controller pods.
+
+Full-cluster power-cycle drill evidence on 2026-05-25: all Talos nodes were rebooted with `--mode powercycle` and no Kubernetes drain. Talos and Kubernetes recovered, media workloads and RWO Longhorn config PVCs recovered, and post-outage cleanup removed terminal controller pods left by node shutdown. Prometheus required a longer startup probe because WAL replay exceeded the default startup window during full-cluster recovery; monitoring retention is intentionally bounded because observability history is less critical than successful restart.
 
 ## New Server Or Stolen Server Runbook
 
