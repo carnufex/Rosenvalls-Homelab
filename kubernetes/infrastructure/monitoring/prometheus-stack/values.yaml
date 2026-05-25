@@ -70,6 +70,8 @@ alertmanager:
 
 prometheus:
   prometheusSpec:
+    retention: 10d
+    retentionSize: 40GB
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -77,7 +79,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 20Gi
+              storage: 50Gi
     resources:
       requests:
         cpu: 500m

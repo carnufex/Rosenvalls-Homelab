@@ -15,7 +15,7 @@ The app intentionally uses SQLite for the May 2026 demo. Move it to CloudNativeP
 Storage:
 
 - `rosenvall-devops-state`: `longhorn-critical`, stores SQLite demo state.
-- `rosenvall-devops-codex-home`: `longhorn`, stores runtime Codex home data.
+- `rosenvall-devops-codex-home`: `longhorn`, stores runtime Codex home data. It is currently `ReadWriteOnce`; app-created cleanup jobs that mount it must run on the same node as the API pod or be redesigned to use a Secret/ConfigMap for the minimal Codex files they need.
 - The API memory limit is intentionally higher than the request because the current demo document can be large in SQLite; revisit this when the state model moves to CloudNativePG.
 
 Secrets:

@@ -23,6 +23,7 @@ This directory contains the configuration for Longhorn, a distributed block stor
 - `replicaSoftAntiAffinity=false` stays strict at the node level so Longhorn prefers one replica per worker.
 - `replicaZoneSoftAntiAffinity=true` must stay enabled because unlabeled nodes are treated as the same zone by Longhorn. If this is set to `false`, new 2-replica volumes can get stuck with `ReplicaSchedulingFailure` even when both workers are healthy.
 - `allowVolumeCreationWithDegradedAvailability=false` stays enabled so GitOps fails loudly when Longhorn cannot place the requested redundancy.
+- `orphanResourceAutoDeletion=instance` is enabled with a `300s` grace period so stale engine or replica runtime instances left by node restarts are cleaned automatically.
 
 ## Backup
 
@@ -35,3 +36,14 @@ This directory contains the configuration for Longhorn, a distributed block stor
 ## Recovery Expectations
 
 For filesystem inconsistencies, snapshot or back up first and then perform recovery through GitOps changes and runbook steps.
+
+For attach failures after a node restart:
+
+```powershell
+kubectl -n longhorn-system get orphan -o wide
+kubectl -n longhorn-system get volume.longhorn.io <volume-name> -o wide
+kubectl -n longhorn-system get volumeattachments.longhorn.io <volume-name> -o yaml
+kubectl get volumeattachment.storage.k8s.io
+```
+
+If a workload PVC is stuck in `attaching` and Longhorn reports an `engine-instance` orphan for the same volume, delete only that matching orphan and let Longhorn reconcile. If Kubernetes still holds a stale `VolumeAttachment` for an old node, delete only the stale attachment object after confirming the replacement pod is scheduled elsewhere.

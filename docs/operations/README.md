@@ -168,7 +168,13 @@ kubectl get httproute -A
 kubectl get pvc -A
 kubectl describe pvc -n media media-library
 kubectl get volumes.longhorn.io -n longhorn-system
+kubectl -n longhorn-system get orphan -o wide
+kubectl get volumeattachment.storage.k8s.io
 ```
+
+After node restarts, Longhorn can leave stale engine instances or stale Kubernetes `VolumeAttachment` objects. For app PVCs stuck in `ContainerCreating`, match the stuck PVC name to `kubectl -n longhorn-system get orphan -o wide` before deleting anything. Delete only orphan resources of type `engine-instance` that match the affected volume, then recreate the stuck workload pod.
+
+Prometheus uses bounded local TSDB storage. If it crashloops with `panic: preallocate: no space left on device`, first expand or repair the Prometheus PVC and restart the pod so filesystem resize can complete. Avoid adding observability PVCs to R2 backup groups unless there is an explicit storage budget decision.
 
 ### NFS Media Library
 

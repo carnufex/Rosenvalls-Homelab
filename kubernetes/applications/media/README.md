@@ -63,6 +63,19 @@ Verify the shared media PVC before scaling workloads:
 .\scripts\verify-media-nfs.ps1
 ```
 
+If Radarr, Sonarr, or Seerr remain in `ContainerCreating` after a node restart, check the config PVCs before changing app manifests:
+
+```powershell
+kubectl -n media get pods,pvc
+kubectl -n media describe pod -l app.kubernetes.io/name=radarr
+kubectl -n media describe pod -l app.kubernetes.io/name=sonarr
+kubectl -n media describe pod -l app.kubernetes.io/name=seerr
+kubectl -n longhorn-system get orphan -o wide
+kubectl -n longhorn-system get volume.longhorn.io
+```
+
+Longhorn `engine-instance` orphans that match the stuck config PVC can block attach after a node restart. Delete only matching orphan resources, then delete the stuck media pod so Kubernetes creates a clean replacement. Do not delete media PVCs or Longhorn replicas unless a backup/restore path has been explicitly chosen.
+
 Verify Deluge VPN after it is live:
 
 ```powershell
