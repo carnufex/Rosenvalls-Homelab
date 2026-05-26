@@ -24,7 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:aaea9eece76febd3e2a9b3f1e0be5aec13e9d1df9b14da3ab630d215268cb009
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:260d5d410153ca22d0ff857127cf95940d7aa4eee823572343239400ab3f5028
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
