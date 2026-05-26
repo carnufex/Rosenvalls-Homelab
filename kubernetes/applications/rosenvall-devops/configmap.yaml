@@ -22,6 +22,7 @@ data:
   Ai__Codex__Path: codex
   Ai__Codex__Home: /app/codex-home
   Ai__Codex__ImplementationBypassSandbox: "false"
+  Ai__Codex__KubernetesSandboxMode: danger-full-access
   Ai__Codex__PreviewSourceMode: kubernetes-job
   Ai__Codex__PreviewSourceJobTimeoutSeconds: "600"
   Ai__Codex__Model: gpt-5.4

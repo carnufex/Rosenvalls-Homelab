@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        rosenvall.devops/config-revision: pipelines-kubeconfig-incluster-2026-05-26
+        rosenvall.devops/config-revision: codex-runner-sandbox-2026-05-26
       labels:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:988f10df2b73f768fcdfbbb3b2e020a8bcb4fef2e7c61298a51c7ee1296beaf3
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:0253a9fe53428e8a634851a8e717e696c419981a826bc8946f237931ee0914ef
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
