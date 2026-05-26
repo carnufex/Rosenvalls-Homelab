@@ -56,6 +56,18 @@ spec:
                   name: rosenvall-devops-github-app
                   key: app-slug
                   optional: true
+            - name: GitHub__AppClientId
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-github-app
+                  key: client-id
+                  optional: true
+            - name: GitHub__AppClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-github-app
+                  key: client-secret
+                  optional: true
           resources:
             requests:
               cpu: 100m
