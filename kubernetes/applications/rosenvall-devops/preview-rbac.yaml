@@ -69,3 +69,31 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: rosenvall-devops-runtime-credentials
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rosenvall-devops-pipeline-token-cleanup
+  namespace: rosenvall-devops-pipelines
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rosenvall-devops-pipeline-token-cleanup
+  namespace: rosenvall-devops-pipelines
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+subjects:
+  - kind: ServiceAccount
+    name: rosenvall-devops-runtime
+    namespace: rosenvall-devops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: rosenvall-devops-pipeline-token-cleanup
