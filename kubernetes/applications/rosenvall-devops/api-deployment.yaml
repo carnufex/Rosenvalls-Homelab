@@ -15,6 +15,8 @@ spec:
       app.kubernetes.io/name: rosenvall-devops-api
   template:
     metadata:
+      annotations:
+        rosenvall.devops/config-revision: pipelines-kubeconfig-incluster-2026-05-26
       labels:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
