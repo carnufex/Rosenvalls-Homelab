@@ -9,13 +9,11 @@ variable "proxmox" {
   })
   sensitive = true
 }
-
 variable "cluster_name" {
   description = "Name of the Kubernetes cluster"
   type        = string
   default     = "talos-cluster"
 }
-
 variable "cluster_endpoint" {
   description = "Endpoint for the Kubernetes API"
   type        = string
@@ -80,25 +78,4 @@ variable "nodes_config" {
       vm_id        = 201
     }
   }
-}
-
-variable "media_nfs" {
-  description = "Optional helper VM configuration for exporting the media library over NFS"
-  type = object({
-    name               = string
-    host_node          = string
-    ip                 = string
-    vm_id              = number
-    cpu                = number
-    ram_dedicated      = number
-    boot_disk_size_gib = number
-    boot_datastore     = optional(string)
-    image_datastore    = optional(string)
-    data_datastore     = string
-    data_disk_size_gib = number
-    gateway            = optional(string)
-    allowed_clients    = optional(list(string))
-  })
-  default  = null
-  nullable = true
 }

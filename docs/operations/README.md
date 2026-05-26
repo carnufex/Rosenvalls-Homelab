@@ -92,6 +92,7 @@ kubectl top nodes
 kubectl top pods -A --sort-by=memory
 kubectl get pods -A --field-selector status.phase=Failed
 kubectl get events -A --sort-by=.lastTimestamp
+kubectl get nodes -L homelab.rosenvall.se/proxmox-host,topology.kubernetes.io/zone
 ```
 
 If Metrics API is unavailable, query Prometheus directly until `metrics-server` has reconciled:
@@ -103,6 +104,11 @@ kubectl -n monitoring exec $pod -c prometheus -- wget -qO- "http://127.0.0.1:909
 ```
 
 During Docker cutover, `ragflow` and `matplan-whisper` may be intentionally paused to keep worker memory below eviction pressure. Re-enable them only after media and Home Assistant have run in Kubernetes without new evictions for at least one day.
+
+Control-plane memory above 85% should be treated as an early warning, not an
+automatic VM resize. First check whether workloads can move off `desktop` or
+whether the physical host needs more RAM; `control-01` should only be increased
+after the host has enough reserve.
 
 ## Cluster UI
 
@@ -212,8 +218,7 @@ attached to `media-nfs-01` as `scsi1`. VM `100` must stay stopped with
 unused disk.
 
 Use `.\scripts\provision-host1-media-nfs-vm.ps1` to recreate or re-bootstrap
-the VM. The older host-level NFS scripts are deprecated and require an explicit
-escape-hatch flag.
+the VM.
 
 ### Host-Network Apps
 
@@ -252,4 +257,3 @@ kubectl logs -n media deploy/deluge-vpn -c deluge
 - [Scaling](../scaling/README.md)
 - [Networking](../networking/README.md)
 - [Storage and backups](../storage-and-backups/README.md)
-- [Migrations and cutover](../migrations/README.md)

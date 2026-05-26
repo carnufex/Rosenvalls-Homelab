@@ -16,3 +16,4 @@ resources:
   - api-deployment.yaml
   - frontend-deployment.yaml
   - worker-deployment.yaml
+  - import-worker-deployment.yaml

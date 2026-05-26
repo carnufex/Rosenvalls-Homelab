@@ -9,7 +9,7 @@ Read in this order if you are new to the repo:
 3. [Operations](operations/README.md)
 4. [Disaster recovery](disaster-recovery/README.md)
 5. [Scaling](scaling/README.md)
-6. [Migrations and cutover](migrations/README.md)
+6. [Storage and backups](storage-and-backups/README.md)
 
 Jump directly to a topic:
 
@@ -20,7 +20,6 @@ Jump directly to a topic:
 - [Scaling](scaling/README.md)
 - [Networking](networking/README.md)
 - [Storage and backups](storage-and-backups/README.md)
-- [Migrations and cutover](migrations/README.md)
 
 ## Source Of Truth
 

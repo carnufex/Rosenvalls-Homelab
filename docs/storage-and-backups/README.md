@@ -21,8 +21,14 @@ Longhorn keeps:
 
 - `defaultReplicaCount=2`
 - strict node-level anti-affinity
-- soft zone anti-affinity because this homelab is effectively single-zone
+- soft zone anti-affinity while `host1` has limited Longhorn capacity
 - `allowVolumeCreationWithDegradedAvailability=false`
+
+Kubernetes nodes should carry `homelab.rosenvall.se/proxmox-host` and
+`topology.kubernetes.io/zone` labels for the physical Proxmox host. Those labels
+allow workloads and Longhorn replica placement to become host-aware. Do not make
+zone anti-affinity strict until `host1` has enough Longhorn disk capacity, or
+new 2-replica volumes can fail to schedule.
 
 ## Media Library Model
 
@@ -119,4 +125,3 @@ Store them outside Git and outside the cluster.
 - [Operations](../operations/README.md)
 - [Disaster recovery](../disaster-recovery/README.md)
 - [Scaling](../scaling/README.md)
-- [Migrations and cutover](../migrations/README.md)

@@ -176,4 +176,3 @@ Invoke-WebRequest -Uri https://argo.rosenvall.se -Method Head
 - [Architecture](../architecture/README.md)
 - [Operations](../operations/README.md)
 - [Disaster recovery](../disaster-recovery/README.md)
-- [Migrations and cutover](../migrations/README.md)

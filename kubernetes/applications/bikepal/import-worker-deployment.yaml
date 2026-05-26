@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bikepal-worker
+  name: bikepal-import-worker
   namespace: bikepal
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   replicas: 1
   revisionHistoryLimit: 3
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
-      app.kubernetes.io/name: bikepal-worker
+      app.kubernetes.io/name: bikepal-import-worker
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: bikepal-worker
+        app.kubernetes.io/name: bikepal-import-worker
     spec:
       serviceAccountName: bikepal-runtime
+      nodeSelector:
+        kubernetes.io/hostname: worker-02
       containers:
         - name: worker
-          image: ghcr.io/carnufex/bikepal-worker@sha256:a2dd12912d197d578b44d816d5606f6773095570b01e4fc4deffcba172a2d46d
-          imagePullPolicy: Always
+          image: ghcr.io/carnufex/bikepal-worker@sha256:d64bbe0e7b59260b5799dff16217c6e71bc16b1fc879ee8b85566df288c2053e
+          imagePullPolicy: IfNotPresent
           env:
             - name: JobRunner__WorkerName
-              value: bikepal-worker
+              value: bikepal-import-worker
           envFrom:
             - configMapRef:
                 name: bikepal-config
@@ -33,11 +33,11 @@ spec:
                 name: bikepal-secrets
           resources:
             requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
               cpu: 500m
-              memory: 512Mi
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 6Gi
           volumeMounts:
             - name: data-protection-keys
               mountPath: /var/bikepal/data-protection

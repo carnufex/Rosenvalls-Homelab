@@ -248,9 +248,31 @@ try {
 
 Write-Section "Node Metrics"
 try {
-    kubectl top nodes
+    $topNodeTable = kubectl top nodes
     if ($LASTEXITCODE -ne 0) {
         Add-Warning "kubectl top nodes failed."
+    } else {
+        $topNodeTable
+        $controlPlaneNames = @($nodes.items |
+            Where-Object { $_.metadata.labels.PSObject.Properties.Name -contains "node-role.kubernetes.io/control-plane" } |
+            ForEach-Object { $_.metadata.name })
+
+        foreach ($line in @($topNodeTable | Select-Object -Skip 1)) {
+            $parts = @($line -split "\s+" | Where-Object { $_ })
+            if ($parts.Count -lt 5) {
+                continue
+            }
+
+            $nodeName = $parts[0]
+            if ($controlPlaneNames -notcontains $nodeName) {
+                continue
+            }
+
+            $memoryPercent = [int]($parts[4].TrimEnd("%"))
+            if ($memoryPercent -ge 85) {
+                Add-Warning "Control-plane node $nodeName memory usage is $memoryPercent%; review workload placement or VM memory before it reaches sustained pressure."
+            }
+        }
     }
 } catch {
     Add-Warning "kubectl top nodes failed: $($_.Exception.Message)"

@@ -39,6 +39,25 @@ When adding workers on a Proxmox host that is not the default image node, the
 Talos module downloads the Talos image to that node's local ISO storage as well.
 This is required because Proxmox `local` storage is node-local.
 
+## Failure Domains And Taints
+
+Normal workers intentionally do not use taints. In this small cluster, taints
+would reduce scheduling flexibility without adding real redundancy. Use labels
+and topology spread first:
+
+- `homelab.rosenvall.se/proxmox-host=desktop|host1`
+- `topology.kubernetes.io/zone=desktop|host1`
+
+When adding or rebuilding nodes, make sure the local `tofu/terraform.tfvars`
+entry carries both labels. Use taints only for dedicated special-purpose nodes
+after every workload that must run there has an explicit toleration.
+
+Physical redundancy is limited by the current host layout. Most Kubernetes
+capacity still runs on `desktop`; `host1` has one storage-capable worker and the
+media NFS VM. For better host-loss tolerance, add more storage-capable capacity
+on `host1` or add a third physical host before tightening Longhorn zone
+anti-affinity.
+
 ## Add A Control Plane Node
 
 The repo can model more control plane nodes, but this should be treated as an advanced change until it is proven and documented in a dedicated HA runbook.

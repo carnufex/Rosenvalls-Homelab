@@ -7,6 +7,7 @@ metadata:
     app: cloudflared
 spec:
   replicas: 2
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cloudflared
@@ -15,10 +16,17 @@ spec:
       labels:
         app: cloudflared
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: cloudflared
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:latest
-          imagePullPolicy: Always
+          image: cloudflare/cloudflared@sha256:a5b5e6fd9a372f054b9a843c219bfbcdceb54691605312a8b1ee72978bdf1aa1
+          imagePullPolicy: IfNotPresent
           args:
             - tunnel
             - --config

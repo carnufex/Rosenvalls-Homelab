@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudnative-pg
+  namespace: cnpg-system
+spec:
+  revisionHistoryLimit: 3
+  template:
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: cloudnative-pg
+              app.kubernetes.io/name: cloudnative-pg
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: barman-cloud
+  namespace: cnpg-system
+spec:
+  revisionHistoryLimit: 3

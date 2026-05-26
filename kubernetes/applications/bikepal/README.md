@@ -1,11 +1,12 @@
 # BikePal
 
-BikePal is deployed here as a three-workload app. It is not publicly routed until
+BikePal is deployed here as a four-workload app. It is not publicly routed until
 it has native Authentik/OIDC support or an approved Authentik proxy exception:
 
 - `bikepal-frontend` serves `/`
 - `bikepal-api` serves `/api`
-- `bikepal-worker` processes background jobs and road-network imports
+- `bikepal-worker` processes normal background jobs
+- `bikepal-import-worker` processes heavier road-network imports on `worker-02`
 
 The folder mirrors the `matplan` app structure while adding the storage and PostGIS pieces BikePal needs.
 
@@ -87,6 +88,7 @@ When rotating secrets or publishing new images, keep these manifests aligned:
 - `api-deployment.yaml`
 - `frontend-deployment.yaml`
 - `worker-deployment.yaml`
+- `import-worker-deployment.yaml`
 
 The deployment manifests should stay pinned to immutable GHCR digests and be updated by the BikePal publish workflow
 when new images are published.

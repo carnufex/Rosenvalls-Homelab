@@ -1,7 +1,7 @@
 proxmox = {
   name         = "pve"
   cluster_name = "pve"
-  endpoint     = "https://192.168.1.100:8006/"
+  endpoint     = "https://192.168.1.111:8006/"
   insecure     = true
   username     = "root@pam"
   api_token    = "root@pam!terraform=your-token-here"
@@ -22,6 +22,10 @@ nodes_config = {
     cpu           = 2
     ram_dedicated = 4096
     igpu          = false
+    extra_labels = {
+      "homelab.rosenvall.se/proxmox-host" = "desktop"
+      "topology.kubernetes.io/zone"       = "desktop"
+    }
   }
   "worker-01" = {
     host_node     = "pve"
@@ -34,6 +38,8 @@ nodes_config = {
     igpu          = false
     extra_labels = {
       "homelab.rosenvall.se/lan-special" = "true"
+      "homelab.rosenvall.se/proxmox-host" = "desktop"
+      "topology.kubernetes.io/zone"       = "desktop"
     }
   }
   # Example second physical host capacity node.
@@ -57,11 +63,7 @@ nodes_config = {
   #   }
   #   extra_labels = {
   #     "homelab.rosenvall.se/proxmox-host" = "host1"
+  #     "topology.kubernetes.io/zone"       = "host1"
   #   }
   # }
 }
-
-# The current production media library is exported directly from the Proxmox
-# host that owns the existing media disk. Keep the helper-VM module disabled
-# unless you intentionally want a blank helper VM with a virtual media disk.
-media_nfs = null

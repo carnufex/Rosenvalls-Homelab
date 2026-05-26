@@ -1,5 +1,7 @@
 grafana:
   envFromSecret: grafana-oauth
+  testFramework:
+    enabled: false
 
   admin:
     existingSecret: grafana-admin-credentials

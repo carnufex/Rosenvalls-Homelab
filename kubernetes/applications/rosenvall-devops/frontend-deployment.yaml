@@ -7,7 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   replicas: 1
-  revisionHistoryLimit: 2
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: rosenvall-devops-frontend
@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: frontend
-          image: ghcr.io/carnufex/rosenvall-devops-frontend:main
+          image: ghcr.io/carnufex/rosenvall-devops-frontend@sha256:289b8b44a97efc80b47e56718f6910f1e80d02be8e2cd7f7dc671410b74256e4
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false

@@ -15,3 +15,7 @@ helmCharts:
     version: 0.27.0
     includeCRDs: true
     repo: https://cloudnative-pg.github.io/charts
+    kubeVersion: v1.31.1
+
+patches:
+  - path: deployment-hardening-patch.yaml
