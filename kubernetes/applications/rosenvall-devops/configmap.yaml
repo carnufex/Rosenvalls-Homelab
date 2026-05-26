@@ -30,3 +30,4 @@ data:
   CODEX_HOME: /app/codex-home
   Preview__KubectlPath: kubectl
   Preview__KubeconfigPath: ""
+  Pipelines__KubeconfigPath: ""
