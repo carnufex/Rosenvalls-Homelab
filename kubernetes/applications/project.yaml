@@ -11,6 +11,8 @@ spec:
   destinations:
   - namespace: rosenvall-devops
     server: https://kubernetes.default.svc
+  - namespace: rosenvall-devops-pipelines
+    server: https://kubernetes.default.svc
   - namespace: bikepal
     server: https://kubernetes.default.svc
   - namespace: homeassistant
