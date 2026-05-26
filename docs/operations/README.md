@@ -108,8 +108,9 @@ During Docker cutover, `ragflow` and `matplan-whisper` may be intentionally paus
 
 Use Headlamp for live Kubernetes object inspection:
 
-- `https://headlamp.rosenvall.local`
-- internal gateway only
+- `https://headlamp.rosenvall.se`
+- `https://headlamp.rosenvall.local` redirects to the canonical `.se` URL
+- Authentik OIDC login
 - read-only cluster role by default
 - shows nodes, namespaces, pods, workload placement, events, PVCs, routes, ArgoCD apps, ExternalSecrets, Longhorn objects, CNPG clusters, and Metrics API CPU/memory data
 

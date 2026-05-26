@@ -19,4 +19,4 @@
 
 ## Expected Links
 
-The link list is compiled into the separate `hub-central` image. When that source app is updated, include `https://headlamp.rosenvall.local` next to Grafana, Prometheus, Longhorn, and the other internal operations surfaces.
+The link list is compiled into the separate `hub-central` image. Keep it aligned with live `HTTPRoute` hostnames. Headlamp should open `https://headlamp.rosenvall.se`; `https://headlamp.rosenvall.local` is only a redirect alias.

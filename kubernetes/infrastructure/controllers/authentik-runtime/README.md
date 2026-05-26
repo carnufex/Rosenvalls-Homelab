@@ -11,7 +11,7 @@ creates cluster application providers.
 | ArgoCD | Active | `https://argo.rosenvall.se/api/dex/callback` |
 | Rosenvall DevOps | Active | `https://devops.rosenvall.se/auth/callback` |
 | Grafana | Active after sync | `https://grafana.rosenvall.local/login/generic_oauth` |
-| Headlamp | Active after sync | `https://headlamp.rosenvall.local/oidc-callback` |
+| Headlamp | Active | `https://headlamp.rosenvall.se/oidc-callback` |
 | RAGFlow | Provider only | `https://ragflow.rosenvall.local/v1/user/oauth/callback/oidc` |
 
 Use native OIDC for apps in this table. Proxy-based protection is limited to

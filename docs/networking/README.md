@@ -26,6 +26,7 @@ LoadBalancer IP pool. The internal and external Gateway services currently use
 `192.168.1.220` and `192.168.1.222`.
 
 `https://hub-central.rosenvall.local` is a redirect alias back to the apex dashboard.
+`https://headlamp.rosenvall.local` is a redirect alias to the canonical public Headlamp URL, `https://headlamp.rosenvall.se`, so the OIDC callback origin stays consistent.
 
 ## Public Routing Model
 
@@ -65,7 +66,7 @@ Internal HTTP listeners redirect to HTTPS.
 - `https://hub-central.rosenvall.local`
 - `https://authentik.rosenvall.local`
 - `https://grafana.rosenvall.local`
-- `https://headlamp.rosenvall.local`
+- `https://headlamp.rosenvall.local` (redirects to `https://headlamp.rosenvall.se`)
 - `https://prometheus.rosenvall.local`
 - `https://longhorn.rosenvall.local`
 - `https://ragflow.rosenvall.local`

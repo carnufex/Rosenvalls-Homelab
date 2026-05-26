@@ -29,15 +29,7 @@ clusterRoleBinding:
   clusterRoleName: headlamp-readonly
 
 httpRoute:
-  enabled: true
-  annotations:
-    argocd.argoproj.io/sync-options: Replace=true
-  parentRefs:
-    - name: internal
-      namespace: gateway
-      sectionName: https
-  hostnames:
-    - headlamp.rosenvall.local
+  enabled: false
 
 service:
   type: ClusterIP

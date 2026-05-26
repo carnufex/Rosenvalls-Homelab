@@ -1,11 +1,12 @@
 # Headlamp
 
-Headlamp is the internal Kubernetes UI for quick cluster inspection.
+Headlamp is the Kubernetes UI for quick cluster inspection.
 
 ## Access Model
 
-- URL: `https://headlamp.rosenvall.local`
-- Route: `gateway/internal` only
+- Canonical URL: `https://headlamp.rosenvall.se`
+- Local alias: `https://headlamp.rosenvall.local` redirects to the canonical public URL
+- Routes: `gateway/external` serves the app, `gateway/internal` only serves the redirect alias
 - Service type: `ClusterIP`
 - Default permissions: read-only cluster visibility through `ClusterRole/headlamp-readonly`
 - No delete, patch, create, exec, or secret-read permission is granted by this app.
@@ -25,7 +26,7 @@ The UI uses the existing Metrics API, so `kubectl top nodes` and `kubectl top po
 
 ## Auth Status
 
-Headlamp uses Authentik OIDC with callback `https://headlamp.rosenvall.local/oidc-callback`.
+Headlamp uses Authentik OIDC with callback `https://headlamp.rosenvall.se/oidc-callback`.
 Kubernetes API authentication must accept the Authentik issuer
 `https://authentik.rosenvall.se/application/o/headlamp/` and map the `groups`
 claim from the `profile` scope with the `authentik:` prefix.

@@ -198,8 +198,6 @@ data:
           invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
           client_type: confidential
           redirect_uris:
-            - url: https://headlamp.rosenvall.local/oidc-callback
-              matching_mode: strict
             - url: https://headlamp.rosenvall.se/oidc-callback
               matching_mode: strict
           client_id: !Env HEADLAMP_CLIENT_ID
