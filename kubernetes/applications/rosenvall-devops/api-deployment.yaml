@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        rosenvall.devops/config-revision: codex-runner-sandbox-2026-05-26
+        rosenvall.devops/config-revision: board-ai-environment-2026-05-27
       labels:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:0253a9fe53428e8a634851a8e717e696c419981a826bc8946f237931ee0914ef
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:0b4e3a0e605f5d59de81a2b9645a7615e7e198d726cf0851a17bf7beeddbe307
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
