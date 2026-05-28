@@ -69,6 +69,26 @@ data:
     metadata:
       name: Apps - Rosenvall DevOps
     entries:
+      - id: rosenvall-devops-demo-users-group
+        model: authentik_core.group
+        identifiers:
+          name: Rosenvall DevOps Demo Users
+        attrs:
+          name: Rosenvall DevOps Demo Users
+      - id: rosenvall-devops-demo-user
+        model: authentik_core.user
+        identifiers:
+          username: demo
+        attrs:
+          username: demo
+          name: Demo
+          email: demo@rosenvall.local
+          path: users
+          type: internal
+          is_active: true
+          password: demo
+          groups:
+            - !KeyOf rosenvall-devops-demo-users-group
       - id: rosenvall_devops_provider
         model: authentik_providers_oauth2.oauth2provider
         identifiers:
