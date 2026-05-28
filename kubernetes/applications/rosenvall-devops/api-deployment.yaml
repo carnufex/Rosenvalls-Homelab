@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        rosenvall.devops/config-revision: production-hosting-2026-05-28
+        rosenvall.devops/config-revision: preview-recovery-2026-05-28
       labels:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:fd22d781afd974a21fa0d33cabdcd8a96c96104cc8b57cd9f46fc1740ddd3c7f
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:dbc574eacaf18655c6065777ade5945929d11d10af4996a94e07d944eb9ef6b0
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -73,10 +73,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 512Mi
+              memory: 1Gi
             limits:
               cpu: 500m
-              memory: 2Gi
+              memory: 3Gi
           livenessProbe:
             httpGet:
               path: /healthz
