@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        rosenvall.devops/config-revision: preview-recovery-2026-05-28
+        rosenvall.devops/config-revision: preview-step-terminal-history-2026-05-28
       labels:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:dbc574eacaf18655c6065777ade5945929d11d10af4996a94e07d944eb9ef6b0
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:2a5e1e128eba9072ceda92a04365e228cee5a5d0f55ea95b6f7c97eb3b72d72c
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
