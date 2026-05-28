@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        rosenvall.devops/config-revision: board-ai-environment-2026-05-27
+        rosenvall.devops/config-revision: production-hosting-2026-05-28
       labels:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:50d9a44ff328bb20cd5e18fe219048fdb80601c041b4a7fdb28cc4c913a9c8d3
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:fd22d781afd974a21fa0d33cabdcd8a96c96104cc8b57cd9f46fc1740ddd3c7f
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
