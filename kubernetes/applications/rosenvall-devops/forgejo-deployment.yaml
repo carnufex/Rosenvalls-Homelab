@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rosenvall-devops-forgejo
+  namespace: rosenvall-devops
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rosenvall-devops-forgejo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rosenvall-devops-forgejo
+        app.kubernetes.io/part-of: rosenvall-devops
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: forgejo
+          image: codeberg.org/forgejo/forgejo:15-rootless
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: USER_UID
+              value: "1000"
+            - name: USER_GID
+              value: "1000"
+            - name: FORGEJO__DEFAULT__APP_NAME
+              value: Rosenvall DevOps Local Git
+            - name: FORGEJO__server__DOMAIN
+              value: rosenvall-devops-forgejo.rosenvall-devops.svc.cluster.local
+            - name: FORGEJO__server__ROOT_URL
+              value: http://rosenvall-devops-forgejo.rosenvall-devops.svc.cluster.local:3000/
+            - name: FORGEJO__server__HTTP_PORT
+              value: "3000"
+            - name: FORGEJO__server__DISABLE_SSH
+              value: "true"
+            - name: FORGEJO__security__INSTALL_LOCK
+              value: "true"
+            - name: FORGEJO__service__DISABLE_REGISTRATION
+              value: "true"
+            - name: FORGEJO__service__REQUIRE_SIGNIN_VIEW
+              value: "true"
+            - name: FORGEJO__repository__DEFAULT_PRIVATE
+              value: private
+            - name: FORGEJO__actions__ENABLED
+              value: "false"
+            - name: FORGEJO__packages__ENABLED
+              value: "false"
+            - name: FORGEJO_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-forgejo-admin
+                  key: username
+            - name: FORGEJO_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-forgejo-admin
+                  key: password
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -ec
+                  - |
+                    (
+                      for attempt in $(seq 1 30); do
+                        forgejo admin user create --admin --username "$FORGEJO_ADMIN_USERNAME" --password "$FORGEJO_ADMIN_PASSWORD" --email rdo@rosenvall.local --must-change-password=false && break
+                        sleep 2
+                      done
+                    ) >/tmp/forgejo-rdo-bootstrap.log 2>&1 || true
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: forgejo-data
+              mountPath: /var/lib/gitea
+      volumes:
+        - name: forgejo-data
+          persistentVolumeClaim:
+            claimName: rosenvall-devops-forgejo-data

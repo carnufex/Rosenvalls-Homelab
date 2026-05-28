@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: frontend
-          image: ghcr.io/carnufex/rosenvall-devops-frontend@sha256:61998b4f475f3447d6f115b059d04c1079c9c7548810222423de340dd2838fd9
+          image: ghcr.io/carnufex/rosenvall-devops-frontend@sha256:ad82f0dbc4259ac3fc6aae0f7928414ea056c712e41974501fa5fa13c781b1f2
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false

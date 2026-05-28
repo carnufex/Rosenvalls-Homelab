@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        rosenvall.devops/config-revision: preview-step-terminal-history-2026-05-28
+        rosenvall.devops/config-revision: localgit-forgejo-2026-05-28
       labels:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:2a5e1e128eba9072ceda92a04365e228cee5a5d0f55ea95b6f7c97eb3b72d72c
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:415a3053d315c3be3f497f3d7e3f7c835bd454b470f2bdc2f364f9acaab84dbb
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -70,6 +70,11 @@ spec:
                   name: rosenvall-devops-github-app
                   key: client-secret
                   optional: true
+            - name: LocalGit__Password
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-forgejo-admin
+                  key: password
           resources:
             requests:
               cpu: 100m

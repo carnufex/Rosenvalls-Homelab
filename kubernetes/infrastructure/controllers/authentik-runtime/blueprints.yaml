@@ -102,6 +102,8 @@ data:
           redirect_uris:
             - url: https://devops.rosenvall.se/auth/callback
               matching_mode: strict
+            - url: http://localhost:5173/auth/callback
+              matching_mode: strict
           access_code_validity: minutes=1
           access_token_validity: hours=1
           refresh_token_validity: days=30
