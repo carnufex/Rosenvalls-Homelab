@@ -70,6 +70,11 @@ spec:
                   name: rosenvall-devops-github-app
                   key: client-secret
                   optional: true
+            - name: LocalGit__Password
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-forgejo-admin
+                  key: password
           resources:
             requests:
               cpu: 100m

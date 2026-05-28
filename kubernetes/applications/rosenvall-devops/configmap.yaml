@@ -31,6 +31,12 @@ data:
   Ai__Codex__AvailableModels__0: gpt-5.4
   Ai__Codex__AvailableModels__1: gpt-5.3-codex
   CODEX_HOME: /app/codex-home
+  LocalGit__Enabled: "true"
+  LocalGit__ApiBaseUrl: http://rosenvall-devops-forgejo.rosenvall-devops.svc.cluster.local:3000/api/v1
+  LocalGit__RunnerApiBaseUrl: http://rosenvall-devops-forgejo.rosenvall-devops.svc.cluster.local:3000/api/v1
+  LocalGit__CloneBaseUrl: http://rosenvall-devops-forgejo.rosenvall-devops.svc.cluster.local:3000
+  LocalGit__Owner: rdo
+  LocalGit__Username: rdo
   Preview__KubectlPath: kubectl
   Preview__KubeconfigPath: ""
   Pipelines__KubeconfigPath: ""

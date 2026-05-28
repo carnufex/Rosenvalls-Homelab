@@ -8,11 +8,16 @@ resources:
   - codex-home-pvc.yaml
   - ghcr-image-pull-secret.yaml
   - github-app-externalsecret.yaml
+  - forgejo-credentials.yaml
   - serviceaccount.yaml
   - preview-rbac.yaml
   - preview-cleaner-rbac.yaml
   - preview-cleaner-configmap.yaml
   - preview-cleaner-cronjob.yaml
+  - forgejo-pvc.yaml
+  - forgejo-service.yaml
+  - forgejo-deployment.yaml
+  - forgejo-networkpolicy.yaml
   - api-service.yaml
   - frontend-service.yaml
   - api-deployment.yaml
