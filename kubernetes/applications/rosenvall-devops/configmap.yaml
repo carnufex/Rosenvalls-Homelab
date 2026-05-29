@@ -23,7 +23,7 @@ data:
   Ai__Codex__Home: /app/codex-home
   Ai__Codex__ImplementationBypassSandbox: "false"
   Ai__Codex__KubernetesSandboxMode: danger-full-access
-  Ai__Codex__KubernetesRunnerImage: ghcr.io/carnufex/rosenvall-devops-api@sha256:415a3053d315c3be3f497f3d7e3f7c835bd454b470f2bdc2f364f9acaab84dbb
+  Ai__Codex__KubernetesRunnerImage: ghcr.io/carnufex/rosenvall-devops-api@sha256:563e3605e872d11594e6d9c0b41b687db5d9b372f542a7303aa336583778c046
   Ai__Codex__PreviewSourceMode: kubernetes-job
   Ai__Codex__PreviewSourceJobTimeoutSeconds: "600"
   Ai__Codex__PreviewSourceApiMemoryMinHeadroomBytes: "268435456"
