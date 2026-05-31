@@ -1,7 +1,12 @@
 param(
     [int]$PreviewTtlHours = 24,
     [int]$TopPods = 15,
-    [string[]]$AllowedOutOfSyncApps = @("ragflow-helm")
+    [string[]]$AllowedOutOfSyncApps = @("ragflow-helm"),
+    [hashtable[]]$PublicRouteChecks = @(
+        @{ Host = "argo.rosenvall.se"; Path = "/api/dex/.well-known/openid-configuration"; GatewayIP = "192.168.1.222"; Expected = @(200) },
+        @{ Host = "headlamp.rosenvall.se"; Path = "/"; GatewayIP = "192.168.1.222"; Expected = @(200, 302) },
+        @{ Host = "plex.rosenvall.se"; Path = "/"; GatewayIP = "192.168.1.222"; Expected = @(200, 302, 401) }
+    )
 )
 
 $ErrorActionPreference = "Stop"
@@ -49,6 +54,28 @@ function Invoke-KubectlJson {
     }
 
     return $raw | ConvertFrom-Json
+}
+
+function Invoke-HttpStatus {
+    param(
+        [string]$HostName,
+        [string]$Path = "/",
+        [string]$GatewayIP
+    )
+
+    $url = "https://$HostName$Path"
+    $arguments = @("-k", "-sS", "-o", "NUL", "-w", "%{http_code}", "-I", "--max-time", "15")
+    if ($GatewayIP) {
+        $arguments += @("--resolve", "${HostName}:443:${GatewayIP}")
+    }
+    $arguments += $url
+
+    $status = & curl.exe @arguments 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $status) {
+        return $null
+    }
+
+    return [int]($status | Select-Object -Last 1)
 }
 
 function Get-ConditionStatus {
@@ -318,9 +345,22 @@ foreach ($app in $apps.items) {
 }
 $appRows | Sort-Object Name | Format-Table -AutoSize
 
+Write-Section "ArgoCD Dex"
+try {
+    kubectl -n argocd exec deploy/argocd-dex-server -- sh -c "nc -z -w 5 127.0.0.1 5556"
+    if ($LASTEXITCODE -ne 0) {
+        Add-Failure "ArgoCD Dex pod is reachable by Kubernetes but is not listening on 5556."
+    } else {
+        Write-Ok "ArgoCD Dex is listening on 5556."
+    }
+} catch {
+    Add-Failure "Unable to verify ArgoCD Dex listener on 5556: $($_.Exception.Message)"
+}
+
 Write-Section "Pods"
 $pods = Invoke-KubectlJson @("get", "pods", "-A")
 $badPods = @()
+$runningNotReadyPods = @()
 foreach ($pod in $pods.items) {
     $phase = $pod.status.phase
     if ($phase -ne "Running" -and $phase -ne "Succeeded") {
@@ -331,6 +371,18 @@ foreach ($pod in $pods.items) {
             Node      = $pod.spec.nodeName
         }
     }
+
+    if ($phase -eq "Running") {
+        $ready = Get-ConditionStatus -Conditions $pod.status.conditions -Type "Ready"
+        if ($ready -ne "True") {
+            $runningNotReadyPods += [pscustomobject]@{
+                Namespace = $pod.metadata.namespace
+                Name      = $pod.metadata.name
+                Ready     = $ready
+                Node      = $pod.spec.nodeName
+            }
+        }
+    }
 }
 
 if ($badPods.Count -gt 0) {
@@ -338,6 +390,13 @@ if ($badPods.Count -gt 0) {
     Add-Failure "Found $($badPods.Count) pod(s) outside Running/Succeeded."
 } else {
     Write-Ok "No pods outside Running/Succeeded."
+}
+
+if ($runningNotReadyPods.Count -gt 0) {
+    $runningNotReadyPods | Format-Table -AutoSize
+    Add-Failure "Found $($runningNotReadyPods.Count) Running pod(s) that are not Ready."
+} else {
+    Write-Ok "All Running pods report Ready=True."
 }
 
 Write-Section "External Secrets"
@@ -385,6 +444,83 @@ if ($badRoutes.Count -gt 0) {
     Add-Failure "HTTPRoutes without accepted parent: $($badRoutes -join ', ')"
 } else {
     Write-Ok "All HTTPRoutes have an accepted parent."
+}
+
+Write-Section "Service Endpoints"
+try {
+    $services = Invoke-KubectlJson @("get", "services", "-A")
+    $endpointSlices = Invoke-KubectlJson @("get", "endpointslices.discovery.k8s.io", "-A")
+    $servicesWithoutEndpoints = @()
+
+    foreach ($service in @($services.items)) {
+        if ($service.spec.type -eq "ExternalName" -or -not $service.spec.selector) {
+            continue
+        }
+
+        $serviceName = $service.metadata.name
+        $namespace = $service.metadata.namespace
+        $slices = @($endpointSlices.items | Where-Object {
+            $_.metadata.namespace -eq $namespace -and
+            $_.metadata.labels."kubernetes.io/service-name" -eq $serviceName
+        })
+
+        $readyEndpoints = 0
+        foreach ($slice in $slices) {
+            foreach ($endpoint in @($slice.endpoints)) {
+                if ($endpoint.conditions.ready -ne $false) {
+                    $readyEndpoints++
+                }
+            }
+        }
+
+        if ($readyEndpoints -eq 0) {
+            $servicesWithoutEndpoints += [pscustomobject]@{
+                Namespace = $namespace
+                Service   = $serviceName
+                Type      = $service.spec.type
+            }
+        }
+    }
+
+    if ($servicesWithoutEndpoints.Count -gt 0) {
+        $servicesWithoutEndpoints | Sort-Object Namespace, Service | Format-Table -AutoSize
+        Add-Warning "Found service(s) with selectors but no ready endpoints. Some may be intentionally idle, but app routes depending on them will fail."
+    } else {
+        Write-Ok "All selector-backed services have ready endpoints."
+    }
+} catch {
+    Add-Warning "Unable to verify service endpoints: $($_.Exception.Message)"
+}
+
+Write-Section "Public Route Reachability"
+foreach ($check in $PublicRouteChecks) {
+    $hostName = $check.Host
+    $path = $check.Path
+    $gatewayIP = $check.GatewayIP
+    $expected = @($check.Expected)
+
+    $publicStatus = Invoke-HttpStatus -HostName $hostName -Path $path
+    $gatewayStatus = Invoke-HttpStatus -HostName $hostName -Path $path -GatewayIP $gatewayIP
+
+    [pscustomobject]@{
+        Host          = $hostName
+        Path          = $path
+        Cloudflare    = $publicStatus
+        GatewayDirect = $gatewayStatus
+    } | Format-Table -AutoSize
+
+    $gatewayOk = $gatewayStatus -and ($expected -contains $gatewayStatus)
+    $publicOk = $publicStatus -and ($expected -contains $publicStatus)
+
+    if ($gatewayOk -and -not $publicOk) {
+        Add-Failure "$hostName$path works through Cilium gateway ($gatewayStatus) but fails through Cloudflare ($publicStatus). Check Cloudflare Tunnel public hostname/origin settings."
+    } elseif (-not $gatewayOk -and -not $publicOk) {
+        Add-Failure "$hostName$path is not reachable through gateway or Cloudflare."
+    } elseif (-not $gatewayOk) {
+        Add-Failure "$hostName$path is reachable through Cloudflare but gateway-direct status is $gatewayStatus, expected one of $($expected -join ',')."
+    } else {
+        Write-Ok "$hostName$path returned expected status through Cloudflare and gateway-direct."
+    }
 }
 
 Write-Section "DevOps Preview Namespaces"

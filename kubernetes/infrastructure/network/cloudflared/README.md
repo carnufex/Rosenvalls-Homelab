@@ -10,6 +10,7 @@ This directory contains the in-cluster Cloudflare Tunnel deployment.
 - The tunnel forwards `*.rosenvall.se` and `rosenvall.se` to `https://cilium-gateway-external.gateway.svc.cluster.local:443`.
 - The external Gateway then dispatches traffic to app-level `HTTPRoute` resources.
 - The wildcard published route in Cloudflare must enable `Match SNI to Host` so Cloudflared presents the requested hostname as SNI to the Gateway. A literal wildcard SNI such as `*.rosenvall.se` breaks TLS routing and returns Cloudflare `502`.
+- If a public hostname returns Cloudflare `503 no healthy upstream` while the same hostname works with `curl --resolve <host>:443:192.168.1.222`, the in-cluster Gateway and `HTTPRoute` are healthy and the Cloudflare dashboard route for that hostname is misconfigured or pointing at the wrong origin.
 - The local tunnel config is still generated through `configMapGenerator`, so process-level config changes roll the `cloudflared` pods automatically via the hashed ConfigMap name.
 
 This means the tunnel depends on the full secret chain being healthy:
@@ -27,6 +28,23 @@ This means the tunnel depends on the full secret chain being healthy:
 4. For the wildcard route `*.rosenvall.se`, enable `Match SNI to Host` in Additional application settings.
 5. Put the Bitwarden item UUID in `external-secret.yaml`.
 6. Ensure the bootstrap secret `bitwarden-access-token` exists in the cluster.
+
+## Public route triage
+
+Use the gateway-direct comparison before changing Kubernetes manifests:
+
+```powershell
+curl.exe -k -I https://headlamp.rosenvall.se
+curl.exe -k -I --resolve headlamp.rosenvall.se:443:192.168.1.222 https://headlamp.rosenvall.se
+```
+
+For app hostnames such as `headlamp.rosenvall.se` and `plex.rosenvall.se`, the Cloudflare route should use:
+
+- origin service: `https://cilium-gateway-external.gateway.svc.cluster.local:443`
+- `No TLS Verify`: enabled
+- `Match SNI to Host`: enabled
+
+If gateway-direct returns the expected app response but Cloudflare returns `503`, fix the Cloudflare Tunnel public hostname/origin entry. Restarting app pods or changing `HTTPRoute` resources will not fix that class of failure.
 
 ## Break-glass recovery
 

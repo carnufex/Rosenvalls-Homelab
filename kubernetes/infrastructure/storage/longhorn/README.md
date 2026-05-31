@@ -36,7 +36,7 @@ This directory contains the configuration for Longhorn, a distributed block stor
 
 ## Recovery Expectations
 
-For filesystem inconsistencies, snapshot or back up first and then perform recovery through GitOps changes and runbook steps.
+For filesystem inconsistencies, snapshot or back up first and then perform recovery through GitOps changes and runbook steps. A workload can be `Running` while its mounted filesystem returns `Input/output error`; in that case the safest first step is usually a single pod remount, followed by filesystem repair or Longhorn restore only if the error persists.
 
 For unplanned power loss:
 

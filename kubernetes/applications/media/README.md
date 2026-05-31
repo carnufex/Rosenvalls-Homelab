@@ -76,6 +76,23 @@ kubectl -n longhorn-system get volume.longhorn.io
 
 Longhorn `engine-instance` orphans that match the stuck config PVC can block attach after a node restart. Delete only matching orphan resources, then delete the stuck media pod so Kubernetes creates a clean replacement. Do not delete media PVCs or Longhorn replicas unless a backup/restore path has been explicitly chosen.
 
+If Plex is `Running` but not `Ready` and logs show `Input/output error` under `/config/Library`, treat it as a bad Longhorn config mount before changing Plex settings:
+
+```powershell
+kubectl -n media get pod -l app.kubernetes.io/name=plex -o wide
+kubectl -n media logs -l app.kubernetes.io/name=plex --tail=120
+kubectl -n longhorn-system get volume.longhorn.io pvc-21b281fd-03a2-490e-a02e-1156bb7efe2b -o wide
+```
+
+First delete only the Plex pod so Kubernetes remounts `PersistentVolumeClaim/plex-config` cleanly:
+
+```powershell
+kubectl -n media delete pod -l app.kubernetes.io/name=plex
+kubectl -n media rollout status deploy/plex
+```
+
+If the replacement pod still reports filesystem I/O errors, stop Plex and repair or restore `plex-config`. The weekly R2 backup job `r2-plex-config-weekly-backup` is the offsite restore path; prefer the newest completed Longhorn backup or local snapshot from before the first I/O error. Do not delete `plex-config` while preserving Plex identity is required.
+
 Verify Deluge VPN after it is live:
 
 ```powershell
