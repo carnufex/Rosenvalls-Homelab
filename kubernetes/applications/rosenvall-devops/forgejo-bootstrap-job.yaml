@@ -8,12 +8,18 @@ metadata:
     argocd.argoproj.io/sync-options: Replace=true
 spec:
   backoffLimit: 3
+  manualSelector: true
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rosenvall-devops-forgejo-bootstrap
+      rosenvall.devops/bootstrap: forgejo
   ttlSecondsAfterFinished: 604800
   template:
     metadata:
       labels:
         app.kubernetes.io/name: rosenvall-devops-forgejo-bootstrap
         app.kubernetes.io/part-of: rosenvall-devops
+        rosenvall.devops/bootstrap: forgejo
     spec:
       automountServiceAccountToken: false
       restartPolicy: Never
