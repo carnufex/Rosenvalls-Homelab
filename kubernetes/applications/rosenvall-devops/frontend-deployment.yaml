@@ -13,27 +13,34 @@ spec:
       app.kubernetes.io/name: rosenvall-devops-frontend
   template:
     metadata:
+      annotations:
+        rosenvall.devops/config-revision: deploy-328278b-2026-05-31
       labels:
         app.kubernetes.io/name: rosenvall-devops-frontend
     spec:
-      serviceAccountName: rosenvall-devops-runtime
+      serviceAccountName: rosenvall-devops-frontend
       automountServiceAccountToken: false
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: frontend
-          image: ghcr.io/carnufex/rosenvall-devops-frontend@sha256:d8428f1287ca2495e7974e3b5645a4a0630009ed516590a287ea326fc0314742
+          image: ghcr.io/carnufex/rosenvall-devops-frontend@sha256:d63c15df51f65fccbb8d7d3ce44a6a9f39edc55981c0b90cc99b976d6b1b4dd3
           imagePullPolicy: Always
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 101
+            runAsGroup: 101
+            readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-              add:
-                - CHOWN
-                - SETGID
-                - SETUID
           ports:
             - containerPort: 8080
               name: http
@@ -60,3 +67,13 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: nginx-cache
+          emptyDir: {}

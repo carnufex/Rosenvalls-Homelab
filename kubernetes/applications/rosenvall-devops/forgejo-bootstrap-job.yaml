@@ -1,44 +1,57 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: rosenvall-devops-forgejo
+  name: rosenvall-devops-forgejo-bootstrap
   namespace: rosenvall-devops
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
-  replicas: 1
-  revisionHistoryLimit: 2
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: rosenvall-devops-forgejo
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 604800
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: rosenvall-devops-forgejo
+        app.kubernetes.io/name: rosenvall-devops-forgejo-bootstrap
         app.kubernetes.io/part-of: rosenvall-devops
     spec:
       automountServiceAccountToken: false
+      restartPolicy: Never
       securityContext:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: forgejo
+        - name: bootstrap
           image: codeberg.org/forgejo/forgejo:15-rootless
           imagePullPolicy: IfNotPresent
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-          ports:
-            - containerPort: 3000
-              name: http
+          command:
+            - sh
+            - -ec
+            - |
+              for attempt in $(seq 1 30); do
+                echo "bootstrap attempt ${attempt}: ensuring ${FORGEJO_ADMIN_USERNAME}"
+                if forgejo admin user create \
+                  --admin \
+                  --username "$FORGEJO_ADMIN_USERNAME" \
+                  --password "$FORGEJO_ADMIN_PASSWORD" \
+                  --email rdo@rosenvall.local \
+                  --must-change-password=false; then
+                  echo "Forgejo RDO service user created."
+                  exit 0
+                fi
+
+                if forgejo admin user change-password \
+                  --username "$FORGEJO_ADMIN_USERNAME" \
+                  --password "$FORGEJO_ADMIN_PASSWORD"; then
+                  echo "Forgejo RDO service user already existed; password updated."
+                  exit 0
+                fi
+
+                sleep 2
+              done
+
+              echo "Failed to create or update Forgejo RDO service user." >&2
+              exit 1
           env:
             - name: USER_UID
               value: "1000"
@@ -76,29 +89,21 @@ spec:
                 secretKeyRef:
                   name: rosenvall-devops-forgejo-admin
                   key: password
-          readinessProbe:
-            httpGet:
-              path: /api/healthz
-              port: http
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 6
-          livenessProbe:
-            httpGet:
-              path: /api/healthz
-              port: http
-            initialDelaySeconds: 30
-            periodSeconds: 20
-            timeoutSeconds: 3
-            failureThreshold: 3
           resources:
             requests:
-              cpu: 100m
-              memory: 256Mi
+              cpu: 50m
+              memory: 128Mi
             limits:
               cpu: 500m
-              memory: 1Gi
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
           volumeMounts:
             - name: forgejo-data
               mountPath: /var/lib/gitea

@@ -8,6 +8,7 @@ metadata:
 data:
   ASPNETCORE_ENVIRONMENT: Production
   ASPNETCORE_URLS: http://+:8080
+  Authentication__Mode: Required
   Authentication__Authority: https://authentik.rosenvall.se/application/o/rosenvall-devops/
   Authentication__Audience: rosenvall-devops
   Frontend__AllowedOrigins__0: https://devops.rosenvall.se
@@ -23,7 +24,7 @@ data:
   Ai__Codex__Home: /app/codex-home
   Ai__Codex__ImplementationBypassSandbox: "false"
   Ai__Codex__KubernetesSandboxMode: danger-full-access
-  Ai__Codex__KubernetesRunnerImage: ghcr.io/carnufex/rosenvall-devops-api@sha256:563e3605e872d11594e6d9c0b41b687db5d9b372f542a7303aa336583778c046
+  Ai__Codex__KubernetesRunnerImage: ghcr.io/carnufex/rosenvall-devops-api@sha256:c9a99150577abb03a0b4dd492c4b85b340e85780cb1ce63216d3b989c4bbd9f4
   Ai__Codex__PreviewSourceMode: kubernetes-job
   Ai__Codex__PreviewSourceJobTimeoutSeconds: "600"
   Ai__Codex__PreviewSourceApiMemoryMinHeadroomBytes: "268435456"

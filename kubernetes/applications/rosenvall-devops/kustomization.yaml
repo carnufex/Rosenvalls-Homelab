@@ -16,6 +16,7 @@ resources:
   - preview-cleaner-cronjob.yaml
   - forgejo-pvc.yaml
   - forgejo-service.yaml
+  - forgejo-bootstrap-job.yaml
   - forgejo-deployment.yaml
   - forgejo-networkpolicy.yaml
   - api-service.yaml

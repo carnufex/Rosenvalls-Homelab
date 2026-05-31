@@ -31,8 +31,8 @@ Security notes:
 - Preview namespaces are cleaned by `CronJob/rosenvall-devops-preview-cleaner` after 24 hours when they carry `app.kubernetes.io/part-of=rosenvall-devops-preview`. The cleaner skips `devops-previews` and any namespace annotated with `rosenvall.devops/keep=true`.
 - `pods/log` is intentionally not granted. Add it back only if the app has a documented log-viewing feature that needs it.
 - Keep Codex sandbox enforcement enabled; do not set `Ai__Codex__ImplementationBypassSandbox` to `true`.
-- API and frontend containers disallow privilege escalation and use the runtime default seccomp profile. The frontend keeps only `CHOWN`, `SETGID`, and `SETUID` because the current nginx entrypoint chowns cache directories and starts workers as UID/GID 101; remove those exceptions after the image is rebuilt to avoid startup chown/setuid.
-- `runAsNonRoot` is not forced yet because the current image user contract is not documented; add it after the GHCR images are verified to run as a non-root UID.
+- API and frontend containers disallow privilege escalation and use the runtime default seccomp profile. The API image runs as UID/GID 1000 with a read-only root filesystem, writable `/tmp`, and writable state/Codex PVC mounts. The frontend uses the unprivileged nginx image as UID/GID 101 with a read-only root filesystem and writable `/tmp` plus nginx cache mounts.
+- The API uses `ServiceAccount/rosenvall-devops-api` for Kubernetes orchestration. `ServiceAccount/rosenvall-devops-runtime` is kept for preview-source result publishing only and is bound to a namespaced ConfigMap writer role, not the preview manager ClusterRole.
 
 Preview cleanup checks:
 

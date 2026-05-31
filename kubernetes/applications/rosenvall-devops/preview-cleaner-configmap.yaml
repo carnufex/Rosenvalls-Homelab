@@ -14,9 +14,36 @@ data:
     ttl_seconds="$((ttl_hours * 3600))"
     selector="app.kubernetes.io/part-of=rosenvall-devops-preview"
 
-    kubectl get namespaces -l "${selector}" -o go-template='{{range .items}}{{.metadata.name}}{{"\t"}}{{.metadata.creationTimestamp}}{{"\t"}}{{index .metadata.annotations "rosenvall.devops/keep"}}{{"\n"}}{{end}}' |
-    while IFS="$(printf '\t')" read -r name created keep; do
+    is_guid() {
+      echo "$1" | grep -Eq '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+    }
+
+    kubectl get namespaces -l "${selector}" -o go-template='{{range .items}}{{.metadata.name}}{{"\t"}}{{.metadata.creationTimestamp}}{{"\t"}}{{index .metadata.annotations "rosenvall.devops/keep"}}{{"\t"}}{{index .metadata.labels "rosenvall.devops/managed-by"}}{{"\t"}}{{index .metadata.labels "rosenvall.devops/board-id"}}{{"\t"}}{{index .metadata.labels "rosenvall.devops/work-item-id"}}{{"\n"}}{{end}}' |
+    while IFS="$(printf '\t')" read -r name created keep managed_by board_id work_item_id; do
       if [ -z "${name}" ] || [ "${name}" = "devops-previews" ]; then
+        continue
+      fi
+
+      case "${name}" in
+        devops-preview-*) ;;
+        *)
+          echo "skip ${name}: name does not start with devops-preview-"
+          continue
+          ;;
+      esac
+
+      if [ "${managed_by}" != "rosenvall-devops" ]; then
+        echo "skip ${name}: missing rosenvall.devops/managed-by=rosenvall-devops"
+        continue
+      fi
+
+      if ! is_guid "${board_id}"; then
+        echo "skip ${name}: missing valid rosenvall.devops/board-id"
+        continue
+      fi
+
+      if ! is_guid "${work_item_id}"; then
+        echo "skip ${name}: missing valid rosenvall.devops/work-item-id"
         continue
       fi
 

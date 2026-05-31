@@ -16,19 +16,28 @@ spec:
   template:
     metadata:
       annotations:
-        rosenvall.devops/config-revision: localgit-forgejo-2026-05-28
+        rosenvall.devops/config-revision: deploy-328278b-2026-05-31
       labels:
         app.kubernetes.io/name: rosenvall-devops-api
     spec:
-      serviceAccountName: rosenvall-devops-runtime
+      serviceAccountName: rosenvall-devops-api
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:563e3605e872d11594e6d9c0b41b687db5d9b372f542a7303aa336583778c046
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:c9a99150577abb03a0b4dd492c4b85b340e85780cb1ce63216d3b989c4bbd9f4
           imagePullPolicy: Always
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             capabilities:
               drop:
@@ -70,11 +79,19 @@ spec:
                   name: rosenvall-devops-github-app
                   key: client-secret
                   optional: true
+            - name: GitHub__WebhookSecret
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-github-app
+                  key: webhook-secret
+                  optional: true
             - name: LocalGit__Password
               valueFrom:
                 secretKeyRef:
                   name: rosenvall-devops-forgejo-admin
                   key: password
+            - name: HOME
+              value: /tmp
           resources:
             requests:
               cpu: 100m
@@ -103,6 +120,8 @@ spec:
               mountPath: /app/data
             - name: codex-home
               mountPath: /app/codex-home
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: state
           persistentVolumeClaim:
@@ -110,3 +129,5 @@ spec:
         - name: codex-home
           persistentVolumeClaim:
             claimName: rosenvall-devops-codex-home
+        - name: tmp
+          emptyDir: {}
