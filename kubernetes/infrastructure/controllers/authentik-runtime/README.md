@@ -65,6 +65,10 @@ Kubernetes RBAC uses the kube-apiserver OIDC group prefix
 `authentik:`, so the read-only ClusterRoleBinding references
 `authentik:Kubernetes Viewers`.
 
+Being an Authentik administrator does not automatically grant access to
+applications. App access is controlled by the application-specific groups above,
+for example `ArgoCD Admins` or `ArgoCD Viewers` for ArgoCD.
+
 ## User Onboarding
 
 Add users from the Authentik admin UI:
