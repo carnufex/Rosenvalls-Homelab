@@ -5,6 +5,7 @@ metadata:
   namespace: rosenvall-devops
   annotations:
     argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   backoffLimit: 3
   ttlSecondsAfterFinished: 604800
@@ -16,6 +17,13 @@ spec:
     spec:
       automountServiceAccountToken: false
       restartPolicy: Never
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: rosenvall-devops-forgejo
+              topologyKey: kubernetes.io/hostname
       securityContext:
         fsGroup: 1000
         seccompProfile:
