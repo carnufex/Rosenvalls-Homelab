@@ -22,6 +22,17 @@ data:
       apk add --no-cache tar gzip coreutils >/dev/null
     }
 
+    prepare_rclone_crypt() {
+      if [ -n "${RCLONE_CONFIG_CRITICAL_PASSWORD:-}" ]; then
+        RCLONE_CONFIG_CRITICAL_PASSWORD="$(rclone obscure "$RCLONE_CONFIG_CRITICAL_PASSWORD")"
+        export RCLONE_CONFIG_CRITICAL_PASSWORD
+      fi
+      if [ -n "${RCLONE_CONFIG_CRITICAL_PASSWORD2:-}" ]; then
+        RCLONE_CONFIG_CRITICAL_PASSWORD2="$(rclone obscure "$RCLONE_CONFIG_CRITICAL_PASSWORD2")"
+        export RCLONE_CONFIG_CRITICAL_PASSWORD2
+      fi
+    }
+
     month_id() {
       date -u +%Y-%m
     }
@@ -54,6 +65,7 @@ data:
     . /scripts/common.sh
 
     install_tools
+    prepare_rclone_crypt
     month="$(month_id)"
     work="/work/authentik-$month"
     mkdir -p "$work"
@@ -80,6 +92,7 @@ data:
     . /scripts/common.sh
 
     install_tools
+    prepare_rclone_crypt
     month="$(month_id)"
     work="/work/app-configs-$month"
     mkdir -p "$work/app-configs"
