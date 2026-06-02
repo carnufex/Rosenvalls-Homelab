@@ -3,12 +3,17 @@ kind: CronJob
 metadata:
   name: plex-self-heal
   namespace: media
+  labels:
+    app.kubernetes.io/name: plex-self-heal
 spec:
   schedule: "*/5 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 3
   jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: plex-self-heal
     spec:
       backoffLimit: 0
       template:
