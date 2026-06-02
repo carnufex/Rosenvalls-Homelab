@@ -4,8 +4,10 @@ param(
     [string[]]$AllowedOutOfSyncApps = @("ragflow-helm"),
     [hashtable[]]$PublicRouteChecks = @(
         @{ Host = "argo.rosenvall.se"; Path = "/api/dex/.well-known/openid-configuration"; GatewayIP = "192.168.1.222"; Expected = @(200) },
+        @{ Host = "devops.rosenvall.se"; Path = "/"; GatewayIP = "192.168.1.222"; Expected = @(200, 302) },
         @{ Host = "headlamp.rosenvall.se"; Path = "/"; GatewayIP = "192.168.1.222"; Expected = @(200, 302) },
-        @{ Host = "plex.rosenvall.se"; Path = "/"; GatewayIP = "192.168.1.222"; Expected = @(200, 302, 401) }
+        @{ Host = "plex.rosenvall.se"; Path = "/"; GatewayIP = "192.168.1.222"; Expected = @(200, 302, 401) },
+        @{ Host = "seerr.rosenvall.se"; Path = "/"; GatewayIP = "192.168.1.222"; Expected = @(200, 302, 401) }
     )
 )
 

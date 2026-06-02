@@ -43,8 +43,17 @@ For app hostnames such as `headlamp.rosenvall.se` and `plex.rosenvall.se`, the C
 - origin service: `https://cilium-gateway-external.gateway.svc.cluster.local:443`
 - `No TLS Verify`: enabled
 - `Match SNI to Host`: enabled
+- HTTP Host Header override: unset
 
 If gateway-direct returns the expected app response but Cloudflare returns `503`, fix the Cloudflare Tunnel public hostname/origin entry. Restarting app pods or changing `HTTPRoute` resources will not fix that class of failure.
+
+Current known failure pattern: `headlamp.rosenvall.se`, `plex.rosenvall.se`, and
+`seerr.rosenvall.se` can return Cloudflare `503 no healthy upstream` while
+gateway-direct returns `200` or Authentik `302`. In that case:
+
+1. Check that no more-specific published application route for the hostname exists in another tunnel or app.
+2. Keep the wildcard `*.rosenvall.se` route pointed at the external Cilium Gateway.
+3. If wildcard routing still fails for only those hostnames, create explicit published application routes for those hostnames with the same origin settings as the wildcard route.
 
 ## Break-glass recovery
 

@@ -6,5 +6,6 @@ resources:
   - authentik-db-prereqs
   - authentik-runtime
   - authentik-db-ops
+  - r2-critical-dr
   - cert-manager
   - external-secrets

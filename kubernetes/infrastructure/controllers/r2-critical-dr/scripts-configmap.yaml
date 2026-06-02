@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: r2-critical-dr-scripts
+  namespace: r2-critical-dr
+data:
+  common.sh: |
+    #!/bin/sh
+    set -eu
+
+    log() {
+      printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"
+    }
+
+    install_tools() {
+      if ! command -v rclone >/dev/null 2>&1; then
+        apk add --no-cache rclone >/dev/null
+      fi
+      if ! command -v kubectl >/dev/null 2>&1; then
+        apk add --no-cache kubectl >/dev/null
+      fi
+      apk add --no-cache tar gzip coreutils >/dev/null
+    }
+
+    month_id() {
+      date -u +%Y-%m
+    }
+
+    kubectl_pod_by_selector() {
+      namespace="$1"
+      selector="$2"
+      kubectl -n "$namespace" get pod -l "$selector" \
+        --field-selector=status.phase=Running \
+        -o jsonpath='{.items[0].metadata.name}'
+    }
+
+    prune_month_dirs() {
+      remote="$1"
+      keep="${2:-3}"
+      dirs="$(rclone lsf --dirs-only "$remote" 2>/dev/null | sed 's#/$##' | sort || true)"
+      count="$(printf '%s\n' "$dirs" | sed '/^$/d' | wc -l | tr -d ' ')"
+      if [ "$count" -le "$keep" ]; then
+        return 0
+      fi
+      remove_count="$((count - keep))"
+      printf '%s\n' "$dirs" | sed '/^$/d' | head -n "$remove_count" | while IFS= read -r old_dir; do
+        log "Pruning old critical DR backup $remote/$old_dir"
+        rclone purge "$remote/$old_dir"
+      done
+    }
+  authentik-critical-backup.sh: |
+    #!/bin/sh
+    set -eu
+    . /scripts/common.sh
+
+    install_tools
+    month="$(month_id)"
+    work="/work/authentik-$month"
+    mkdir -p "$work"
+
+    pod="$(kubectl_pod_by_selector authentik 'cnpg.io/cluster=authentik-postgresql,cnpg.io/instanceRole=primary')"
+    if [ -z "$pod" ]; then
+      log "No running Authentik PostgreSQL primary pod found."
+      exit 1
+    fi
+
+    log "Dumping Authentik database from pod $pod"
+    kubectl -n authentik exec "$pod" -c postgres -- \
+      sh -lc 'pg_dump -d authentik --no-owner --no-privileges | gzip -9' \
+      > "$work/authentik.sql.gz"
+
+    gzip -t "$work/authentik.sql.gz"
+    log "Uploading encrypted Authentik dump to critical:authentik/$month/"
+    rclone copy "$work/authentik.sql.gz" "critical:authentik/$month/"
+    prune_month_dirs "critical:authentik" 3
+    log "Authentik critical R2 backup complete."
+  app-config-critical-backup.sh: |
+    #!/bin/sh
+    set -eu
+    . /scripts/common.sh
+
+    install_tools
+    month="$(month_id)"
+    work="/work/app-configs-$month"
+    mkdir -p "$work/app-configs"
+
+    capture_config() {
+      name="$1"
+      namespace="$2"
+      selector="$3"
+      container="$4"
+      source_path="$5"
+      shift 5
+
+      pod="$(kubectl_pod_by_selector "$namespace" "$selector")"
+      if [ -z "$pod" ]; then
+        log "No running pod found for $namespace/$name"
+        exit 1
+      fi
+
+      parent="$(dirname "$source_path")"
+      base="$(basename "$source_path")"
+      log "Capturing slim config for $name from $namespace/$pod:$source_path"
+      kubectl -n "$namespace" exec "$pod" -c "$container" -- \
+        tar -C "$parent" "$@" -czf - "$base" > "$work/app-configs/$name.tar.gz"
+      gzip -t "$work/app-configs/$name.tar.gz"
+    }
+
+    capture_config homeassistant homeassistant 'app.kubernetes.io/name=homeassistant' homeassistant /config \
+      --exclude='config/.cache' \
+      --exclude='config/deps' \
+      --exclude='config/tts'
+
+    capture_config plex media 'app.kubernetes.io/name=plex' plex /config \
+      --exclude='config/Library/Application Support/Plex Media Server/Metadata' \
+      --exclude='config/Library/Application Support/Plex Media Server/Media' \
+      --exclude='config/Library/Application Support/Plex Media Server/Cache' \
+      --exclude='config/Library/Application Support/Plex Media Server/Codecs' \
+      --exclude='config/Library/Application Support/Plex Media Server/Logs' \
+      --exclude='config/Library/Application Support/Plex Media Server/Crash Reports' \
+      --exclude='config/Library/Application Support/Plex Media Server/Updates' \
+      --exclude='config/Library/Application Support/Plex Media Server/Plug-in Support/Caches'
+
+    capture_config radarr media 'app.kubernetes.io/name=radarr' radarr /config \
+      --exclude='config/MediaCover' \
+      --exclude='config/logs' \
+      --exclude='config/Backups' \
+      --exclude='config/Sentry'
+
+    capture_config sonarr media 'app.kubernetes.io/name=sonarr' sonarr /config \
+      --exclude='config/MediaCover' \
+      --exclude='config/logs' \
+      --exclude='config/Backups' \
+      --exclude='config/Sentry'
+
+    capture_config seerr media 'app.kubernetes.io/name=seerr' seerr /app/config \
+      --exclude='config/.cache' \
+      --exclude='config/.yarn' \
+      --exclude='config/logs'
+
+    capture_config jackett media 'app.kubernetes.io/name=jackett' jackett /config \
+      --exclude='config/Jackett/Logs' \
+      --exclude='config/Jackett/Indexers/Cache'
+
+    capture_config deluge media 'app.kubernetes.io/name=deluge-vpn' deluge /config \
+      --exclude='config/archive' \
+      --exclude='config/icons' \
+      --exclude='config/torrents' \
+      --exclude='config/plugins/.python-eggs'
+
+    tar -C "$work" -czf "$work/app-configs.tar.gz" app-configs
+    gzip -t "$work/app-configs.tar.gz"
+
+    log "Uploading encrypted app-config archive to critical:app-configs/$month/"
+    rclone copy "$work/app-configs.tar.gz" "critical:app-configs/$month/"
+    prune_month_dirs "critical:app-configs" 3
+    log "App config critical R2 backup complete."

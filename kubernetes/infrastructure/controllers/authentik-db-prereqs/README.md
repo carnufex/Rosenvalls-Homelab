@@ -28,7 +28,9 @@ the bootstrap secrets have been created.
 
 ## Backup And DR Status
 
-Active Authentik CNPG backups to Cloudflare R2 are disabled to avoid R2 Class A operation costs. The live cluster currently relies on Longhorn replicas and local snapshots for immediate recovery. A new local S3-compatible backup target, such as MinIO, must be added before Authentik database restore is considered fully protected again.
+Active Authentik CNPG backups to Cloudflare R2 are disabled to avoid R2 Class A operation costs. The live cluster relies on Longhorn replicas and local snapshots for immediate in-cluster recovery, plus `CronJob/r2-critical-dr/authentik-critical-r2` for a monthly encrypted logical dump to R2 critical DR storage.
+
+Do not re-enable CNPG `barmanObjectStore` or WAL archiving to R2 in default mode. If continuous database backup is needed later, use a local S3-compatible backend such as MinIO outside Longhorn's own data disks.
 
 ## DR Restore Mode (opt-in)
 

@@ -18,9 +18,9 @@ Verified from the current cluster health pass:
 Partially verified:
 
 - `ragflow-helm` was `OutOfSync Healthy` and needs follow-up before the cluster is considered fully clean.
-- Longhorn local snapshots exist, but active offsite backup is paused until local MinIO or another non-R2 backend is added.
+- Longhorn local snapshots exist, and R2 critical DR now covers only Authentik, bootstrap material, and slim app configs.
 - Media NFS has verification scripts and documentation, but media files still need a separate file-level backup policy.
-- Authentik has a historical CNPG restore overlay, but active R2 WAL/base backups are disabled and a new local backup target is required.
+- Authentik has a low-frequency logical R2 dump path. Active R2 WAL/base backups remain disabled.
 
 Missing or residual risk:
 
@@ -100,7 +100,8 @@ Full-cluster power-cycle drill evidence on 2026-05-25: all Talos nodes were rebo
 | Core cluster bootstrap | Strong | OpenTofu + Talos + `bootstrap.ps1` are codified |
 | Secret chain bootstrap | Manual dependency | Requires `bitwarden-access-token` |
 | Public routing | Partial | In-cluster connector is in Git, published routes are dashboard-managed |
-| Authentik database | Partial | Active R2 backups are disabled; add local MinIO before relying on restore |
+| Authentik database | Partial | Monthly encrypted logical R2 dump exists; restore drill still required |
+| Slim app configs | Partial | Monthly encrypted R2 archive excludes metadata/cache/media |
 | Longhorn volumes | Partial | Local snapshots exist; active offsite backup is disabled to avoid R2 Class A costs |
 | MatPlan data | Weak | Runtime is defined, restore path is not documented |
 | Talos/Kubernetes access artifacts | Weak | Generated locally, no repo-defined off-machine backup policy |
@@ -133,16 +134,17 @@ kubectl get httproute -A
 
 If the wildcard route still fails while the cluster objects are healthy, inspect the Cloudflare dashboard-side published route and confirm `Match SNI to Host` is enabled.
 
-## Authentik Restore
+## Critical R2 Restore
 
-Authentik is the best-documented restore path in the repo today.
+R2 is not a general backup backend. It is a low-frequency encrypted offsite DR store for:
 
-- default mode: `initdb`
-- restore mode: switch to the `dr-restore` overlay under `authentik-db-prereqs`
-- historical live backups: `s3://rosenvall-homelab-backup/authentik/live/`
-- DR overlay writes to: `s3://rosenvall-homelab-backup/authentik/dr/`
+- `critical-dr/bootstrap/<yyyy-mm>/`
+- `critical-dr/authentik/<yyyy-mm>/`
+- `critical-dr/app-configs/<yyyy-mm>/`
 
-Default live-cluster writes to R2 are disabled. Do not treat the historical R2 prefix as current unless a fresh backup inventory confirms a usable recovery point.
+The critical backup job uses `rclone crypt`. Restore requires the same Bitwarden-backed R2 credentials and crypt material used by `ExternalSecret/r2-critical-dr-secrets`.
+
+For Authentik, restore from the logical dump after the base `authentik-postgresql` cluster exists, rather than enabling CNPG R2 WAL replay. Historical CNPG barman prefixes under `authentik/live` and `authentik/dr` are legacy material and should not be treated as current unless a fresh inventory confirms a usable recovery point.
 
 Do not mix backup prefixes between fresh bootstrap and DR-restored clusters.
 
@@ -176,7 +178,8 @@ $env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
 For state restore drills, use non-production restore targets first:
 
 - restore one small Longhorn-backed config PVC from backup into a temporary namespace
-- restore Authentik with the documented `dr-restore` overlay in a controlled window
+- restore Authentik from the critical logical dump into a temporary database in a controlled window
+- restore slim app configs into a temporary directory and verify excluded metadata/cache/media stay excluded
 - verify MatPlan and BikePal CNPG backup/restore before treating those databases as recoverable
 - verify media files through NFS and a separate file-level backup, not through Longhorn
 

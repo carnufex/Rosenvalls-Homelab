@@ -1,5 +1,8 @@
 param(
-    [decimal]$LonghornStoredBackupWarnGiB = 8
+    [decimal]$LonghornStoredBackupWarnGiB = 8,
+    [decimal]$R2StoredObjectWarnGiB = 8,
+    [string]$RawR2Remote = "r2:rosenvall-homelab-backup",
+    [string]$CriticalR2Remote = "critical:"
 )
 
 $ErrorActionPreference = "Stop"
@@ -51,6 +54,10 @@ function Test-IsR2Reference {
     }
 
     return $Value -match "rosenvall-homelab-backup|r2\.cloudflarestorage\.com|cloudflarestorage\.com"
+}
+
+function Test-RcloneAvailable {
+    return [bool](Get-Command rclone -ErrorAction SilentlyContinue)
 }
 
 Write-Host "== R2 Active Write Path Audit ==" -ForegroundColor Cyan
@@ -159,6 +166,55 @@ try {
     }
 } catch {
     Add-Warning "Unable to inspect Longhorn backup inventory: $($_.Exception.Message)"
+}
+
+Write-Host ""
+Write-Host "== R2 Object Guard ==" -ForegroundColor Cyan
+
+if (-not (Test-RcloneAvailable)) {
+    Add-Warning "rclone is not available locally; skipped raw R2 object guard."
+} else {
+    try {
+        $rawObjects = & rclone lsf -R --files-only $RawR2Remote 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            throw "rclone lsf failed for $RawR2Remote"
+        }
+
+        $outsideCritical = @($rawObjects | Where-Object { $_ -and ($_ -notmatch "^critical-dr/") })
+        if ($outsideCritical.Count -gt 0) {
+            Add-Failure "R2 contains $($outsideCritical.Count) object(s) outside critical-dr/. Run scripts/r2-critical-inventory.ps1 before deleting anything."
+        } else {
+            Write-Ok "All listable R2 objects are under critical-dr/."
+        }
+
+        $sizeJson = & rclone size --json $RawR2Remote 2>$null
+        if ($LASTEXITCODE -eq 0 -and $sizeJson) {
+            $size = $sizeJson | ConvertFrom-Json
+            $sizeGiB = [math]::Round([decimal]$size.bytes / 1GB, 3)
+            if ($sizeGiB -gt $R2StoredObjectWarnGiB) {
+                Add-Warning "R2 raw object size is about ${sizeGiB}GiB, above ${R2StoredObjectWarnGiB}GiB warning threshold."
+            } else {
+                Write-Ok "R2 raw object size is about ${sizeGiB}GiB."
+            }
+        }
+    } catch {
+        Add-Warning "Unable to inspect raw R2 objects with rclone: $($_.Exception.Message)"
+    }
+
+    try {
+        foreach ($category in @("authentik", "app-configs", "bootstrap")) {
+            $dirs = @(& rclone lsf --dirs-only "$CriticalR2Remote$category/" 2>$null | Where-Object { $_ })
+            if ($LASTEXITCODE -ne 0) {
+                continue
+            }
+
+            if ($category -eq "authentik" -and $dirs.Count -gt 3) {
+                Add-Warning "R2 critical Authentik backup retention has $($dirs.Count) month directories; expected at most 3."
+            }
+        }
+    } catch {
+        Add-Warning "Unable to inspect critical R2 retention with rclone: $($_.Exception.Message)"
+    }
 }
 
 if ($warnings.Count -gt 0) {

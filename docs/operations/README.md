@@ -59,6 +59,8 @@ Use these after:
 .\scripts\post-power-loss-check.ps1
 .\scripts\provision-host1-media-nfs-vm.ps1
 .\scripts\r2-backup-audit.ps1
+.\scripts\r2-critical-inventory.ps1
+.\scripts\build-r2-dr-kit.ps1
 .\scripts\seed-homeassistant.ps1
 .\scripts\seed-media-configs.ps1
 .\scripts\verify-local-routes.ps1
@@ -200,13 +202,27 @@ Prometheus uses bounded local TSDB storage. If it crashloops with `panic: preall
 
 ### R2 Backup Cost Guard
 
-R2 is not an active backup backend in free-tier mode. It must not be used by Longhorn polling/backup jobs or CNPG WAL/base backups without an explicit budget decision.
+R2 is not an active Longhorn or CNPG WAL/base backup backend in free-tier mode. It must not be used by Longhorn polling/backup jobs or CNPG `barmanObjectStore` without an explicit budget decision.
 
 ```powershell
 .\scripts\r2-backup-audit.ps1
 ```
 
-This check fails if Longhorn `BackupTarget/default`, Longhorn recurring backup jobs, CNPG `barmanObjectStore`, or PVC labels still point at R2. It also lists historical Longhorn backup inventory so a keep/delete list can be built before any R2 object cleanup.
+This check fails if Longhorn `BackupTarget/default`, Longhorn recurring backup jobs, CNPG `barmanObjectStore`, or PVC labels still point at R2. When local `rclone` is configured, it also fails if listable R2 objects exist outside `critical-dr/`, warns above 8GiB, and checks critical Authentik retention.
+
+Critical R2 jobs are monthly and encrypted with `rclone crypt`:
+
+- `CronJob/r2-critical-dr/authentik-critical-r2`
+- `CronJob/r2-critical-dr/app-config-critical-r2`
+
+Manual DR-kit and cleanup inventory:
+
+```powershell
+.\scripts\build-r2-dr-kit.ps1
+.\scripts\r2-critical-inventory.ps1
+```
+
+Both scripts are dry-run by default. `build-r2-dr-kit.ps1` requires `-Upload` to copy anything to R2; `r2-critical-inventory.ps1` requires `-Apply` to delete anything.
 
 ### NFS Media Library
 

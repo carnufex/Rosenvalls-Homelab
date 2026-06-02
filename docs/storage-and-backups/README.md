@@ -85,16 +85,33 @@ Longhorn is configured with:
 
 - hourly local snapshots for the `default` recurring-job group, retained for 24 snapshots
 
-Active R2 backups are disabled. Cloudflare R2 exceeded the free Class A operation allowance when it was used as an active Longhorn and CNPG backup target. Do not point Longhorn, CNPG, or any high-frequency backup process at R2 unless there is an explicit budget decision.
+Active Longhorn and CNPG R2 backups are disabled. Cloudflare R2 exceeded the free Class A operation allowance when it was used as an active Longhorn and CNPG backup target. Do not point Longhorn, CNPG, or any high-frequency backup process at R2 unless there is an explicit budget decision.
 
 Config PVCs should carry `recurring-job.longhorn.io/source=enabled` plus `recurring-job-group.longhorn.io/default=enabled` for local snapshots only. The next primary backup target should be local S3-compatible storage, such as MinIO on a disk outside Longhorn's own data disks.
 
-R2 is reserved for a small, manual or low-frequency offsite DR copy only. Keep it well below the free-tier limits for both storage and Class A operations.
+R2 is reserved for low-frequency critical DR only. The live R2 policy is:
+
+- monthly Authentik logical dump under encrypted `critical-dr/authentik/<yyyy-mm>/`
+- monthly slim app config archive under encrypted `critical-dr/app-configs/<yyyy-mm>/`
+- manual encrypted bootstrap DR kit under `critical-dr/bootstrap/<yyyy-mm>/`
+- three monthly copies retained for each critical category
+- no media files, generated metadata, cache, thumbnails, Longhorn volume backups, CNPG WAL archives, or general app data
+
+Slim app config means restore-relevant configuration only. It includes Home Assistant, Plex, Radarr, Sonarr, Seerr, Jackett, and Deluge configuration files and local app databases, but excludes Plex metadata/cache/codecs/logs, Radarr/Sonarr media covers/logs/backups, and generated cache directories.
+
+Keep R2 well below the free-tier limits for both storage and Class A operations.
 
 Audit R2 risk with:
 
 ```powershell
 .\scripts\r2-backup-audit.ps1
+```
+
+Build and inspect critical R2 artifacts with:
+
+```powershell
+.\scripts\build-r2-dr-kit.ps1
+.\scripts\r2-critical-inventory.ps1
 ```
 
 ### NFS Media Library

@@ -1,0 +1,85 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: authentik-critical-r2
+  namespace: r2-critical-dr
+spec:
+  schedule: "10 3 1 * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: r2-critical-dr
+          restartPolicy: Never
+          containers:
+            - name: backup
+              image: alpine:3.21.3
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "/scripts/authentik-critical-backup.sh"]
+              envFrom:
+                - secretRef:
+                    name: r2-critical-dr-secrets
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: work
+                  mountPath: /work
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsUser: 0
+                runAsGroup: 0
+          volumes:
+            - name: scripts
+              configMap:
+                name: r2-critical-dr-scripts
+                defaultMode: 0555
+            - name: work
+              emptyDir: {}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: app-config-critical-r2
+  namespace: r2-critical-dr
+spec:
+  schedule: "40 3 1 * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: r2-critical-dr
+          restartPolicy: Never
+          containers:
+            - name: backup
+              image: alpine:3.21.3
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "/scripts/app-config-critical-backup.sh"]
+              envFrom:
+                - secretRef:
+                    name: r2-critical-dr-secrets
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: work
+                  mountPath: /work
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsUser: 0
+                runAsGroup: 0
+          volumes:
+            - name: scripts
+              configMap:
+                name: r2-critical-dr-scripts
+                defaultMode: 0555
+            - name: work
+              emptyDir: {}
