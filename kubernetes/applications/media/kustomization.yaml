@@ -24,6 +24,7 @@ resources:
   - seerr-oauth2-proxy-service.yaml
   - plex-oauth2-proxy-service.yaml
   - plex-service.yaml
+  - plex-self-heal-rbac.yaml
   - radarr-httproute.yaml
   - sonarr-httproute.yaml
   - jackett-httproute.yaml
@@ -41,3 +42,4 @@ resources:
   - seerr-oauth2-proxy-deployment.yaml
   - plex-oauth2-proxy-deployment.yaml
   - plex-deployment.yaml
+  - plex-self-heal-cronjob.yaml

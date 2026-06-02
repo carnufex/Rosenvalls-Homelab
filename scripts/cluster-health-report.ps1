@@ -492,6 +492,83 @@ try {
     Add-Warning "Unable to verify service endpoints: $($_.Exception.Message)"
 }
 
+Write-Section "Plex Semantic Health"
+try {
+    $plexPods = Invoke-KubectlJson @("get", "pods", "-n", "media", "-l", "app.kubernetes.io/name=plex")
+    if (@($plexPods.items).Count -ne 1) {
+        Add-Failure "Expected exactly one Plex pod, found $(@($plexPods.items).Count)."
+    } else {
+        $plexPod = $plexPods.items[0]
+        $plexReady = Get-ConditionStatus -Conditions $plexPod.status.conditions -Type "Ready"
+        [pscustomobject]@{
+            Pod   = $plexPod.metadata.name
+            Ready = $plexReady
+            Node  = $plexPod.spec.nodeName
+            IP    = $plexPod.status.podIP
+        } | Format-Table -AutoSize
+
+        if ($plexReady -ne "True") {
+            Add-Failure "Plex pod is not Ready."
+        }
+    }
+
+    $plexConfigPvc = Invoke-KubectlJson @("get", "pvc", "plex-config", "-n", "media")
+    if ($plexConfigPvc.status.phase -ne "Bound") {
+        Add-Failure "Plex config PVC is $($plexConfigPvc.status.phase), expected Bound."
+    }
+
+    $plexVolumeName = $plexConfigPvc.spec.volumeName
+    if ($plexVolumeName) {
+        try {
+            $plexLonghornVolume = Invoke-KubectlJson @("get", "volumes.longhorn.io", $plexVolumeName, "-n", "longhorn-system")
+            [pscustomobject]@{
+                Volume     = $plexVolumeName
+                State      = $plexLonghornVolume.status.state
+                Robustness = $plexLonghornVolume.status.robustness
+                Node       = $plexLonghornVolume.status.currentNodeID
+            } | Format-Table -AutoSize
+
+            if ($plexLonghornVolume.status.state -ne "attached") {
+                Add-Failure "Plex config Longhorn volume is $($plexLonghornVolume.status.state), expected attached."
+            } elseif ($plexLonghornVolume.status.robustness -ne "healthy") {
+                Add-Warning "Plex config Longhorn volume robustness is $($plexLonghornVolume.status.robustness), expected healthy."
+            }
+        } catch {
+            Add-Warning "Unable to verify Plex Longhorn volume ${plexVolumeName}: $($_.Exception.Message)"
+        }
+    }
+
+    kubectl -n media exec deploy/plex -- sh -c 'curl -fsS --max-time 10 http://127.0.0.1:32400/identity | grep -q MediaContainer'
+    if ($LASTEXITCODE -ne 0) {
+        Add-Failure "Plex /identity check failed from inside the pod."
+    } else {
+        Write-Ok "Plex /identity responds from inside the pod."
+    }
+
+    kubectl -n media exec deploy/plex -- sh -c 'dir="/config/Library/Application Support/Plex Media Server/Codecs"; [ ! -d "$dir" ] || ! find "$dir" -type f -name EasyAudioEncoder ! -perm -111 | grep -q .'
+    if ($LASTEXITCODE -ne 0) {
+        Add-Failure "Plex EasyAudioEncoder cache contains non-executable binaries; restart Plex after initContainer rollout or clear the codec cache."
+    } else {
+        Write-Ok "Plex EasyAudioEncoder cache has no non-executable binaries."
+    }
+
+    $plexDirectStatus = & curl.exe -sS -o NUL -w "%{http_code}" --max-time 15 "http://192.168.1.211:32400/identity" 2>$null
+    if ($LASTEXITCODE -ne 0 -or [int]$plexDirectStatus -ne 200) {
+        Add-Failure "Plex LAN direct identity endpoint returned '$plexDirectStatus', expected 200."
+    } else {
+        Write-Ok "Plex LAN direct identity endpoint returned 200."
+    }
+
+    $plexLocalStatus = Invoke-HttpStatus -HostName "plex.rosenvall.local" -Path "/identity"
+    if ($plexLocalStatus -ne 200) {
+        Add-Failure "plex.rosenvall.local/identity returned '$plexLocalStatus', expected 200."
+    } else {
+        Write-Ok "plex.rosenvall.local/identity returned 200."
+    }
+} catch {
+    Add-Failure "Unable to verify Plex semantic health: $($_.Exception.Message)"
+}
+
 Write-Section "Public Route Reachability"
 foreach ($check in $PublicRouteChecks) {
     $hostName = $check.Host

@@ -93,6 +93,24 @@ kubectl -n media rollout status deploy/plex
 
 If the replacement pod still reports filesystem I/O errors, stop Plex and repair or restore `plex-config`. The weekly R2 backup job `r2-plex-config-weekly-backup` is the offsite restore path; prefer the newest completed Longhorn backup or local snapshot from before the first I/O error. Do not delete `plex-config` while preserving Plex identity is required.
 
+Plex can also be `Running` while playback fails because the persisted codec cache contains a broken `EasyAudioEncoder` binary. The deployment includes an init container that repairs non-executable `EasyAudioEncoder` binaries at pod startup, and `CronJob/plex-self-heal` checks `/identity` plus the codec cache every five minutes. The CronJob is allowed to delete only the Plex pod in the `media` namespace; it does not delete `plex-config`, media files, libraries, or Longhorn volumes.
+
+Check the semantic Plex health path with:
+
+```powershell
+kubectl -n media get pod -l app.kubernetes.io/name=plex -o wide
+kubectl -n media exec deploy/plex -- sh -c 'curl -fsS --max-time 10 http://127.0.0.1:32400/identity | grep -q MediaContainer'
+kubectl -n media exec deploy/plex -- sh -c 'dir="/config/Library/Application Support/Plex Media Server/Codecs"; [ ! -d "$dir" ] || ! find "$dir" -type f -name EasyAudioEncoder ! -perm -111 | grep -q .'
+kubectl -n media get cronjob,job -l app.kubernetes.io/name=plex-self-heal
+```
+
+If the codec check fails and you need to repair immediately before GitOps has rolled the init container, delete only the codec cache or the Plex pod. The cache is recreated by Plex; the config PVC is not:
+
+```powershell
+kubectl -n media delete pod -l app.kubernetes.io/name=plex
+kubectl -n media rollout status deploy/plex
+```
+
 Verify Deluge VPN after it is live:
 
 ```powershell
@@ -114,4 +132,6 @@ This verifies the WireGuard interface, policy routing, external IP through the t
   - `https://plex.rosenvall.local`
 - Public `https://seerr.rosenvall.se` and `https://plex.rosenvall.se` are explicit Authentik proxy exceptions using `oauth2-proxy`.
 - Plex on the pinned worker's port `32400` remains the primary compatibility path for native clients and discovery traffic.
-- Public Plex browser traffic goes through Authentik first, then `plex-oauth2-proxy` forwards to `plex.media.svc.cluster.local:32400`.
+- Plex advertises only `https://plex.rosenvall.local:443` and `http://192.168.1.211:32400` to native clients. Do not advertise `https://plex.rosenvall.se:443` while it is protected by Authentik/Cloudflare, because Plex TV/native clients need a direct Plex endpoint.
+- Public Plex browser traffic goes through Authentik first, then `plex-oauth2-proxy` forwards to `plex.media.svc.cluster.local:32400`. If `curl -k -I --resolve plex.rosenvall.se:443:192.168.1.222 https://plex.rosenvall.se` works but normal `https://plex.rosenvall.se` returns Cloudflare `503`, fix the Cloudflare Tunnel public hostname/origin entry rather than restarting Plex.
+- Guest/IoT TV clients need an explicit firewall allow rule to reach the direct Plex endpoint `192.168.1.211:32400`. Keep that rule narrow to the TV/Guest/IoT source network and the Plex port.

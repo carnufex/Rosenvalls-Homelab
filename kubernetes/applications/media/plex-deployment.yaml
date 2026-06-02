@@ -5,6 +5,7 @@ metadata:
   namespace: media
   annotations:
     argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -29,6 +30,28 @@ spec:
                     operator: In
                     values:
                       - "true"
+      initContainers:
+        - name: plex-codec-cache-repair
+          image: plexinc/pms-docker:1.43.0.10492-121068a07@sha256:1131c4cd21fa22f8196f749f1dbb69af306776c3c83c7f5b061e51dc49bcff7f
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              codecs_dir="/config/Library/Application Support/Plex Media Server/Codecs"
+              [ -d "$codecs_dir" ] || exit 0
+
+              find "$codecs_dir" -type f -name EasyAudioEncoder | while IFS= read -r binary; do
+                [ -x "$binary" ] && continue
+                chmod 755 "$binary" || rm -rf "$(dirname "$(dirname "$binary")")"
+              done
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: plex
           image: plexinc/pms-docker:1.43.0.10492-121068a07@sha256:1131c4cd21fa22f8196f749f1dbb69af306776c3c83c7f5b061e51dc49bcff7f
@@ -42,7 +65,7 @@ spec:
             - name: HOSTNAME
               value: k8s-plex
             - name: ADVERTISE_IP
-              value: https://plex.rosenvall.local:443,https://plex.rosenvall.se:443,http://192.168.1.211:32400
+              value: https://plex.rosenvall.local:443,http://192.168.1.211:32400
             - name: PLEX_UID
               valueFrom:
                 configMapKeyRef:
@@ -64,21 +87,26 @@ spec:
               cpu: 2000m
               memory: 2048Mi
           startupProbe:
-            tcpSocket:
+            httpGet:
+              path: /identity
               port: web
             failureThreshold: 60
             periodSeconds: 10
+            timeoutSeconds: 5
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /identity
               port: web
             periodSeconds: 10
-            timeoutSeconds: 2
+            timeoutSeconds: 5
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /identity
               port: web
             initialDelaySeconds: 60
-            periodSeconds: 20
-            timeoutSeconds: 2
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
           volumeMounts:
             - name: config
               mountPath: /config

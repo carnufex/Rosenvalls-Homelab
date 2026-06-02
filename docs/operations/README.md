@@ -229,6 +229,12 @@ kubectl logs -n media deploy/plex
 kubectl logs -n homeassistant deploy/homeassistant
 ```
 
+For Plex, also run the semantic health checks in `.\scripts\cluster-health-report.ps1`.
+They verify `/identity`, the `plex-config` Longhorn volume, the direct LAN
+endpoint, the local route, and the persisted `EasyAudioEncoder` codec cache.
+`CronJob/plex-self-heal` may delete only the Plex pod if `/identity` or the
+codec cache is broken; it does not delete Plex config or media files.
+
 ### Deluge VPN
 
 ```powershell

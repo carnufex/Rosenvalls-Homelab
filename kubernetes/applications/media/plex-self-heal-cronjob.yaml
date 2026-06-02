@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: plex-self-heal
+  namespace: media
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: plex-self-heal
+        spec:
+          serviceAccountName: plex-self-heal
+          restartPolicy: Never
+          containers:
+            - name: checker
+              image: bitnami/kubectl@sha256:9c362260ef11ec664c36f34e0cb263b5cacd5b2f64e4c9b93aa3c3dc95549315
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  namespace="${POD_NAMESPACE:-media}"
+
+                  if ! kubectl -n "$namespace" wait --for=condition=Ready pod -l app.kubernetes.io/name=plex --timeout=30s; then
+                    echo "Plex pod is not Ready; leaving remediation to Kubernetes probes."
+                    exit 1
+                  fi
+
+                  pod="$(kubectl -n "$namespace" get pod -l app.kubernetes.io/name=plex -o jsonpath='{.items[0].metadata.name}')"
+
+                  if ! kubectl -n "$namespace" exec "$pod" -- sh -c 'curl -fsS --max-time 10 http://127.0.0.1:32400/identity | grep -q MediaContainer'; then
+                    echo "Plex identity endpoint failed inside the pod; deleting pod for clean remount/restart."
+                    kubectl -n "$namespace" delete pod "$pod" --wait=false
+                    exit 1
+                  fi
+
+                  if ! kubectl -n "$namespace" exec "$pod" -- sh -c 'dir="/config/Library/Application Support/Plex Media Server/Codecs"; [ ! -d "$dir" ] || ! find "$dir" -type f -name EasyAudioEncoder ! -perm -111 | grep -q .'; then
+                    echo "Plex EasyAudioEncoder cache contains non-executable binaries; deleting pod so initContainer repairs cache."
+                    kubectl -n "$namespace" delete pod "$pod" --wait=false
+                    exit 1
+                  fi
+
+                  echo "Plex semantic health checks passed."
+              env:
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                capabilities:
+                  drop:
+                    - ALL
+                seccompProfile:
+                  type: RuntimeDefault

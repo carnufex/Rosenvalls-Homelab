@@ -50,6 +50,13 @@ Public `.rosenvall.se` application routes must either use native Authentik/OIDC,
 an explicit Authentik proxy exception, or be removed from GitOps until they can
 be protected. Current proxy exceptions are Seerr and Plex.
 
+Plex is a special case: `https://plex.rosenvall.se` is browser access through
+Authentik and `oauth2-proxy`, not the endpoint advertised to native Plex clients.
+TV apps and local Plex clients should use the direct LAN path on
+`192.168.1.211:32400` or `https://plex.rosenvall.local`. If a TV is on Guest or
+IoT, add a narrow firewall allow rule from that source network to
+`192.168.1.211:32400`.
+
 ## Internal Routing Model
 
 The current internal flow is:
@@ -162,7 +169,7 @@ Invoke-WebRequest -Uri https://argo.rosenvall.se -Method Head
 - `https://devops.rosenvall.se` uses native Authentik OIDC.
 - `https://headlamp.rosenvall.se` uses native Authentik OIDC.
 - `https://seerr.rosenvall.se` uses Authentik through `oauth2-proxy`.
-- `https://plex.rosenvall.se` uses Authentik through `oauth2-proxy`.
+- `https://plex.rosenvall.se` uses Authentik through `oauth2-proxy` for browser access only.
 - MatPlan and BikePal are not publicly routed until they have native Authentik/OIDC or an approved proxy exception.
 
 ## Implementation Notes
