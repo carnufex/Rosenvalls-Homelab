@@ -26,6 +26,10 @@ If any secret is missing, External Secrets cannot render
 The manifest references the Bitwarden Secrets Manager secret IDs directly after
 the bootstrap secrets have been created.
 
+## Backup And DR Status
+
+Active Authentik CNPG backups to Cloudflare R2 are disabled to avoid R2 Class A operation costs. The live cluster currently relies on Longhorn replicas and local snapshots for immediate recovery. A new local S3-compatible backup target, such as MinIO, must be added before Authentik database restore is considered fully protected again.
+
 ## DR Restore Mode (opt-in)
 
 To restore from object storage, switch this app to the `dr-restore` overlay in Git and sync:
@@ -34,11 +38,11 @@ To restore from object storage, switch this app to the `dr-restore` overlay in G
 
 This keeps disaster recovery explicit and avoids recovery bootstrap loops during normal installs.
 
-Backup path contract:
+Historical R2 backup path contract:
 
-- normal live cluster backups write to `s3://rosenvall-homelab-backup/authentik/live/`
+- historical live cluster backups wrote to `s3://rosenvall-homelab-backup/authentik/live/`
 - the DR overlay restores from that live path
 - a cluster running in DR mode writes to `s3://rosenvall-homelab-backup/authentik/dr/`
-- the live cluster keeps a `7d` CNPG retention policy and compresses both base backups and WAL archives with `gzip`
+- the live cluster no longer writes new base backups or WAL archives to those paths in default mode
 
 Do not reuse the same backup prefix for a fresh `initdb` cluster and a DR-restored cluster. Mixing archive histories can cause WAL replay conflicts during recovery.

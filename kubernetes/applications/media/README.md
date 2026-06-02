@@ -91,7 +91,7 @@ kubectl -n media delete pod -l app.kubernetes.io/name=plex
 kubectl -n media rollout status deploy/plex
 ```
 
-If the replacement pod still reports filesystem I/O errors, stop Plex and repair or restore `plex-config`. The weekly R2 backup job `r2-plex-config-weekly-backup` is the offsite restore path; prefer the newest completed Longhorn backup or local snapshot from before the first I/O error. Do not delete `plex-config` while preserving Plex identity is required.
+If the replacement pod still reports filesystem I/O errors, stop Plex and repair or restore `plex-config`. Active R2 Longhorn backups are disabled to avoid Class A operation costs, so prefer a local Longhorn snapshot or the future local MinIO backup path. Historical R2 backups may exist, but verify inventory before relying on them. Do not delete `plex-config` while preserving Plex identity is required.
 
 Plex can also be `Running` while playback fails because the persisted codec cache contains a broken `EasyAudioEncoder` binary. The deployment includes an init container that repairs non-executable `EasyAudioEncoder` binaries at pod startup, and `CronJob/plex-self-heal` checks `/identity` plus the codec cache every five minutes. The CronJob is allowed to delete only the Plex pod in the `media` namespace; it does not delete `plex-config`, media files, libraries, or Longhorn volumes.
 

@@ -5,8 +5,8 @@ namespace: longhorn-system
 resources:
   - namespace.yaml
   - http-route.yaml
+  - backup-target-disabled.yaml
   - recurring-jobs.yaml
-  - s3-external-secret.yaml
   - storage-class-critical.yaml
   - storage-class-observability.yaml
 

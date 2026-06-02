@@ -3,5 +3,4 @@ kind: Kustomization
 namespace: authentik
 
 resources:
-  - scheduled-backup.yaml
-  - manual-backup.yaml
+  - r2-backups-disabled-configmap.yaml

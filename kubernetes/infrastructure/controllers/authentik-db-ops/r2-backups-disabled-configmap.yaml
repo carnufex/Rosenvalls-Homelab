@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-r2-backups-disabled
+  namespace: authentik
+data:
+  reason: "R2 is disabled as an active backup backend to avoid Class A operation costs."

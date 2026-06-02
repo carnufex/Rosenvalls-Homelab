@@ -8,7 +8,7 @@ metadata:
     homelab.rosenvall.se/rename-note: "PVC name is kept to preserve migrated Overseerr data for Seerr."
   labels:
     recurring-job.longhorn.io/source: enabled
-    recurring-job-group.longhorn.io/r2-small-config: enabled
+    recurring-job-group.longhorn.io/default: enabled
 spec:
   accessModes:
     - ReadWriteOnce

@@ -5,5 +5,4 @@ namespace: authentik
 resources:
   - namespace.yaml
   - external-secret.yaml
-  - s3-external-secret.yaml
   - database.yaml

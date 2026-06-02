@@ -18,9 +18,9 @@ Verified from the current cluster health pass:
 Partially verified:
 
 - `ragflow-helm` was `OutOfSync Healthy` and needs follow-up before the cluster is considered fully clean.
-- Longhorn backup target and recurring groups exist, but a restore drill is still required.
+- Longhorn local snapshots exist, but active offsite backup is paused until local MinIO or another non-R2 backend is added.
 - Media NFS has verification scripts and documentation, but media files still need a separate file-level backup policy.
-- Authentik has a documented CNPG restore overlay, but restore should be drilled before relying on it in an incident.
+- Authentik has a historical CNPG restore overlay, but active R2 WAL/base backups are disabled and a new local backup target is required.
 
 Missing or residual risk:
 
@@ -100,8 +100,8 @@ Full-cluster power-cycle drill evidence on 2026-05-25: all Talos nodes were rebo
 | Core cluster bootstrap | Strong | OpenTofu + Talos + `bootstrap.ps1` are codified |
 | Secret chain bootstrap | Manual dependency | Requires `bitwarden-access-token` |
 | Public routing | Partial | In-cluster connector is in Git, published routes are dashboard-managed |
-| Authentik database | Documented restore path | Restore overlay and S3 backup contract exist |
-| Longhorn volumes | Partial | Backup target exists, recurring offsite backup policy is not codified here |
+| Authentik database | Partial | Active R2 backups are disabled; add local MinIO before relying on restore |
+| Longhorn volumes | Partial | Local snapshots exist; active offsite backup is disabled to avoid R2 Class A costs |
 | MatPlan data | Weak | Runtime is defined, restore path is not documented |
 | Talos/Kubernetes access artifacts | Weak | Generated locally, no repo-defined off-machine backup policy |
 | Headlamp cluster UI | Internal read-only | Helps inspect recovery state, but is not part of bootstrap |
@@ -139,8 +139,10 @@ Authentik is the best-documented restore path in the repo today.
 
 - default mode: `initdb`
 - restore mode: switch to the `dr-restore` overlay under `authentik-db-prereqs`
-- live backups: `s3://rosenvall-homelab-backup/authentik/live/`
+- historical live backups: `s3://rosenvall-homelab-backup/authentik/live/`
 - DR overlay writes to: `s3://rosenvall-homelab-backup/authentik/dr/`
+
+Default live-cluster writes to R2 are disabled. Do not treat the historical R2 prefix as current unless a fresh backup inventory confirms a usable recovery point.
 
 Do not mix backup prefixes between fresh bootstrap and DR-restored clusters.
 

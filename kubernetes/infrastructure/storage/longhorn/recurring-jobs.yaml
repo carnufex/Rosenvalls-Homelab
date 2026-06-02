@@ -14,37 +14,3 @@ spec:
   labels:
     backup-tier: default
     cadence: hourly
----
-apiVersion: longhorn.io/v1beta2
-kind: RecurringJob
-metadata:
-  name: r2-small-config-daily-backup
-  namespace: longhorn-system
-spec:
-  name: r2-small-config-daily-backup
-  task: backup
-  cron: "30 3 * * *"
-  retain: 3
-  concurrency: 2
-  groups:
-    - r2-small-config
-  labels:
-    backup-tier: r2-free
-    cadence: daily
----
-apiVersion: longhorn.io/v1beta2
-kind: RecurringJob
-metadata:
-  name: r2-plex-config-weekly-backup
-  namespace: longhorn-system
-spec:
-  name: r2-plex-config-weekly-backup
-  task: backup
-  cron: "45 4 * * 0"
-  retain: 1
-  concurrency: 1
-  groups:
-    - r2-plex-config
-  labels:
-    backup-tier: r2-free
-    cadence: weekly

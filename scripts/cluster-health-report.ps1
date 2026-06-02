@@ -106,6 +106,16 @@ function Add-ReferencedPvc {
     }
 }
 
+function Test-IsR2Reference {
+    param([string]$Value)
+
+    if (-not $Value) {
+        return $false
+    }
+
+    return $Value -match "rosenvall-homelab-backup|r2\.cloudflarestorage\.com|cloudflarestorage\.com"
+}
+
 Write-Section "Nodes"
 $nodes = Invoke-KubectlJson @("get", "nodes")
 $nodeRows = @()
@@ -271,6 +281,67 @@ try {
     }
 } catch {
     Add-Warning "Unable to verify Longhorn orphan resources: $($_.Exception.Message)"
+}
+
+Write-Section "R2 Backup Cost Guard"
+try {
+    $r2RiskCount = 0
+    $backupTargets = Invoke-KubectlJson @("get", "backuptargets.longhorn.io", "-n", "longhorn-system")
+    foreach ($target in @($backupTargets.items)) {
+        $url = $target.spec.backupTargetURL
+        if (Test-IsR2Reference $url) {
+            $r2RiskCount++
+            Add-Warning "Longhorn BackupTarget $($target.metadata.name) still points at R2: $url"
+        }
+    }
+
+    $recurringJobs = Invoke-KubectlJson @("get", "recurringjobs.longhorn.io", "-n", "longhorn-system")
+    foreach ($job in @($recurringJobs.items)) {
+        $groups = @($job.spec.groups) -join ","
+        $backupTier = $null
+        if ($job.spec.labels) {
+            $backupTier = $job.spec.labels."backup-tier"
+        }
+
+        if ($job.spec.task -eq "backup" -and ($job.metadata.name -match "^r2-" -or $groups -match "r2-" -or $backupTier -match "r2")) {
+            $r2RiskCount++
+            Add-Warning "Longhorn RecurringJob $($job.metadata.name) is still an R2 backup job."
+        }
+    }
+
+    $clusters = Invoke-KubectlJson @("get", "clusters.postgresql.cnpg.io", "-A")
+    foreach ($cluster in @($clusters.items)) {
+        $store = $cluster.spec.backup.barmanObjectStore
+        if (-not $store) {
+            continue
+        }
+
+        if ((Test-IsR2Reference $store.destinationPath) -or (Test-IsR2Reference $store.endpointURL)) {
+            $r2RiskCount++
+            Add-Warning "CNPG cluster $($cluster.metadata.namespace)/$($cluster.metadata.name) still archives to R2."
+        }
+    }
+
+    $pvcsForR2Labels = Invoke-KubectlJson @("get", "pvc", "-A")
+    $r2LabelCount = 0
+    foreach ($pvc in @($pvcsForR2Labels.items)) {
+        foreach ($label in @($pvc.metadata.labels.PSObject.Properties)) {
+            if ($label.Name -match "recurring-job-group\.longhorn\.io/r2-") {
+                $r2LabelCount++
+            }
+        }
+    }
+
+    if ($r2LabelCount -gt 0) {
+        $r2RiskCount += $r2LabelCount
+        Add-Warning "Found $r2LabelCount PVC R2 recurring-job label(s). Remove these before re-enabling any backup jobs."
+    }
+
+    if ($r2RiskCount -eq 0) {
+        Write-Ok "No active R2 backup cost risk detected."
+    }
+} catch {
+    Add-Warning "Unable to verify R2 backup cost guardrails: $($_.Exception.Message)"
 }
 
 Write-Section "Node Metrics"

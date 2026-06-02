@@ -58,6 +58,7 @@ Use these after:
 .\scripts\export-local-ca.ps1
 .\scripts\post-power-loss-check.ps1
 .\scripts\provision-host1-media-nfs-vm.ps1
+.\scripts\r2-backup-audit.ps1
 .\scripts\seed-homeassistant.ps1
 .\scripts\seed-media-configs.ps1
 .\scripts\verify-local-routes.ps1
@@ -196,6 +197,16 @@ After node restarts, Longhorn can leave stale engine instances or stale Kubernet
 For abrupt power loss, Longhorn should keep `node-down-pod-deletion-policy=delete-deployment-pod`. This allows single-replica Deployment workloads with RWO config PVCs to be recreated on a healthy worker when the original node is down. Do not broaden this to StatefulSets without a separate database/storage review.
 
 Prometheus uses bounded local TSDB storage. If it crashloops with `panic: preallocate: no space left on device`, first expand or repair the Prometheus PVC and restart the pod so filesystem resize can complete. Avoid adding observability PVCs to R2 backup groups unless there is an explicit storage budget decision.
+
+### R2 Backup Cost Guard
+
+R2 is not an active backup backend in free-tier mode. It must not be used by Longhorn polling/backup jobs or CNPG WAL/base backups without an explicit budget decision.
+
+```powershell
+.\scripts\r2-backup-audit.ps1
+```
+
+This check fails if Longhorn `BackupTarget/default`, Longhorn recurring backup jobs, CNPG `barmanObjectStore`, or PVC labels still point at R2. It also lists historical Longhorn backup inventory so a keep/delete list can be built before any R2 object cleanup.
 
 ### NFS Media Library
 

@@ -35,20 +35,3 @@ spec:
     parameters:
       max_connections: "100"
       shared_buffers: "256MB"
-
-  backup:
-    retentionPolicy: "7d"
-    barmanObjectStore:
-      destinationPath: "s3://rosenvall-homelab-backup/authentik/live/"
-      endpointURL: "https://a7dca16c95c8d1148ee2c066adc80041.r2.cloudflarestorage.com"
-      data:
-        compression: gzip
-      s3Credentials:
-        accessKeyId:
-          name: s3-credentials
-          key: ACCESS_KEY_ID
-        secretAccessKey:
-          name: s3-credentials
-          key: ACCESS_SECRET_KEY
-      wal:
-        compression: gzip

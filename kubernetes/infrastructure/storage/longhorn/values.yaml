@@ -59,11 +59,6 @@ csi:
         cpu: 60m
         memory: 70Mi
 
-defaultBackupStore:
-  backupTarget: 's3://rosenvall-homelab-backup@auto/'
-  backupTargetCredentialSecret: s3-credentials
-  pollInterval: 180
-
 defaultSettings:
   allowRecurringJobWhileVolumeDetached: true
   createDefaultDiskLabeledNodes: true
@@ -83,7 +78,7 @@ defaultSettings:
   replicaZoneSoftAntiAffinity: true
   concurrentReplicaRebuildPerNodeLimit: 1
   replicaReplenishmentWaitInterval: 600
-  backupstorePollInterval: 300
+  backupstorePollInterval: 86400
   orphanResourceAutoDeletion: instance
   orphanResourceAutoDeletionGracePeriod: 300
   replicaSoftAntiAffinity: false
