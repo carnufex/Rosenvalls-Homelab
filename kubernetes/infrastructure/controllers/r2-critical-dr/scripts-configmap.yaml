@@ -119,20 +119,43 @@ data:
       gzip -t "$work/app-configs/$name.tar.gz"
     }
 
+    capture_plex_config() {
+      pod="$(kubectl_pod_by_selector media 'app.kubernetes.io/name=plex')"
+      if [ -z "$pod" ]; then
+        log "No running pod found for media/plex"
+        exit 1
+      fi
+
+      log "Capturing slim config for plex from media/$pod:/config"
+      kubectl -n media exec "$pod" -c plex -- sh -lc '
+        set -eu
+        tmp="$(mktemp -d)"
+        root="/config/Library/Application Support/Plex Media Server"
+        out="$tmp/plex/Library/Application Support/Plex Media Server"
+        mkdir -p "$out/Plug-in Support"
+
+        for file in Preferences.xml Preferences.xml.pre-auth-reset-20260521-072003.bak; do
+          if [ -f "$root/$file" ]; then
+            cp -a "$root/$file" "$out/$file"
+          fi
+        done
+
+        if [ -d "$root/Plug-in Support/Databases" ]; then
+          cp -a "$root/Plug-in Support/Databases" "$out/Plug-in Support/Databases"
+        fi
+
+        tar -C "$tmp" -czf - plex
+        rm -rf "$tmp"
+      ' > "$work/app-configs/plex.tar.gz"
+      gzip -t "$work/app-configs/plex.tar.gz"
+    }
+
     capture_config homeassistant homeassistant 'app.kubernetes.io/name=homeassistant' homeassistant /config \
       --exclude='config/.cache' \
       --exclude='config/deps' \
       --exclude='config/tts'
 
-    capture_config plex media 'app.kubernetes.io/name=plex' plex /config \
-      --exclude='config/Library/Application Support/Plex Media Server/Metadata' \
-      --exclude='config/Library/Application Support/Plex Media Server/Media' \
-      --exclude='config/Library/Application Support/Plex Media Server/Cache' \
-      --exclude='config/Library/Application Support/Plex Media Server/Codecs' \
-      --exclude='config/Library/Application Support/Plex Media Server/Logs' \
-      --exclude='config/Library/Application Support/Plex Media Server/Crash Reports' \
-      --exclude='config/Library/Application Support/Plex Media Server/Updates' \
-      --exclude='config/Library/Application Support/Plex Media Server/Plug-in Support/Caches'
+    capture_plex_config
 
     capture_config radarr media 'app.kubernetes.io/name=radarr' radarr /config \
       --exclude='config/MediaCover' \
