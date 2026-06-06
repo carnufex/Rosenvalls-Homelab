@@ -39,7 +39,7 @@ spec:
                 echo "Failed to decode Cloudflare tunnel token." >&2
                 exit 1
               fi
-              umask 022
+              umask 077
               printf '{"AccountTag":"%s","TunnelID":"%s","TunnelSecret":"%s"}' "$account" "$tunnel" "$secret" > /creds/tunnel.json
           env:
             - name: TUNNEL_TOKEN
