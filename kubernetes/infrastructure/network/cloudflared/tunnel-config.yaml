@@ -1,4 +1,6 @@
-# The tunnel token is provided via environment variable, so we don't need credentials-file here.
+# The tunnel token is decoded into this credentials file by the initContainer.
+tunnel: 8cde49fc-7eed-4521-b673-d406599e5b6e
+credentials-file: /etc/cloudflared/creds/tunnel.json
 
 metrics: 0.0.0.0:2000
 

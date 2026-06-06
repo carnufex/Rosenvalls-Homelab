@@ -23,27 +23,50 @@ spec:
           labelSelector:
             matchLabels:
               app: cloudflared
-      containers:
-        - name: cloudflared
-          image: cloudflare/cloudflared@sha256:a5b5e6fd9a372f054b9a843c219bfbcdceb54691605312a8b1ee72978bdf1aa1
+      initContainers:
+        - name: write-tunnel-credentials
+          image: alpine:3.21.3
           imagePullPolicy: IfNotPresent
-          args:
-            - tunnel
-            - --config
-            - /etc/cloudflared/config/config.yaml
-            - run
-            - --token
-            - $(TUNNEL_TOKEN)
-          volumeMounts:
-            - name: config
-              mountPath: /etc/cloudflared/config
-              readOnly: true
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              decoded="$(printf '%s' "$TUNNEL_TOKEN" | base64 -d)"
+              account="$(printf '%s' "$decoded" | sed -n 's/.*"a":"\([^"]*\)".*/\1/p')"
+              tunnel="$(printf '%s' "$decoded" | sed -n 's/.*"t":"\([^"]*\)".*/\1/p')"
+              secret="$(printf '%s' "$decoded" | sed -n 's/.*"s":"\([^"]*\)".*/\1/p')"
+              if [ -z "$account" ] || [ -z "$tunnel" ] || [ -z "$secret" ]; then
+                echo "Failed to decode Cloudflare tunnel token." >&2
+                exit 1
+              fi
+              umask 077
+              printf '{"AccountTag":"%s","TunnelID":"%s","TunnelSecret":"%s"}' "$account" "$tunnel" "$secret" > /creds/tunnel.json
           env:
             - name: TUNNEL_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: cloudflared-secret
                   key: TUNNEL_TOKEN
+          volumeMounts:
+            - name: creds
+              mountPath: /creds
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared@sha256:a5b5e6fd9a372f054b9a843c219bfbcdceb54691605312a8b1ee72978bdf1aa1
+          imagePullPolicy: IfNotPresent
+          args:
+            - tunnel
+            - --no-autoupdate
+            - --config
+            - /etc/cloudflared/config/config.yaml
+            - run
+          volumeMounts:
+            - name: config
+              mountPath: /etc/cloudflared/config
+              readOnly: true
+            - name: creds
+              mountPath: /etc/cloudflared/creds
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /ready
@@ -64,3 +87,6 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
+        - name: creds
+          emptyDir:
+            medium: Memory
