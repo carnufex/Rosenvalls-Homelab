@@ -10,7 +10,11 @@ This directory contains the in-cluster Cloudflare Tunnel deployment.
 - The tunnel forwards `*.rosenvall.se` and `rosenvall.se` to `https://cilium-gateway-external.gateway.svc.cluster.local:443`.
 - The external Gateway then dispatches traffic to app-level `HTTPRoute` resources.
 - The wildcard published route in Cloudflare must enable `Match SNI to Host` so Cloudflared presents the requested hostname as SNI to the Gateway. A literal wildcard SNI such as `*.rosenvall.se` breaks TLS routing and returns Cloudflare `502`.
-- If a public hostname returns Cloudflare `503 no healthy upstream` while the same hostname works with `curl --resolve <host>:443:192.168.1.222`, the in-cluster Gateway and `HTTPRoute` are healthy and the Cloudflare dashboard route for that hostname is misconfigured or pointing at the wrong origin.
+- Public hostname checks must compare both the LAN path to the Gateway IP and the
+  in-cluster path that `cloudflared` actually uses. A hostname can work with
+  `curl --resolve <host>:443:192.168.1.222` from an operator workstation while
+  still failing from the `cloudflare` namespace if Cilium Envoy has stale Gateway
+  state.
 - The local tunnel config is still generated through `configMapGenerator`, so process-level config changes roll the `cloudflared` pods automatically via the hashed ConfigMap name.
 
 This means the tunnel depends on the full secret chain being healthy:
@@ -31,7 +35,15 @@ This means the tunnel depends on the full secret chain being healthy:
 
 ## Public route triage
 
-Use the gateway-direct comparison before changing Kubernetes manifests:
+Use `scripts/cluster-health-report.ps1` first. Its public route section compares
+three paths:
+
+- Cloudflare public route
+- gateway-direct from the operator workstation to `192.168.1.222`
+- in-cluster route from a temporary pod in the `cloudflare` namespace to
+  `cilium-gateway-external.gateway.svc.cluster.local`
+
+You can still run a quick gateway-direct comparison manually:
 
 ```powershell
 curl.exe -k -I https://headlamp.rosenvall.se
@@ -45,15 +57,34 @@ For app hostnames such as `headlamp.rosenvall.se` and `plex.rosenvall.se`, the C
 - `Match SNI to Host`: enabled
 - HTTP Host Header override: unset
 
-If gateway-direct returns the expected app response but Cloudflare returns `503`, fix the Cloudflare Tunnel public hostname/origin entry. Restarting app pods or changing `HTTPRoute` resources will not fix that class of failure.
+If gateway-direct returns the expected app response but the in-cluster route
+returns Envoy `503`, restart or inspect Cilium Envoy before changing app
+manifests:
 
-Current known failure pattern: `headlamp.rosenvall.se`, `plex.rosenvall.se`, and
+```powershell
+kubectl -n kube-system rollout restart daemonset/cilium-envoy
+kubectl -n kube-system rollout status daemonset/cilium-envoy
+```
+
+If gateway-direct and the in-cluster route both return the expected app response
+but Cloudflare returns `503`, fix the Cloudflare Tunnel public hostname/origin
+entry. Restarting app pods or changing `HTTPRoute` resources will not fix that
+class of failure.
+
+Known failure pattern: `headlamp.rosenvall.se`, `plex.rosenvall.se`, and
 `seerr.rosenvall.se` can return Cloudflare `503 no healthy upstream` while
 gateway-direct returns `200` or Authentik `302`. In that case:
 
-1. Check that no more-specific published application route for the hostname exists in another tunnel or app.
-2. Keep the wildcard `*.rosenvall.se` route pointed at the external Cilium Gateway.
-3. If wildcard routing still fails for only those hostnames, create explicit published application routes for those hostnames with the same origin settings as the wildcard route.
+1. Run `scripts/cluster-health-report.ps1` and check `InClusterGateway`.
+2. If `InClusterGateway` is `503`, restart `daemonset/cilium-envoy`.
+3. If `InClusterGateway` is healthy but Cloudflare is still `503`, check that no
+   more-specific published application route for the hostname exists in another
+   tunnel or app.
+4. Keep the wildcard `*.rosenvall.se` route pointed at the external Cilium
+   Gateway.
+5. If wildcard routing still fails for only those hostnames, create explicit
+   published application routes for those hostnames with the same origin settings
+   as the wildcard route.
 
 ## Break-glass recovery
 

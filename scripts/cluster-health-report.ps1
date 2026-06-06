@@ -2,6 +2,9 @@ param(
     [int]$PreviewTtlHours = 24,
     [int]$TopPods = 15,
     [string[]]$AllowedOutOfSyncApps = @("ragflow-helm"),
+    [string]$InClusterGatewayCheckNamespace = "cloudflare",
+    [string]$InClusterGatewayCheckImage = "curlimages/curl:8.8.0",
+    [switch]$SkipInClusterGatewayChecks,
     [hashtable[]]$PublicRouteChecks = @(
         @{ Host = "argo.rosenvall.se"; Path = "/api/dex/.well-known/openid-configuration"; GatewayIP = "192.168.1.222"; Expected = @(200) },
         @{ Host = "devops.rosenvall.se"; Path = "/"; GatewayIP = "192.168.1.222"; Expected = @(200, 302) },
@@ -78,6 +81,63 @@ function Invoke-HttpStatus {
     }
 
     return [int]($status | Select-Object -Last 1)
+}
+
+function Invoke-InClusterGatewayStatus {
+    param(
+        [string]$PodName,
+        [string]$Namespace,
+        [string]$HostName,
+        [string]$Path = "/",
+        [string]$GatewayService = "cilium-gateway-external.gateway.svc.cluster.local"
+    )
+
+    $url = "https://$HostName$Path"
+    $connectTo = "${HostName}:443:${GatewayService}:443"
+    $arguments = @(
+        "-n", $Namespace,
+        "exec", $PodName,
+        "--",
+        "curl",
+        "-k",
+        "-sS",
+        "-o", "/dev/null",
+        "-w", "%{http_code}",
+        "-I",
+        "--max-time", "15",
+        "--connect-to", $connectTo,
+        $url
+    )
+
+    $status = & kubectl @arguments 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $status) {
+        return $null
+    }
+
+    return [int]($status | Select-Object -Last 1)
+}
+
+function New-InClusterGatewayCheckPod {
+    param(
+        [string]$Namespace,
+        [string]$Image
+    )
+
+    $suffix = [Guid]::NewGuid().ToString("N").Substring(0, 8)
+    $podName = "gateway-origin-check-$suffix"
+
+    & kubectl -n $Namespace run $podName --image=$Image --restart=Never --command -- sleep 300 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to create temporary pod $Namespace/$podName."
+    }
+
+    & kubectl -n $Namespace wait --for=condition=Ready "pod/$podName" --timeout=60s | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        & kubectl -n $Namespace delete pod $podName --ignore-not-found --wait=false | Out-Null
+        throw "Temporary pod $Namespace/$podName did not become Ready."
+    }
+
+    return $podName
 }
 
 function Get-ConditionStatus {
@@ -643,33 +703,61 @@ try {
 }
 
 Write-Section "Public Route Reachability"
-foreach ($check in $PublicRouteChecks) {
-    $hostName = $check.Host
-    $path = $check.Path
-    $gatewayIP = $check.GatewayIP
-    $expected = @($check.Expected)
+$inClusterCheckPod = $null
+try {
+    if (-not $SkipInClusterGatewayChecks) {
+        try {
+            $inClusterCheckPod = New-InClusterGatewayCheckPod -Namespace $InClusterGatewayCheckNamespace -Image $InClusterGatewayCheckImage
+            Write-Ok "Created temporary in-cluster gateway check pod $InClusterGatewayCheckNamespace/$inClusterCheckPod."
+        } catch {
+            Add-Warning "Unable to create temporary in-cluster gateway check pod: $($_.Exception.Message)"
+        }
+    }
 
-    $publicStatus = Invoke-HttpStatus -HostName $hostName -Path $path
-    $gatewayStatus = Invoke-HttpStatus -HostName $hostName -Path $path -GatewayIP $gatewayIP
+    foreach ($check in $PublicRouteChecks) {
+        $hostName = $check.Host
+        $path = $check.Path
+        $gatewayIP = $check.GatewayIP
+        $expected = @($check.Expected)
 
-    [pscustomobject]@{
-        Host          = $hostName
-        Path          = $path
-        Cloudflare    = $publicStatus
-        GatewayDirect = $gatewayStatus
-    } | Format-Table -AutoSize
+        $publicStatus = Invoke-HttpStatus -HostName $hostName -Path $path
+        $gatewayStatus = Invoke-HttpStatus -HostName $hostName -Path $path -GatewayIP $gatewayIP
+        $inClusterGatewayStatus = $null
 
-    $gatewayOk = $gatewayStatus -and ($expected -contains $gatewayStatus)
-    $publicOk = $publicStatus -and ($expected -contains $publicStatus)
+        if ($inClusterCheckPod) {
+            $inClusterGatewayStatus = Invoke-InClusterGatewayStatus -PodName $inClusterCheckPod -Namespace $InClusterGatewayCheckNamespace -HostName $hostName -Path $path
+        }
 
-    if ($gatewayOk -and -not $publicOk) {
-        Add-Failure "$hostName$path works through Cilium gateway ($gatewayStatus) but fails through Cloudflare ($publicStatus). Check Cloudflare Tunnel public hostname/origin settings."
-    } elseif (-not $gatewayOk -and -not $publicOk) {
-        Add-Failure "$hostName$path is not reachable through gateway or Cloudflare."
-    } elseif (-not $gatewayOk) {
-        Add-Failure "$hostName$path is reachable through Cloudflare but gateway-direct status is $gatewayStatus, expected one of $($expected -join ',')."
-    } else {
-        Write-Ok "$hostName$path returned expected status through Cloudflare and gateway-direct."
+        [pscustomobject]@{
+            Host             = $hostName
+            Path             = $path
+            Cloudflare       = $publicStatus
+            GatewayDirect    = $gatewayStatus
+            InClusterGateway = $inClusterGatewayStatus
+        } | Format-Table -AutoSize
+
+        $gatewayOk = $gatewayStatus -and ($expected -contains $gatewayStatus)
+        $publicOk = $publicStatus -and ($expected -contains $publicStatus)
+        $inClusterGatewayOk = $true
+        if ($inClusterCheckPod) {
+            $inClusterGatewayOk = $inClusterGatewayStatus -and ($expected -contains $inClusterGatewayStatus)
+        }
+
+        if ($gatewayOk -and -not $inClusterGatewayOk) {
+            Add-Failure "$hostName$path works through gateway-direct ($gatewayStatus) but fails from inside the $InClusterGatewayCheckNamespace namespace ($inClusterGatewayStatus). Cloudflared uses this in-cluster path; restart cilium-envoy or inspect Cilium Gateway xDS/Envoy state."
+        } elseif ($gatewayOk -and -not $publicOk) {
+            Add-Failure "$hostName$path works through Cilium gateway ($gatewayStatus) but fails through Cloudflare ($publicStatus). Check Cloudflare Tunnel public hostname/origin settings."
+        } elseif (-not $gatewayOk -and -not $publicOk) {
+            Add-Failure "$hostName$path is not reachable through gateway or Cloudflare."
+        } elseif (-not $gatewayOk) {
+            Add-Failure "$hostName$path is reachable through Cloudflare but gateway-direct status is $gatewayStatus, expected one of $($expected -join ',')."
+        } else {
+            Write-Ok "$hostName$path returned expected status through Cloudflare, gateway-direct, and in-cluster gateway checks."
+        }
+    }
+} finally {
+    if ($inClusterCheckPod) {
+        & kubectl -n $InClusterGatewayCheckNamespace delete pod $inClusterCheckPod --ignore-not-found --wait=false | Out-Null
     }
 }
 
