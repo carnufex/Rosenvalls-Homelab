@@ -50,6 +50,7 @@ spec:
                   --password "$FORGEJO_ADMIN_PASSWORD" \
                   --email rdo@rosenvall.local \
                   --must-change-password=false; then
+                  forgejo admin user must-change-password --unset "$FORGEJO_ADMIN_USERNAME"
                   echo "Forgejo RDO service user created."
                   exit 0
                 fi
@@ -57,6 +58,7 @@ spec:
                 if forgejo admin user change-password \
                   --username "$FORGEJO_ADMIN_USERNAME" \
                   --password "$FORGEJO_ADMIN_PASSWORD"; then
+                  forgejo admin user must-change-password --unset "$FORGEJO_ADMIN_USERNAME"
                   echo "Forgejo RDO service user already existed; password updated."
                   exit 0
                 fi
