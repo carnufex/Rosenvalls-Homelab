@@ -8,3 +8,6 @@ resources:
   - externalsecret.yaml
   - scripts-configmap.yaml
   - cronjobs.yaml
+  - r2-dr-report-externalsecret.yaml
+  - r2-dr-report-configmap.yaml
+  - r2-dr-report-cronjob.yaml

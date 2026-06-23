@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: r2-dr-report
+  namespace: r2-critical-dr
+spec:
+  schedule: "5 7 * * *"
+  timeZone: Europe/Stockholm
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: r2-critical-dr
+          restartPolicy: Never
+          containers:
+            - name: report
+              image: alpine:3.21.3
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "/scripts/r2-dr-report.sh"]
+              envFrom:
+                - secretRef:
+                    name: r2-critical-dr-secrets
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: slack
+                  mountPath: /etc/slack
+                  readOnly: true
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsUser: 0
+                runAsGroup: 0
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+          volumes:
+            - name: scripts
+              configMap:
+                name: r2-dr-report
+                defaultMode: 0555
+            - name: slack
+              secret:
+                secretName: alertmanager-slack

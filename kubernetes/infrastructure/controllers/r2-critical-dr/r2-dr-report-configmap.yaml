@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: r2-dr-report
+  namespace: r2-critical-dr
+data:
+  r2-dr-report.sh: |
+    #!/bin/sh
+    # Daily peace-of-mind report: how much of the R2 free tier we use, and how
+    # fresh the critical-dr backups are. Hard guard: warn well before the 10 GB
+    # free-tier limit so we never get billed.
+    set -u
+
+    apk add --no-cache rclone curl jq coreutils >/dev/null 2>&1
+
+    webhook="$(cat /etc/slack/webhook-url)"
+    bucket="r2:rosenvall-homelab-backup"
+
+    # Cloudflare R2 free tier: 10 GB-month of storage (decimal GB).
+    LIMIT=10000000000
+    WARN=7000000000
+    CRIT=9000000000
+    STALE_DAYS=40   # backups are monthly; older than this means a run was missed
+
+    sizejson="$(rclone size "${bucket}" --json 2>/dev/null)"
+    bytes="$(printf '%s' "${sizejson}" | jq -r '.bytes // 0')"
+    count="$(printf '%s' "${sizejson}" | jq -r '.count // 0')"
+    [ -z "${bytes}" ] && bytes=0
+
+    pct=$(( bytes * 100 / LIMIT ))
+    mib=$(( bytes / 1048576 ))
+
+    # Freshness: newest object modtime across the bucket.
+    newest_date="$(rclone lsl "${bucket}" 2>/dev/null | awk '{print $2}' | sort | tail -1)"
+    age_days="-1"
+    if [ -n "${newest_date}" ]; then
+      ne="$(date -u -d "${newest_date}" +%s 2>/dev/null || echo '')"
+      [ -n "${ne}" ] && age_days=$(( ( $(date -u +%s) - ne ) / 86400 ))
+    fi
+
+    emoji=":white_check_mark:"
+    word="all good"
+    notes=""
+
+    if [ "${bytes}" -ge "${CRIT}" ]; then
+      emoji=":rotating_light:"; word="CRITICAL — near R2 free-tier limit"
+    elif [ "${bytes}" -ge "${WARN}" ]; then
+      emoji=":warning:"; word="approaching R2 free-tier limit"
+    fi
+
+    if [ "${age_days}" -gt "${STALE_DAYS}" ]; then
+      emoji=":warning:"
+      notes="${notes}
+    :warning: Newest backup is ${age_days} days old — the monthly backup may have been missed."
+    elif [ "${age_days}" -lt 0 ]; then
+      emoji=":warning:"
+      notes="${notes}
+    :warning: Could not determine backup age (bucket empty or unreachable)."
+    fi
+
+    age_str="${age_days} days"
+    [ "${age_days}" -lt 0 ] && age_str="unknown"
+
+    msg="$(printf '%s *R2 / DR backup report* — %s\n_%s_\n\n• R2 usage: *%s MiB / 10 GB* (%s%%), %s objects\n• Newest backup: %s ago%s' \
+      "${emoji}" "${word}" "$(date -u '+%Y-%m-%d %H:%M UTC')" "${mib}" "${pct}" "${count}" "${age_str}" "${notes}")"
+
+    printf '%s\n\n' "${msg}"
+    payload="$(jq -n --arg t "${msg}" '{text:$t}')"
+    curl -s -o /dev/null -w 'slack_status=%{http_code}\n' \
+      -X POST -H 'content-type: application/json' --data "${payload}" "${webhook}"
