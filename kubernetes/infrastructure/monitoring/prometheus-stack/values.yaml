@@ -1,3 +1,15 @@
+# Talos exposes kube-controller-manager/kube-scheduler only on localhost, and
+# kube-proxy is replaced by Cilium (kube-proxy-replacement: true). The chart's
+# default scrape targets can never succeed here, producing permanent
+# KubeControllerManagerDown / KubeSchedulerDown / KubeProxyDown false alerts.
+# Disable their ServiceMonitors and rules so Slack stays signal, not noise.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
 grafana:
   envFromSecret: grafana-oauth
   testFramework:
