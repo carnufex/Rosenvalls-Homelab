@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rosenvall-devops-impl-task-cleaner
+  namespace: rosenvall-devops
+spec:
+  schedule: "37 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          serviceAccountName: rosenvall-devops-impl-task-cleaner
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: cleanup
+              image: alpine/k8s:1.31.13
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - /scripts/cleanup-impl-task-jobs.sh
+              env:
+                - name: TTL_HOURS
+                  value: "48"
+                - name: DRY_RUN
+                  value: "false"
+              volumeMounts:
+                - name: cleaner-script
+                  mountPath: /scripts
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+          volumes:
+            - name: cleaner-script
+              configMap:
+                name: rosenvall-devops-impl-task-cleaner
+                defaultMode: 0555

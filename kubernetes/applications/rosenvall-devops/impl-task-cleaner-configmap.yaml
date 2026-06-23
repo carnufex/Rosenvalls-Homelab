@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rosenvall-devops-impl-task-cleaner
+  namespace: rosenvall-devops
+data:
+  cleanup-impl-task-jobs.sh: |
+    #!/bin/sh
+    set -eu
+
+    # The devops API creates impl-task-* Jobs without ttlSecondsAfterFinished,
+    # so finished ones linger forever and keep tripping KubeJobFailed. This
+    # janitor deletes only FINISHED impl-task jobs older than the TTL, so
+    # genuinely recent failures still surface (and alert) for a debugging window.
+    ttl_hours="${TTL_HOURS:-48}"
+    dry_run="${DRY_RUN:-false}"
+    now_epoch="$(date -u +%s)"
+    ttl_seconds="$((ttl_hours * 3600))"
+    selector="app.kubernetes.io/part-of=rosenvall-devops-implementation"
+
+    normalize() {
+      # go-template prints "<no value>" for absent fields; treat as empty.
+      case "$1" in
+        "<no value>") printf '' ;;
+        *) printf '%s' "$1" ;;
+      esac
+    }
+
+    kubectl get jobs -l "${selector}" \
+      -o go-template='{{range .items}}{{.metadata.name}}{{"\t"}}{{.metadata.creationTimestamp}}{{"\t"}}{{.status.active}}{{"\t"}}{{.status.succeeded}}{{"\t"}}{{.status.failed}}{{"\n"}}{{end}}' |
+    while IFS="$(printf '\t')" read -r name created active succeeded failed; do
+      [ -z "${name}" ] && continue
+
+      # Safety belt: only ever touch impl-task-* jobs.
+      case "${name}" in
+        impl-task-*) ;;
+        *) echo "skip ${name}: name does not start with impl-task-"; continue ;;
+      esac
+
+      active="$(normalize "${active}")"
+      succeeded="$(normalize "${succeeded}")"
+      failed="$(normalize "${failed}")"
+
+      if [ -n "${active}" ] && [ "${active}" != "0" ]; then
+        echo "skip ${name}: still active"
+        continue
+      fi
+      if [ -z "${succeeded}" ] && [ -z "${failed}" ]; then
+        echo "skip ${name}: not finished yet"
+        continue
+      fi
+
+      created_for_date="$(echo "${created}" | sed 's/T/ /; s/Z$//')"
+      created_epoch="$(date -u -d "${created_for_date}" +%s)"
+      age_seconds="$((now_epoch - created_epoch))"
+
+      if [ "${age_seconds}" -lt "${ttl_seconds}" ]; then
+        echo "skip ${name}: younger than ${ttl_hours}h"
+        continue
+      fi
+
+      if [ "${dry_run}" = "true" ]; then
+        echo "dry-run delete job/${name} (age $((age_seconds / 3600))h)"
+      else
+        echo "delete job/${name} (age $((age_seconds / 3600))h)"
+        kubectl delete job "${name}" --wait=false
+      fi
+    done

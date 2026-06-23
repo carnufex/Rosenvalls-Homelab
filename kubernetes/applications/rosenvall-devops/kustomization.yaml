@@ -14,6 +14,9 @@ resources:
   - preview-cleaner-rbac.yaml
   - preview-cleaner-configmap.yaml
   - preview-cleaner-cronjob.yaml
+  - impl-task-cleaner-rbac.yaml
+  - impl-task-cleaner-configmap.yaml
+  - impl-task-cleaner-cronjob.yaml
   - forgejo-pvc.yaml
   - forgejo-service.yaml
   - forgejo-bootstrap-job.yaml
