@@ -24,10 +24,9 @@ data:
     [ -n "${n_notready}" ] && note ":red_circle: Nodes not Ready: $(echo ${n_notready} | tr '\n' ' ')"
     n_ready="$((n_total - $(echo "${n_notready}" | grep -c .)))"
 
-    # --- ArgoCD apps (ragflow-helm is intentionally OutOfSync) ---
-    bad_apps="$(kubectl get applications.argoproj.io -n argocd --no-headers 2>/dev/null \
-      | awk '($2!="Synced" || $3!="Healthy") && $1!="ragflow-helm" {print $1" ("$2"/"$3")"}')"
-    [ -n "${bad_apps}" ] && note ":red_circle: ArgoCD: $(echo "${bad_apps}" | paste -sd', ' -)"
+    # ArgoCD app state is intentionally NOT reported here — too noisy, and
+    # transient OutOfSync/Progressing is normal during syncs. Real workload
+    # impact still surfaces via the pod/Longhorn/alert checks below.
 
     # --- External secrets (READY is the last column) ---
     bad_es="$(kubectl get externalsecret -A --no-headers 2>/dev/null | awk '$NF!="True"{print $1"/"$2}')"
