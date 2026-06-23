@@ -10,6 +10,9 @@ resources:
   - homelab-app-alerts.yaml
   - longhorn-alerts.yaml
   - homelab-app-status-dashboard.yaml
+  - daily-health-check-rbac.yaml
+  - daily-health-check-configmap.yaml
+  - daily-health-check-cronjob.yaml
 
 helmCharts:
   - name: kube-prometheus-stack

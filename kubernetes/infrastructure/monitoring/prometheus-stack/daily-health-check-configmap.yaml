@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: daily-health-check
+  namespace: monitoring
+data:
+  health-check.sh: |
+    #!/bin/sh
+    # Morning cluster summary -> Slack. Posts a green check when everything is
+    # fine, otherwise a bullet list of what needs attention. Complements alerts:
+    # silence is otherwise ambiguous (all good, or monitoring itself is down).
+    set -u
+
+    AM="http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093"
+    webhook="$(cat /etc/slack/webhook-url)"
+
+    problems=""
+    note() { problems="${problems}
+    ${1}"; }
+
+    # --- Nodes ---
+    n_total="$(kubectl get nodes --no-headers 2>/dev/null | wc -l | tr -d ' ')"
+    n_notready="$(kubectl get nodes --no-headers 2>/dev/null | awk '$2!="Ready"{print $1}')"
+    [ -n "${n_notready}" ] && note ":red_circle: Nodes not Ready: $(echo ${n_notready} | tr '\n' ' ')"
+    n_ready="$((n_total - $(echo "${n_notready}" | grep -c .)))"
+
+    # --- ArgoCD apps (ragflow-helm is intentionally OutOfSync) ---
+    bad_apps="$(kubectl get applications.argoproj.io -n argocd --no-headers 2>/dev/null \
+      | awk '($2!="Synced" || $3!="Healthy") && $1!="ragflow-helm" {print $1" ("$2"/"$3")"}')"
+    [ -n "${bad_apps}" ] && note ":red_circle: ArgoCD: $(echo "${bad_apps}" | paste -sd', ' -)"
+
+    # --- External secrets (READY is the last column) ---
+    bad_es="$(kubectl get externalsecret -A --no-headers 2>/dev/null | awk '$NF!="True"{print $1"/"$2}')"
+    [ -n "${bad_es}" ] && note ":red_circle: ExternalSecrets not synced: $(echo "${bad_es}" | paste -sd', ' -)"
+
+    # --- Longhorn volumes (ignore detached/unknown) ---
+    bad_vols="$(kubectl get volumes.longhorn.io -n longhorn-system \
+      -o custom-columns=N:.metadata.name,R:.status.robustness --no-headers 2>/dev/null \
+      | awk '$2=="degraded" || $2=="faulted" {print $1" ("$2")"}')"
+    [ -n "${bad_vols}" ] && note ":red_circle: Longhorn volumes: $(echo "${bad_vols}" | paste -sd', ' -)"
+
+    # --- Failing pods ---
+    bad_pods="$(kubectl get pods -A --no-headers 2>/dev/null \
+      | awk '$4 ~ /CrashLoopBackOff|Error|ImagePullBackOff|ErrImagePull/ {print $1"/"$2}')"
+    [ -n "${bad_pods}" ] && note ":red_circle: Pods: $(echo "${bad_pods}" | paste -sd', ' -)"
+
+    # --- Firing alerts (the real signal) ---
+    firing="$(curl -s "${AM}/api/v2/alerts?active=true&silenced=false&inhibited=false" 2>/dev/null \
+      | jq -r '[.[] | select(.labels.alertname != "Watchdog" and .labels.alertname != "InfoInhibitor")] | .[].labels.alertname' 2>/dev/null \
+      | sort -u)"
+    [ -n "${firing}" ] && note ":warning: Firing alerts: $(echo "${firing}" | paste -sd', ' -)"
+
+    # --- Longhorn free space (lowest nodes — the recurring bottleneck) ---
+    lh_free="$(kubectl get nodes.longhorn.io -n longhorn-system -o json 2>/dev/null \
+      | jq -r '[.items[] | {n:.metadata.name, avail:([.status.diskStatus[].storageAvailable]|add)}]
+               | sort_by(.avail) | .[] | "    \(.n): \(.avail/1073741824 | floor) GiB free"' 2>/dev/null \
+      | head -5)"
+
+    # --- Compose & post ---
+    date_str="$(date -u '+%Y-%m-%d %H:%M UTC')"
+    if [ -z "${problems}" ]; then
+      header=":white_check_mark: *Homelab daily health check — all green*"
+    else
+      header=":warning: *Homelab daily health check — attention needed*${problems}"
+    fi
+
+    summary="$(printf '%s\n_%s_\n\n• Nodes: %s/%s Ready\n• Longhorn free space:\n%s' \
+      "${header}" "${date_str}" "${n_ready}" "${n_total}" "${lh_free}")"
+
+    payload="$(jq -n --arg t "${summary}" '{text:$t}')"
+    curl -s -o /dev/null -w 'slack_status=%{http_code}\n' \
+      -X POST -H 'content-type: application/json' --data "${payload}" "${webhook}"
