@@ -13,6 +13,8 @@ resources:
   - daily-health-check-rbac.yaml
   - daily-health-check-configmap.yaml
   - daily-health-check-cronjob.yaml
+  - longhorn-weekly-trend-configmap.yaml
+  - longhorn-weekly-trend-cronjob.yaml
 
 helmCharts:
   - name: kube-prometheus-stack
