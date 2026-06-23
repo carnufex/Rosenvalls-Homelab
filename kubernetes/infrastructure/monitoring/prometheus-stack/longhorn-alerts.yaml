@@ -1,0 +1,46 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: longhorn-homelab-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: longhorn-storage
+      rules:
+        # longhorn_volume_robustness: 0=unknown 1=healthy 2=degraded 3=faulted
+        - alert: LonghornVolumeDegraded
+          expr: longhorn_volume_robustness == 2
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Longhorn volume degraded"
+            description: "Volume {{ $labels.volume }} has been degraded (missing a healthy replica) for more than 10 minutes. Check Longhorn node capacity before assuming a bug."
+        - alert: LonghornVolumeFaulted
+          expr: longhorn_volume_robustness == 3
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn volume faulted"
+            description: "Volume {{ $labels.volume }} is faulted — no usable replica. Data may be at risk."
+        - alert: LonghornNodeStorageLow
+          expr: >-
+            (longhorn_node_storage_usage_bytes / longhorn_node_storage_capacity_bytes) > 0.85
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Longhorn node storage above 85%"
+            description: "Longhorn node {{ $labels.node }} is over 85% full. Replicas may fail to schedule (ReplicaSchedulingFailure) and degraded volumes will not self-heal."
+        - alert: LonghornNodeStorageCritical
+          expr: >-
+            (longhorn_node_storage_usage_bytes / longhorn_node_storage_capacity_bytes) > 0.95
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn node storage above 95%"
+            description: "Longhorn node {{ $labels.node }} is over 95% full. New volumes and replica rebuilds will fail."

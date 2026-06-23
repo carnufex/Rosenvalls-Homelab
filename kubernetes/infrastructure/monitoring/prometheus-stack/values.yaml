@@ -61,6 +61,10 @@ prometheusOperator:
 
 alertmanager:
   alertmanagerSpec:
+    # Mounts the ExternalSecret-backed Slack webhook at
+    # /etc/alertmanager/secrets/alertmanager-slack/webhook-url
+    secrets:
+      - alertmanager-slack
     storage:
       volumeClaimTemplate:
         spec:
@@ -69,6 +73,35 @@ alertmanager:
           resources:
             requests:
               storage: 5Gi
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: slack-homelab
+      group_by: ["alertname", "namespace"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      routes:
+        # Watchdog/InfoInhibitor are housekeeping signals, not real incidents.
+        - receiver: "null"
+          matchers:
+            - alertname = "Watchdog"
+        - receiver: "null"
+          matchers:
+            - alertname = "InfoInhibitor"
+    receivers:
+      - name: "null"
+      - name: slack-homelab
+        slack_configs:
+          - api_url_file: /etc/alertmanager/secrets/alertmanager-slack/webhook-url
+            channel: "#homelab-alerts"
+            send_resolved: true
+            title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
+            text: >-
+              {{ range .Alerts }}*{{ .Labels.severity | toUpper }}* — {{ .Annotations.summary }}
+              {{ .Annotations.description }}
+              {{ end }}
 
 prometheus:
   prometheusSpec:

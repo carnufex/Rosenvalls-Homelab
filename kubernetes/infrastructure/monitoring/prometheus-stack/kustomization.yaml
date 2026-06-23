@@ -4,9 +4,11 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - grafana-oauth-externalsecret.yaml
+  - alertmanager-slack-externalsecret.yaml
   - grafana-http-route.yaml
   - prometheus-http-route.yaml
   - homelab-app-alerts.yaml
+  - longhorn-alerts.yaml
   - homelab-app-status-dashboard.yaml
 
 helmCharts:
