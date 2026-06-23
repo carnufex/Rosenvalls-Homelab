@@ -25,6 +25,9 @@ resources:
   - plex-oauth2-proxy-service.yaml
   - plex-service.yaml
   - plex-self-heal-rbac.yaml
+  - deluge-vpn-leak-check-rbac.yaml
+  - deluge-vpn-leak-check-externalsecret.yaml
+  - deluge-vpn-leak-check-configmap.yaml
   - radarr-httproute.yaml
   - sonarr-httproute.yaml
   - jackett-httproute.yaml
@@ -43,3 +46,4 @@ resources:
   - plex-oauth2-proxy-deployment.yaml
   - plex-deployment.yaml
   - plex-self-heal-cronjob.yaml
+  - deluge-vpn-leak-check-cronjob.yaml

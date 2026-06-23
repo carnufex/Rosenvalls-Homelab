@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deluge-vpn-leak-check
+  namespace: media
+data:
+  check.sh: |
+    #!/bin/sh
+    # Verifies Deluge traffic actually exits through the WireGuard VPN and alerts
+    # Slack on a leak or breakage. Deluge and the wireguard container share a
+    # network namespace, so the wireguard container's public egress IP *is*
+    # Deluge's. We compare it to this job's own (home/ISP) egress IP: if they
+    # match, traffic is leaking outside the tunnel. We also check the pod is
+    # healthy and the WireGuard handshake is fresh.
+    #
+    # Posts to Slack only on a problem (or when FORCE_REPORT=true), so healthy
+    # 15-minute runs stay silent.
+    set -u
+
+    NS=media
+    SELECTOR="app.kubernetes.io/name=deluge-vpn"
+    WG_CONTAINER=wireguard
+    HANDSHAKE_MAX=300
+    IP_SERVICES="https://api.ipify.org https://ifconfig.me/ip https://ipinfo.io/ip"
+    webhook="$(cat /etc/slack/webhook-url)"
+
+    alert() {  # emoji, text
+      em="$1"; shift
+      msg="${em} *Deluge VPN check* — $*"
+      printf '%s\n' "${msg}"
+      payload="$(jq -n --arg t "${msg}" '{text:$t}')"
+      curl -s -o /dev/null -X POST -H 'content-type: application/json' --data "${payload}" "${webhook}"
+    }
+
+    valid_ip() { echo "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; }
+
+    home_ip() {
+      for u in ${IP_SERVICES}; do
+        ip="$(curl -s --max-time 8 "$u" 2>/dev/null | tr -d '[:space:]')"
+        valid_ip "$ip" && { echo "$ip"; return 0; }
+      done
+      return 1
+    }
+
+    POD="$(kubectl get pods -n ${NS} -l ${SELECTOR} -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)"
+    if [ -z "${POD}" ]; then
+      alert ":rotating_light:" "Deluge pod not found — Deluge is DOWN."
+      exit 0
+    fi
+
+    phase="$(kubectl get pod ${POD} -n ${NS} -o jsonpath='{.status.phase}' 2>/dev/null)"
+    deluge_ready="$(kubectl get pod ${POD} -n ${NS} -o jsonpath='{range .status.containerStatuses[?(@.name=="deluge")]}{.ready}{end}' 2>/dev/null)"
+    wg_ready="$(kubectl get pod ${POD} -n ${NS} -o jsonpath='{range .status.containerStatuses[?(@.name=="wireguard")]}{.ready}{end}' 2>/dev/null)"
+    if [ "${phase}" != "Running" ] || [ "${deluge_ready}" != "true" ] || [ "${wg_ready}" != "true" ]; then
+      alert ":rotating_light:" "Deluge pod unhealthy (phase=${phase} deluge_ready=${deluge_ready} wg_ready=${wg_ready})."
+      exit 0
+    fi
+
+    # WireGuard handshake freshness (newest peer handshake).
+    hs="$(kubectl exec ${POD} -n ${NS} -c ${WG_CONTAINER} -- sh -c 'wg show wg0 latest-handshakes 2>/dev/null | awk "{print \$2}" | sort -nr | head -1' 2>/dev/null | tr -d '[:space:]')"
+    now="$(date -u +%s)"
+    if ! echo "${hs}" | grep -Eq '^[0-9]+$' || [ "${hs}" -eq 0 ]; then
+      alert ":rotating_light:" "WireGuard has no handshake — tunnel is DOWN. (Killswitch still blocks egress, so no leak, but Deluge can't reach peers.)"
+      exit 0
+    fi
+    age=$(( now - hs ))
+
+    # Actual public egress IP as seen from inside the shared (tunnelled) netns.
+    VPN_IP="$(kubectl exec ${POD} -n ${NS} -c ${WG_CONTAINER} -- sh -c 'for u in https://api.ipify.org https://ifconfig.me/ip; do ip=$(curl -s --max-time 8 "$u" 2>/dev/null | tr -d "[:space:]"); echo "$ip" | grep -Eq "^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$" && { echo "$ip"; break; }; done' 2>/dev/null | tr -d '[:space:]')"
+    if ! valid_ip "${VPN_IP}"; then
+      alert ":rotating_light:" "Deluge has no internet egress through the VPN (tunnel down or broken). Handshake age ${age}s."
+      exit 0
+    fi
+
+    HOME_IP="$(home_ip || echo '')"
+
+    if [ -n "${HOME_IP}" ] && [ "${VPN_IP}" = "${HOME_IP}" ]; then
+      alert ":rotating_light:" "DATA LEAK — Deluge egress IP (${VPN_IP}) equals the home/ISP IP. Traffic is NOT going through the VPN!"
+      exit 0
+    fi
+
+    if [ "${age}" -gt "${HANDSHAKE_MAX}" ]; then
+      alert ":warning:" "Tunnel up and egress is VPN (${VPN_IP}), but the WireGuard handshake is stale (${age}s). Watch for drops."
+      exit 0
+    fi
+
+    echo "OK: deluge egress=${VPN_IP} home=${HOME_IP:-unknown} handshake_age=${age}s — traffic is tunnelled."
+    if [ "${FORCE_REPORT:-false}" = "true" ]; then
+      alert ":white_check_mark:" "All good — Deluge egress *${VPN_IP}* via VPN (home ${HOME_IP:-unknown}), handshake ${age}s ago. Traffic is tunnelled."
+    fi
