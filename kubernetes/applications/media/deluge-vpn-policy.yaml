@@ -28,16 +28,18 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    - toFQDNs:
-        - matchName: wireguard.5july.net
-      toPorts:
-        - ports:
-            - port: "48575"
-              protocol: UDP
-    # wireguard.5july.net rotates between provider endpoints; only the WireGuard UDP port is allowed.
-    - toCIDRSet:
-        - cidr: 98.128.186.0/24
-        - cidr: 94.254.51.0/24
+    # WireGuard handshake/data to any provider endpoint, but ONLY the WireGuard UDP port.
+    # This deliberately does not pin endpoint CIDRs: the provider rotates endpoints (and its own
+    # DNS, set via dns= in wg0.conf, hands back ranges cluster DNS never sees, so toFQDNs can't keep
+    # up). Pinning IPs added no leak protection — the killswitch rests on three independent layers:
+    #   1. Routing: AllowedIPs=0.0.0.0/0 makes wg0 the default route; only LAN/cluster CIDRs bypass
+    #      it (PostUp), so if the tunnel is down public traffic has no route and is dropped.
+    #   2. Crypto: WireGuard only forms a tunnel with the keyed peer; reaching a wrong host does
+    #      nothing, so allowing 48575 to world cannot move any data.
+    #   3. This policy: every egress port except DNS and 48575/UDP is denied, so torrent peer
+    #      traffic (arbitrary ports) can never leave the pod regardless.
+    - toEntities:
+        - world
       toPorts:
         - ports:
             - port: "48575"
