@@ -67,6 +67,9 @@ data:
     summary="$(printf '%s\n_%s_\n\n• Nodes: %s/%s Ready\n• Longhorn free space:\n%s' \
       "${header}" "${date_str}" "${n_ready}" "${n_total}" "${lh_free}")"
 
+    # Log what we are sending so `kubectl logs` is self-documenting.
+    printf '%s\n\n' "${summary}"
+
     payload="$(jq -n --arg t "${summary}" '{text:$t}')"
     curl -s -o /dev/null -w 'slack_status=%{http_code}\n' \
       -X POST -H 'content-type: application/json' --data "${payload}" "${webhook}"
