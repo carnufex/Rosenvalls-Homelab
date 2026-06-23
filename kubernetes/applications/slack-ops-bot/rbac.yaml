@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: slack-ops-bot
+  namespace: slack-ops-bot
+---
+# Scoped, deny-by-omission. The bot can read broadly but may only delete the
+# specific resource kinds its whitelisted remediations use. No secrets, no exec,
+# no RBAC, no namespace/CRD deletion, no write to workloads. Namespace-level
+# protection is additionally enforced in code (PROTECTED_NS).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: slack-ops-bot
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: slack-ops-bot
+subjects:
+  - kind: ServiceAccount
+    name: slack-ops-bot
+    namespace: slack-ops-bot
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: slack-ops-bot

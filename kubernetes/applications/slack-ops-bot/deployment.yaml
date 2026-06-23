@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slack-ops-bot
+  namespace: slack-ops-bot
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: slack-ops-bot
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: slack-ops-bot
+    spec:
+      serviceAccountName: slack-ops-bot
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bot
+          image: python:3.12-slim
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              pip install --no-cache-dir --target=/deps \
+                slack_sdk==3.33.4 websocket-client==1.8.0 kubernetes==31.0.0 requests==2.32.3
+              exec python /app/bot.py
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: PYTHONPATH
+              value: /deps
+            - name: HOME
+              value: /tmp
+          envFrom:
+            - secretRef:
+                name: slack-ops-bot
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+            - name: deps
+              mountPath: /deps
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: code
+          configMap:
+            name: slack-ops-bot-code
+        - name: deps
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
