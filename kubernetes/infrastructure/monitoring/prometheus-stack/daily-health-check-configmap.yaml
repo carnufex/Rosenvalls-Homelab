@@ -49,6 +49,19 @@ data:
       | sort -u)"
     [ -n "${firing}" ] && note ":warning: Firing alerts: $(echo "${firing}" | paste -sd', ' -)"
 
+    # --- Certificates nearing expiry (cert-manager renews ~30d out; <14d left
+    #     means renewal is failing) ---
+    now_s="$(date -u +%s)"
+    expiring="$(kubectl get certificate -A -o json 2>/dev/null \
+      | jq -r --argjson now "${now_s}" --argjson warn "$((14 * 86400))" '
+          .items[]
+          | select(.status.notAfter != null)
+          | . as $c
+          | ($c.status.notAfter | fromdateiso8601) as $exp
+          | select(($exp - $now) < $warn)
+          | "\($c.metadata.namespace)/\($c.metadata.name) (\((($exp - $now) / 86400) | floor)d left)"' 2>/dev/null)"
+    [ -n "${expiring}" ] && note ":red_circle: Certs expiring soon: $(echo "${expiring}" | paste -sd', ' -)"
+
     # --- Longhorn free space (lowest nodes — the recurring bottleneck) ---
     lh_free="$(kubectl get nodes.longhorn.io -n longhorn-system -o json 2>/dev/null \
       | jq -r '[.items[] | {n:.metadata.name, avail:([.status.diskStatus[].storageAvailable]|add)}]
