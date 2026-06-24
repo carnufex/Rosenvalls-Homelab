@@ -1,0 +1,24 @@
+# Shared client graphics for the website's sprite-render API routes
+# (web/lib/sprites.ts reads Tibia.spr at SPR_PATH) and, later, the /play WASM
+# client. The TFS *server* does NOT use sprites — it reads items.otb. Only web
+# (and a future /play asset) consume this.
+#
+# The .spr is ~436 MB and proprietary/local (OneDrive / OTC-Fonticak), so it is
+# NEVER in Git and NOT in any image. It is seeded once with kubectl cp via
+# sprites-seed-pod.yaml (see README "Sprite assets"). web mounts this read-only;
+# losing the .spr only blanks sprite routes (web has an existsSync guard), it
+# does not crash the app.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gatebound-sprites
+  namespace: gatebound
+  annotations:
+    # Bind before any workload that mounts it.
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 1Gi

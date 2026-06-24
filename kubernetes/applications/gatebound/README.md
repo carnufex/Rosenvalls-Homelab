@@ -24,6 +24,44 @@ on an empty data volume).
 - Service: `mariadb.gatebound.svc.cluster.local:3306` (what TFS/web connect to).
 - DB name/user: `forgottenserver` / `forgottenserver`.
 
+## Sprite assets (`gatebound-sprites` PVC)
+
+The **website** decodes item/monster sprites on demand from the 8.60
+`Tibia.spr` (web/lib/sprites.ts, path `SPR_PATH`); the future `/play` WASM
+client needs the same file. The **TFS server does not** — it reads `items.otb`.
+
+`Tibia.spr` is ~436 MB and proprietary/local (OneDrive / OTC-Fonticak), so it
+is never in Git and not baked into any image. It lives in the `gatebound-sprites`
+PVC (1Gi, longhorn, active in `kustomization.yaml`) and is seeded once with
+`kubectl cp`:
+
+```bash
+kubectl apply -f sprites-seed-pod.yaml
+kubectl -n gatebound wait --for=condition=Ready pod/gatebound-sprites-seed --timeout=180s
+kubectl -n gatebound cp "D:/Github/Gatebound-2d/OTC-Fonticak/data/things/860/Tibia.spr" \
+    gatebound-sprites-seed:/sprites/Tibia.spr
+kubectl -n gatebound exec gatebound-sprites-seed -- ls -lh /sprites/Tibia.spr
+kubectl -n gatebound delete pod gatebound-sprites-seed
+```
+
+When `web-deployment.yaml` is added, mount the PVC **read-only** and point the
+app at it:
+
+```yaml
+volumes:
+  - name: sprites
+    persistentVolumeClaim: { claimName: gatebound-sprites, readOnly: true }
+# in the web container:
+volumeMounts:
+  - { name: sprites, mountPath: /sprites, readOnly: true }
+env:
+  - { name: SPR_PATH, value: /sprites/Tibia.spr }
+```
+
+Missing/unseeded → sprite routes just return blank (web has an `existsSync`
+guard); the rest of the site is fine. Keep web at `replicas: 1` while it mounts
+this RWO volume, or switch the PVC to RWX (longhorn supports it) to scale out.
+
 ## Secrets (Bitwarden, homelab project — never in Git)
 
 `ExternalSecret/gatebound-mariadb` → secret `gatebound-mariadb` with

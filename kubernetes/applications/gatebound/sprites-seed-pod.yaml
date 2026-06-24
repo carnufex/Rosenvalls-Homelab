@@ -1,0 +1,30 @@
+# Ops helper — NOT referenced by kustomization.yaml, so ArgoCD ignores it.
+# One-time seed of Tibia.spr into the gatebound-sprites PVC (idle pod that just
+# holds the volume mounted so kubectl cp can write into it):
+#
+#   kubectl apply -f sprites-seed-pod.yaml
+#   kubectl -n gatebound wait --for=condition=Ready pod/gatebound-sprites-seed --timeout=180s
+#   kubectl -n gatebound cp "D:/Github/Gatebound-2d/OTC-Fonticak/data/things/860/Tibia.spr" \
+#       gatebound-sprites-seed:/sprites/Tibia.spr
+#   kubectl -n gatebound exec gatebound-sprites-seed -- ls -lh /sprites/Tibia.spr   # verify size
+#   kubectl -n gatebound delete pod gatebound-sprites-seed
+#
+# Re-run to re-seed if the graphics change.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gatebound-sprites-seed
+  namespace: gatebound
+spec:
+  restartPolicy: Never
+  containers:
+    - name: seed
+      image: busybox:1.36
+      command: ["sh", "-c", "sleep 3600"]
+      volumeMounts:
+        - name: sprites
+          mountPath: /sprites
+  volumes:
+    - name: sprites
+      persistentVolumeClaim:
+        claimName: gatebound-sprites
