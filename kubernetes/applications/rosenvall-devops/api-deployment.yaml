@@ -31,7 +31,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:9d4dab925c8a9378893c53e531e1e2c47b1c40184a9e8c25db8065118cfc3077
+          image: ghcr.io/carnufex/rosenvall-devops-api@sha256:182b19767e1fe5981a030b0f41cf4808d49cfcc531b662aa61b9d81038fb0c85
           imagePullPolicy: Always
           securityContext:
             runAsNonRoot: true
@@ -92,6 +92,12 @@ spec:
                   key: password
             - name: HOME
               value: /tmp
+            - name: CLAUDE_CODE_OAUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rosenvall-devops-claude
+                  key: token
+                  optional: true
           resources:
             requests:
               cpu: 100m
