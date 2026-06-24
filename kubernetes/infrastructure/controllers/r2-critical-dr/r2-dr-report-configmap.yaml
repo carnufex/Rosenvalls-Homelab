@@ -6,9 +6,10 @@ metadata:
 data:
   r2-dr-report.sh: |
     #!/bin/sh
-    # Daily peace-of-mind report: how much of the R2 free tier we use, and how
-    # fresh the critical-dr backups are. Hard guard: warn well before the 10 GB
-    # free-tier limit so we never get billed.
+    # Runs daily but stays SILENT when healthy. Alerts Slack only when a DR
+    # backup is missing (none in STALE_DAYS days -> a weekly run was missed) or
+    # when R2 storage approaches the 10 GB free-tier limit. FORCE_REPORT=true
+    # posts a full status for manual verification.
     set -u
 
     apk add --no-cache rclone curl jq coreutils >/dev/null 2>&1
@@ -20,7 +21,7 @@ data:
     LIMIT=10000000000
     WARN=7000000000
     CRIT=9000000000
-    STALE_DAYS=10   # backups are weekly; older than this means a run was missed
+    STALE_DAYS="${STALE_DAYS:-8}"   # weekly backups; older than this -> a run was missed
 
     sizejson="$(rclone size "${bucket}" --json 2>/dev/null)"
     bytes="$(printf '%s' "${sizejson}" | jq -r '.bytes // 0')"
@@ -38,31 +39,35 @@ data:
       [ -n "${ne}" ] && age_days=$(( ( $(date -u +%s) - ne ) / 86400 ))
     fi
 
-    emoji=":white_check_mark:"
-    word="all good"
-    notes=""
+    problems=""
+    note() { problems="${problems}
+    ${1}"; }
 
     if [ "${bytes}" -ge "${CRIT}" ]; then
-      emoji=":rotating_light:"; word="CRITICAL — near R2 free-tier limit"
+      note ":rotating_light: R2 usage is *critically* near the 10 GB free-tier limit: ${mib} MiB (${pct}%)."
     elif [ "${bytes}" -ge "${WARN}" ]; then
-      emoji=":warning:"; word="approaching R2 free-tier limit"
+      note ":warning: R2 usage is approaching the 10 GB free-tier limit: ${mib} MiB (${pct}%)."
     fi
 
-    if [ "${age_days}" -gt "${STALE_DAYS}" ]; then
-      emoji=":warning:"
-      notes="${notes}
-    :warning: Newest backup is ${age_days} days old — the monthly backup may have been missed."
-    elif [ "${age_days}" -lt 0 ]; then
-      emoji=":warning:"
-      notes="${notes}
-    :warning: Could not determine backup age (bucket empty or unreachable)."
+    if [ "${age_days}" -lt 0 ]; then
+      note ":rotating_light: Could not determine backup age (bucket empty or unreachable)."
+    elif [ "${age_days}" -gt "${STALE_DAYS}" ]; then
+      note ":rotating_light: No DR backup in *${age_days} days* — a weekly backup has been missed. (R2 ${mib} MiB / 10 GB, ${count} objects.)"
     fi
 
-    age_str="${age_days} days"
-    [ "${age_days}" -lt 0 ] && age_str="unknown"
+    # Silent when healthy. Only post on a real problem (or when forced).
+    if [ -z "${problems}" ] && [ "${FORCE_REPORT:-false}" != "true" ]; then
+      echo "OK (silent): R2 ${mib} MiB (${pct}%), newest backup ${age_days}d old — no alert."
+      exit 0
+    fi
 
-    msg="$(printf '%s *R2 / DR backup report* — %s\n_%s_\n\n• R2 usage: *%s MiB / 10 GB* (%s%%), %s objects\n• Newest backup: %s ago%s' \
-      "${emoji}" "${word}" "$(date -u '+%Y-%m-%d %H:%M UTC')" "${mib}" "${pct}" "${count}" "${age_str}" "${notes}")"
+    if [ -z "${problems}" ]; then
+      msg="$(printf ':white_check_mark: *R2 / DR backup report* — all good\n_%s_\n\n• R2 usage: *%s MiB / 10 GB* (%s%%), %s objects\n• Newest backup: %s days ago' \
+        "$(date -u '+%Y-%m-%d %H:%M UTC')" "${mib}" "${pct}" "${count}" "${age_days}")"
+    else
+      msg="$(printf ':rotating_light: *R2 / DR backup needs attention*\n_%s_%s' \
+        "$(date -u '+%Y-%m-%d %H:%M UTC')" "${problems}")"
+    fi
 
     printf '%s\n\n' "${msg}"
     payload="$(jq -n --arg t "${msg}" '{text:$t}')"
