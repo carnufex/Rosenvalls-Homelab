@@ -15,8 +15,10 @@ resources:
   # Independent of the images, so active now; seed it with sprites-seed-pod.yaml
   # (see README "Sprite assets"). The TFS server does not use sprites.
   - sprites-pvc.yaml
-  # --- staged: uncomment once ghcr.io/carnufex/gatebound-* images exist ---
-  # - ghcr-image-pull-secret.yaml
+  # GHCR pull credential (reuses the matplan Bitwarden PAT) — needed before any
+  # gatebound-* image can be pulled. Safe/inert until a deployment references it.
+  - ghcr-image-pull-secret.yaml
+  # --- staged: uncomment as each manifest is authored (images now exist) ---
   # - tfs-config-configmap.yaml
   # - tfs-deployment.yaml
   # - tfs-service.yaml          # LoadBalancer (Cilium LB-IPAM) for TCP 7171/7172
