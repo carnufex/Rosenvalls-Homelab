@@ -1,0 +1,26 @@
+# Publishes the website at gatebound.rosenvall.se. The Cloudflare tunnel already
+# wildcard-routes *.rosenvall.se to the external gateway (cloudflared
+# tunnel-config.yaml), so no per-host Cloudflare route is needed — this HTTPRoute
+# does the gateway-side host match to the web service.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gatebound-web
+  namespace: gatebound
+spec:
+  hostnames:
+    - gatebound.rosenvall.se
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external
+      namespace: gateway
+      sectionName: https
+  rules:
+    - matches:
+        - path: { type: PathPrefix, value: / }
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: gatebound-web
+          port: 3000
