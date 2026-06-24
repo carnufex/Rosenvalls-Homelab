@@ -18,6 +18,8 @@ resources:
   # GHCR pull credential (reuses the matplan Bitwarden PAT) — needed before any
   # gatebound-* image can be pulled. Safe/inert until a deployment references it.
   - ghcr-image-pull-secret.yaml
+  # Website app secrets (AUTH_SECRET) from Bitwarden — needed before web starts.
+  - web-externalsecret.yaml
   # --- staged: uncomment as each manifest is authored (images now exist) ---
   # - tfs-config-configmap.yaml
   # - tfs-deployment.yaml
