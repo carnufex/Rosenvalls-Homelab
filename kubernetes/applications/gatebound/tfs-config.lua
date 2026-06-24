@@ -1,0 +1,559 @@
+-- Docker-anpassad config.lua (genererad av ops-repot).
+-- DB pekar mot compose-tjansten 'mariadb'. Andra mysqlPass har OCH i .env tillsammans.
+
+-- Astra/client protocol configuration is in data/server_config.lua.
+
+Autoloot_enabled = true
+AutoBank = true
+AutoLootGoldPouch = true
+AutoLoot_BlockIDs = ""
+AutoLoot_MoneyIDs = "3031;3035;3043;32724"
+AutoLoot_MaxItemFree = 5
+AutoLoot_MaxItemPremium = 10
+
+-- Boosted Creature
+boostedExpMultiplier = 2.0       -- XP multiplier for boosted creature
+boostedLootMultiplier = 2.0      -- Loot rolls for boosted creature
+boostedSpawnMultiplier = 0.5     -- Spawn interval factor (0.5 = half the time)
+boostedBossLootBonus = 250       -- Loot bonus percent for boosted boss
+boostedBossKillBonus = 3         -- Bosstiary kill multiplier for boosted boss
+
+-- Account Manager
+accountManager = true
+namelockManager = true
+newPlayerChooseVoc = true
+newPlayerSpawnPosX = 0
+newPlayerSpawnPosY = 0
+newPlayerSpawnPosZ = 0
+newPlayerTownId = 1
+newPlayerLevel = 8
+newPlayerMagicLevel = 0
+newPlayerHealth = 185
+newPlayerMana = 90
+newPlayerCap = 470
+generateAccountNumber = false
+
+-- Combat settings
+-- NOTE: valid values for worldType are: "pvp", "no-pvp" and "pvp-enforced"
+worldType = "pvp"
+hotkeyAimbotEnabled = true
+protectionLevel = 1
+killsToRedSkull = 3
+killsToBlackSkull = 6
+pzLocked = 60000
+removeChargesFromRunes = true
+removeChargesFromPotions = true
+removeWeaponAmmunition = true
+removeWeaponCharges = true
+timeToDecreaseFrags = 24 * 60 * 60
+whiteSkullTime = 15 * 60
+stairJumpExhaustion = 2000
+experienceByKillingPlayers = false
+pzLockSkullAttacker = false
+allowAutoAttackWithoutExhaustion = true
+
+-- Protection Time
+-- Grants protection upon connection if monsters are nearby, to give you a grace period; if you move or attack, the protection is deactivated.
+protectionTime = 10
+
+-- Party Config
+-- required to keep shared experience active.
+-- experienceShareRange: Maximum horizontal distance (in tiles) between party members
+-- experienceShareFloors: Maximum vertical floor difference allowed between party members
+expShareRange = 30
+expShareFloors = 1
+expFromPlayersLevelRange = 75
+
+-- Connection Config
+-- NOTE: maxPlayers set to 0 means no limit
+-- NOTE: allowWalkthrough is only applicable to players
+-- NOTE: statusCountMaxPlayersPerIp allows you to only count up to X players per IP in status response (0 = disabled)
+ip = "play.rosenvall.se"  -- advertised game host (DDNS A-record -> home IP, DNS-only)
+bindOnlyGlobalAddress = false
+loginProtocolPort = 7171
+gameProtocolPort = 7172
+statusProtocolPort = 7171
+adminPort = 7170
+maxPlayers = 500
+motd = "Welcome to The Forgotten Server!"
+onePlayerOnlinePerAccount = true
+allowClones = false
+allowWalkthrough = true
+serverName = "Forgotten"
+statusTimeout = 5000
+statusCountMaxPlayersPerIp = 0
+replaceKickOnLogin = true
+maxPacketsPerSecond = 25
+
+-- Connection Limits Config
+-- NOTE: maxConnections: maximum total concurrent connections (0 = no limit)
+-- NOTE: maxConnectionsPerIP: maximum concurrent connections per IP (0 = no limit)
+-- NOTE: networkThreads: number of I/O threads for parallel XTEA encrypt + async_write (default: 2)
+-- NOTE: connectionRateLimitAllowed: how many connections allowed within the rate window before blocking
+-- NOTE: connectionRateLimitMS: minimum interval between connections from the same IP (in ms)
+maxConnections = 2000
+maxConnectionsPerIP = 10
+networkThreads = 2
+connectionRateLimitAllowed = 10
+connectionRateLimitMS = 500
+
+-- Reactor Limits Config
+-- WARNING: reactorMaxTasksPerCycle = 0 means unlimited; use only on dedicated hardware with controlled workloads
+-- NOTE: reactorTimeBudgetMS: max time in ms per cycle (0 = unlimited, max = 1000)
+-- NOTE: reactorMaxInboxSize: max queued tasks before dropping new ones (min = 1, max = 10000000)
+--
+-- Presets:
+--   Low    (small VPS / few players):   250 / 3  / 50000
+--   Normal (default / moderate load):   500 / 5  / 100000
+--   High   (dedicated / heavy load):    1000 / 15 / 200000
+reactorMaxTasksPerCycle = 500
+reactorTimeBudgetMS = 5
+reactorMaxInboxSize = 100000
+
+-- Deaths
+-- NOTE: Leave deathLosePercent as -1 if you want to use the default
+-- death penalty formula. For the old formula, set it to 10. For
+-- no skill/experience loss, set it to 0.
+deathLosePercent = -1
+
+-- Houses
+-- NOTE: houseLevel, when buying a house, ask for the necessary level.
+-- NOTE: set housePriceEachSQM to -1 to disable the ingame buy house functionality
+-- NOTE: valid values for houseRentPeriod are: "daily", "weekly", "monthly", "yearly"
+-- use any other value to disable the rent system
+houseLevel = 150
+housePriceEachSQM = 1000
+houseRentPeriod = "never"
+houseOwnedByAccount = false
+houseDoorShowPrice = true
+onlyInvitedCanMoveHouseItems = true
+
+-- Item Usage
+timeBetweenActions = 200
+timeBetweenExActions = 1000
+-- Set false to use timeBetweenActions for ring and necklace equip exhaustion.
+separateRingNecklaceExhaustion = true
+timeBetweenNecklace = 500
+timeBetweenRing = 500
+exhaustPotionMiliSeconds = 1500
+exhaustItemAtUsePotion = true
+
+-- Optional custom systems
+-- Default false keeps closer 8.60 behavior.
+forgeSystemEnabled = false
+imbuementSystemEnabled = false
+monkVocationEnabled = false
+familiarSystemEnabled = false
+wheelSystemEnabled = false
+bestiarySystemEnabled = false
+marketSystemEnabled = false
+preySystemEnabled = false
+battlePassSystemEnabled = false
+weaponProficiencySystemEnabled = false
+augmentSystemEnabled = false
+monsterLevelEnabled = false
+monsterFactionSystem = false
+monsterFactionRequirePlayerNearby = true
+monsterFactionPreferPlayers = true
+enableColorizedLootValue = false
+enableItemTierDisplay = false
+enableItemUpgradeClassification = false
+enableQuickLoot = false
+quickLootMaxCorpses = 30
+
+-- Enable Task Hunt / Task Board system.
+-- Requires compatible AstraClient/OTCv8 support.
+-- Default: false keeps classic 8.60 behaviour.
+taskHuntingSystemEnabled = false
+
+-- Enable Bounty Tasks inside Task Board.
+-- Requires taskHuntingSystemEnabled.
+bountyTasksEnabled = false
+
+-- Enable Weekly Tasks inside Task Board.
+-- Requires taskHuntingSystemEnabled.
+weeklyTasksEnabled = false
+
+-- Enable Soulpit arena / soul core system.
+soulpitSystemEnabled = false
+
+-- Enable Soulseals resource/window.
+-- Requires weeklyTasksEnabled or proper source of soulseals.
+soulsealsSystemEnabled = false
+
+-- Stress test: runs reactor stress tests
+-- For use test only says: /stress_reactor
+stressTest = false
+stressTestCount = 10000
+stressTestThreads = 8
+stressTestSend = true
+stressTestSendCount = 10000
+stressTestSchedule = true
+stressTestScheduleCount = 10000
+stressTestStaggered = true
+stressTestStaggeredCount = 10000
+stressTestMixed = true
+stressTestMixedCount = 10000
+stressTestCancel = true
+stressTestCancelCount = 10000
+stressTestConcurrentPush = true
+stressTestConcurrentPushCount = 10000
+stressTestConcurrentPushThreads = 8
+stressTestConcurrentSchedule = true
+stressTestConcurrentScheduleCount = 10000
+stressTestConcurrentScheduleThreads = 8
+stressTestHeapOrder = true
+stressTestHeapOrderCount = 5000
+stressTestUniqueIds = true
+stressTestUniqueIdsCount = 10000
+stressTestUniqueIdsThreads = 8
+stressTestMoveOnly = true
+stressTestMoveOnlyCount = 1000
+stressTestExpiration = true
+stressTestExpirationCount = 10000
+stressTestBurst = true
+stressTestBurstCount = 10000
+stressTestReentrancy = true
+stressTestReentrancyCount = 1000
+stressTestShutdownPending = true
+stressTestShutdownPendingCount = 10000
+stressTestCancelExternal = true
+stressTestCancelExternalCount = 10000
+stressTestCancelExternalThreads = 8
+stressTestException = true
+stressTestExceptionCount = 10000
+stressTestBenchmark = true
+stressTestInspection = true
+stressTestInspectionCount = 100
+stressTestMixedDelays = true
+stressTestMixedDelaysCount = 10000
+stressTestLeak = true
+stressTestLeakCount = 10000
+stressTestShutdownSend = true
+stressTestShutdownSendCount = 10000
+
+-- Static item augment defaults. Item-specific values can override these in items.xml.
+augmentIncreasedDamagePercent = 5
+augmentPowerfulImpactPercent = 7
+augmentStrongImpactPercent = 10
+
+-- Configuration to allow mounting in Protection Zone (PZ)
+-- true = allows mounting in PZ, false = disables mounting in PZ (default behavior)
+allowMountInPz = false
+
+-- NPC Lua backend.
+-- "tfs"     loads data/npc/lib/tfs and Lua NPCs from data/npc/lua.
+-- "crystal" loads data/npc/lib/crystal and disables the default TFS Lua NPC folder.
+-- Crystal Lua NPCs are loaded from data/npc/crystalserver (preferred),
+-- then data/npc/crystal and data/npc/npc_Crystal_Server_15x for compatibility.
+-- XML NPCs remain supported in both modes.
+npcSystem = "tfs"
+
+-- Forge Tier Abilities
+-- Formula: chance = A * tier^2 + B * tier + C
+forgeFatalA = 0.05
+forgeFatalB = 0.4
+forgeFatalC = 0.05
+forgeDodgeA = 0.0307576
+forgeDodgeB = 0.440697
+forgeDodgeC = 0.026
+forgeMomentumA = 0.05
+forgeMomentumB = 1.9
+forgeMomentumC = 0.05
+forgeTranscendenceA = 0.0127
+forgeTranscendenceB = 0.1070
+forgeTranscendenceC = 0.0073
+
+-- Token Protection Exceptions
+-- Items that can be moved even when token protection is enabled
+tokenProtectionExceptions = { 3043, 3035, 3031, 32724, 3492, 3577, 3578, 3579, 3580, 3581, 3582, 3583, 3584, 3585, 3586, 3587, 3588, 3589, 3590, 3591, 3592, 3593, 3594, 3595, 3596, 3597, 3598, 3599, 3600, 3601, 3602, 3603, 3604, 3605, 3606, 3607, 3697, 3698, 3699, 3700, 3723, 3724, 3725, 3726, 3727, 3728, 3641, 3642, 3643, 3644, 3645, 3646, 3647, 3648, 3649, 3650, 3651, 3652, 3653, 3654, 3655, 3656, 3657, 3658 }
+
+-- Teleport Block Configuration
+-- IDs of teleports where it is not allowed to throw items
+blockedTeleportIds = { 1949, 10840, 10842, 11553, 11554 }
+
+-- Rates for reward boss system
+-- If a player meets their share of the expectedScore (totalScore/contributors), they receive a lootRate according to the rewardBaseRate.
+-- Number of days before unclaimed reward chest items are automatically removed.
+rewardChestExpireDays = 7
+rewardBaseRate = 1
+rewardRateDamageDone = 1
+rewardRateDamageTaken = 0.5
+rewardRateHealingDone = 0.3
+
+-- Scheduler Task Intervals
+MOVE_CREATURE_INTERVAL = 250
+RANGE_MOVE_CREATURE_INTERVAL = 250
+RANGE_MOVE_ITEM_INTERVAL = 250
+RANGE_USE_ITEM_INTERVAL = 250
+RANGE_USE_ITEM_EX_INTERVAL = 250
+RANGE_USE_WITH_CREATURE_INTERVAL = 250
+RANGE_ROTATE_ITEM_INTERVAL = 250
+-- RANGE_BROWSE_FIELD_INTERVAL = 250
+-- RANGE_WRAP_ITEM_INTERVAL = 250
+-- RANGE_REQUEST_TRADE_INTERVAL = 250
+
+-- Map
+-- NOTE: set mapName WITHOUT .otbm at the end
+mapName = "world"
+mapAuthor = "Skyyzyy"
+
+-- Market
+marketOfferDuration = 30 * 24 * 60 * 60
+premiumToCreateMarketOffer = true
+checkExpiredMarketOffersEachMinutes = 60
+maxMarketOffersAtATimePerPlayer = 100
+
+-- MySQL
+mysqlHost = "mariadb"
+mysqlUser = "forgottenserver"
+mysqlPass = os.getenv("MYSQL_PASSWORD") or "forgotten"  -- injected from gatebound-mariadb secret
+mysqlDatabase = "forgottenserver"
+mysqlPort = 3306
+mysqlSock = ""
+
+-- Misc.
+-- NOTE: classicAttackSpeed set to true makes players constantly attack at regular
+-- intervals regardless of other actions such as item (potion) use. This setting
+-- may cause high CPU usage with many players and potentially affect performance!
+-- NOTE: forceMonsterTypesOnLoad loads all monster types on startup to validate them.
+-- You can disable it to save some memory if you don't see any errors at startup.
+-- bedOfflineTraining to true enables offline training while in bed. If set to false, the player can only sleep in bed without training.
+-- checkDuplicateStorageKeys checks the values stored in the variables for duplicates.
+allowChangeOutfit = true
+freePremium = false
+kickIdlePlayerAfterMinutes = 15
+maxMessageBuffer = 4
+emoteSpells = false
+classicEquipmentSlots = true
+classicAttackSpeed = false
+showScriptsLogInConsole = false
+showOnlineStatusInCharlist = false
+yellMinimumLevel = 2
+yellAlwaysAllowPremium = false
+minimumLevelToSendPrivate = 1
+premiumToSendPrivate = false
+forceMonsterTypesOnLoad = true
+cleanProtectionZones = false
+bedOfflineTraining = true
+showPlayerLogInConsole = true
+healthGainColour = 95
+manaGainColour = 158
+manaLossColour = 5
+
+offlineTrainingThreshold = 600
+checkDuplicateStorageKeys = false
+npcsUsingBankMoney = true
+
+-- Summons settings
+-- removeSummonsOnPz: if true, summons will disappear when player enters Protection Zone.
+-- teleportSummon: if true, summons will teleport to the player when out of range.
+-- familiarEnterPz: if true, familiars can follow their master into Protection Zone.
+-- familiarTeleportRange: tiles before a familiar teleports to its master.
+removeSummonsOnPz = false
+teleportSummon = true
+familiarEnterPz = true
+familiarTeleportRange = 15
+
+-- Protection Zone and No-PvP pushing restrictions
+-- true = restricted (cannot push), false = unrestricted (standard behavior)
+pushCreatureZone = true
+
+-- VIP and Depot limits
+-- NOTE: you can set custom limits per group in data/XML/groups.xml
+vipFreeLimit = 20
+vipPremiumLimit = 100
+depotFreeLimit = 2000
+depotPremiumLimit = 10000
+
+-- Max player allowed on a dummy
+maxAllowedOnADummy = 5
+rateExerciseTrainingSpeed = 1.0
+
+-- Guild War Configuration
+guildWarMinFragLimit = 10 -- Minimum frag limit for guild wars
+guildWarMaxFragLimit = 1000 -- Maximum frag limit for guild wars
+guildWarAnnounceKills = true -- Announce kills during guild war
+
+-- World Light
+-- NOTE: if defaultWorldLight is set to true the world light algorithm will
+-- be handled in the sources. set it to false to avoid conflicts if you wish
+-- to make use of the function setWorldLight(level, color)
+defaultWorldLight = true
+
+-- Server Save
+-- NOTE: serverSaveNotifyDuration in minutes
+serverSaveNotifyMessage = true
+serverSaveNotifyDuration = 5
+serverSaveCleanMap = false
+serverSaveClose = false
+serverSaveShutdown = true
+
+-- Experience stages
+-- NOTE: to use a flat experience multiplier, set experienceStages to nil
+-- minlevel and multiplier are MANDATORY
+-- maxlevel is OPTIONAL, but is considered infinite by default
+-- to disable stages, create a stage with minlevel 1 and no maxlevel
+experienceStages = {
+	{ minlevel = 1, maxlevel = 50, multiplier = 100},
+	{ minlevel = 51, maxlevel = 70, multiplier = 80},
+	{ minlevel = 71, maxlevel = 80, multiplier = 65},
+	{ minlevel = 81, maxlevel = 100, multiplier = 45},
+	{ minlevel = 101, maxlevel = 120, multiplier = 25},
+	{ minlevel = 121, maxlevel = 140, multiplier = 10},
+	{ minlevel = 141, maxlevel = 175, multiplier = 8},
+	{ minlevel = 176, maxlevel = 180, multiplier = 2},
+	{ minlevel = 181, maxlevel = 200, multiplier = 1.5},
+	{ minlevel = 201, maxlevel = 500, multiplier = 1}
+}
+
+-- Skill stages (skill level based multiplier)
+-- NOTE: to use a flat skill multiplier (rateSkill), set skillStages to nil
+-- minlevel and multiplier are MANDATORY
+-- maxlevel is OPTIONAL, but is considered infinite by default
+skillStages = {
+	{ minlevel = 1, maxlevel = 30, multiplier = 113 },
+	{ minlevel = 31, maxlevel = 40, multiplier = 98 },
+	{ minlevel = 41, maxlevel = 50, multiplier = 83 },
+	{ minlevel = 51, maxlevel = 60, multiplier = 68 },
+	{ minlevel = 61, maxlevel = 70, multiplier = 60 },
+	{ minlevel = 71, maxlevel = 80, multiplier = 38 },
+	{ minlevel = 81, maxlevel = 90, multiplier = 23 },
+	{ minlevel = 91, maxlevel = 100, multiplier = 15 },
+	{ minlevel = 101, maxlevel = 110, multiplier = 3 },
+	{ minlevel = 111, multiplier = 1 }
+}
+
+-- Magic level stages (magic level based multiplier)
+-- NOTE: to use a flat magic multiplier (rateMagic), set magicLevelStages to nil
+-- minlevel and multiplier are MANDATORY
+-- maxlevel is OPTIONAL, but is considered infinite by default
+magicLevelStages = {
+	{ minlevel = 0, maxlevel = 50, multiplier = 38 },
+	{ minlevel = 51, maxlevel = 70, multiplier = 35 },
+	{ minlevel = 71, maxlevel = 80, multiplier = 23 },
+	{ minlevel = 81, maxlevel = 100, multiplier = 15 },
+	{ minlevel = 101, maxlevel = 110, multiplier = 3 },
+	{ minlevel = 111, multiplier = 1 }
+}
+
+-- Rates
+rateLoot = 2
+rateSpawn = 1
+spawnMultiplier = 1
+
+-- Player speed
+-- NOTE: Most clients display speed at half its actual value (e.g. 1500 shows as 750).
+-- WARNING: Setting minSpeed too low can cause desync and other client issues.
+-- NOTE: maxPlayerSpeed is the absolute fastest a player can travel, it is not recommended to change this.
+-- 5000 for GODs, 900 for players.
+playerSpeedPerLevel = 2
+playerMinSpeed = 120
+playerMaxSpeed = 900
+maxGodSpeed = 5000
+
+-- Spawn Start Effect & Timer
+-- Placing true makes it take effect when the monster is about to reappear.
+-- timeStartEffect = Effect time that it will do when this point reappears.
+-- timeBetweenTeleportEffects = Time of effect that it will do at the beginning.
+spawnStartEffectEnabled = true
+timeStartEffect = 4200
+timeBetweenTeleportEffects = 1400
+
+-- Offline Training
+-- offlineTrainingEfficiency: 1.0 = 100%, 0.5 = 50% (default)
+offlineTrainingEfficiency = 0.5
+-- Vocation distribution (sum should be 1.0)
+offlineTrainingMageML = 1.0
+offlineTrainingPaladinDist = 0.5
+offlineTrainingPaladinML = 0.25
+offlineTrainingPaladinShield = 0.25
+offlineTrainingKnightMelee = 0.5
+offlineTrainingKnightShield = 0.5
+offlineTrainingMonkMelee = 0.5
+offlineTrainingMonkShield = 0.5
+
+-- Monster Despawn Config
+-- despawnRange is the amount of floors a monster can be from its spawn position
+-- despawnRadius is how many tiles away it can be from its spawn position
+-- removeOnDespawn will remove the monster if true or teleport it back to its spawn position if false
+-- walkToSpawnRadius is the allowed distance that the monster will stay away from spawn position when left with no targets, 0 to disable
+deSpawnRange = 2
+deSpawnRadius = 50
+removeOnDespawn = true
+walkToSpawnRadius = 15
+
+-- Stamina Configs
+-- These options are fully configurable, including regenerating by attacking the trainer or while in a protection zone.
+staminaSystem = true
+timeToRegenMinuteStamina = 3 * 60
+timeToRegenMinutePremiumStamina = 6 * 60
+
+-- Stamina in PZ (Regeneration)
+staminaPz = true
+staminaOrangeDelay = 1
+staminaGreenDelay = 5
+staminaPzGain = 1
+
+-- Stamina in Trainers
+-- Trainer Names = Place a list of trainer names, so you can train;
+-- when you attack a certain target, you will start to regenerate.
+staminaTrainer = true
+staminaTrainerNames = "Trainer;Training Dummy"
+staminaTrainerDelay = 5
+staminaTrainerGain = 1
+
+-- Scripts
+-- warnUnsafeScripts and convertUnsafeScripts have been removed.
+-- The server always enforces safe Lua behavior (hardcoded).
+
+-- Startup
+-- NOTE: defaultPriority only works on Windows and sets process
+-- priority, valid values are: "normal", "above-normal", "high"
+defaultPriority = "high"
+startupDatabaseOptimization = false
+
+-- Logging
+-- logToFile: true = save logs to data/logs/server.log, false = console only (default: false)
+logToFile = false
+-- logLevel: trace, debug, info, warning, error, critical (default: info)
+logLevel = "info"
+-- Status Server Information
+ownerName = ""
+ownerEmail = ""
+url = "https://otland.net/"
+location = "Sweden"
+
+-- Server Statistics
+-- time in seconds: 30 = 30 seconds, 0 = disabled
+statsDumpInterval = 0
+-- time in milliseconds: 50 = 0.05 sec, 0 = disabled
+statsSlowLogTime = 0
+slowTaskWarning = false
+-- time in milliseconds: 500 = 0.5 sec, 0 = disabled
+statsVerySlowLogTime = 0
+
+-- Admin Protocol
+adminPort = 7170
+adminPassword = "admin"
+adminLocalhostOnly = true
+adminRequireLogin = true
+adminEncryption = ""
+adminEncryptionData = ""
+adminLogs = true
+adminConnectionsLimit = 1
+
+-- Chain System
+-- Chain system allows attacks to bounce from target to nearby targets
+toggleChainSystem = true
+-- Delay in milliseconds between each chain hop
+combatChainDelay = 50
+-- Maximum number of chain targets for weapon chain
+combatChainTargets = 5
+-- Weapon chain damage formulas (multiplier based on weapon skill)
+combatChainSkillFormulaAxe = 0.9
+combatChainSkillFormulaClub = 0.7
+combatChainSkillFormulaSword = 1.1
+combatChainSkillFormulaFist = 1.0
+combatChainSkillFormulaDistance = 0.9
+combatChainSkillFormulaWandsAndRods = 1.0

@@ -20,10 +20,10 @@ resources:
   - ghcr-image-pull-secret.yaml
   # Website app secrets (AUTH_SECRET) from Bitwarden — needed before web starts.
   - web-externalsecret.yaml
-  # --- staged: uncomment as each manifest is authored (images now exist) ---
-  # - tfs-config-configmap.yaml
-  # - tfs-deployment.yaml
-  # - tfs-service.yaml          # LoadBalancer (Cilium LB-IPAM) for TCP 7171/7172
+  # TFS game server — image published, config.lua via configMapGenerator below.
+  - tfs-deployment.yaml
+  - tfs-service.yaml            # LoadBalancer (Cilium LB-IPAM) for TCP 7171/7172
+  # --- staged: uncomment as each manifest is authored ---
   # - web-deployment.yaml       # MUST mount gatebound-sprites read-only + set
   #                             #   SPR_PATH=/sprites/Tibia.spr (see README)
   # - web-service.yaml
@@ -38,5 +38,14 @@ configMapGenerator:
     files:
       - db-init/01-schema.sql
       - db-init/02-seed-gm.sql
+    options:
+      disableNameSuffixHash: true
+  # config.lua for TFS (key 'config.lua' <- file tfs-config.lua). Snapshot of the
+  # game repo's server-config/config.lua with mysqlHost=mariadb, the password read
+  # via os.getenv, and ip=play.rosenvall.se. Stable name (no hash) so the
+  # deployment's volume ref is fixed.
+  - name: gatebound-tfs-config
+    files:
+      - config.lua=tfs-config.lua
     options:
       disableNameSuffixHash: true

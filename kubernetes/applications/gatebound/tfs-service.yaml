@@ -1,0 +1,20 @@
+# Exposes the TFS game protocol on a fixed LAN IP via Cilium LB-IPAM. The native
+# OT client speaks raw TCP (not HTTP), so this can't go through the Cloudflare
+# HTTP tunnel — the router forwards public 7171/7172 to this IP, and the DNS-only
+# A-record play.rosenvall.se -> the home public IP points clients here.
+# 192.168.1.223 is free in first-pool (192.168.1.220-229; .220/.222 = gateways).
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatebound-tfs
+  namespace: gatebound
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.1.223"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local   # preserve client source IP (TFS rate-limits per IP)
+  selector:
+    app.kubernetes.io/name: gatebound-tfs
+  ports:
+    - { name: login, port: 7171, targetPort: login, protocol: TCP }
+    - { name: game, port: 7172, targetPort: game, protocol: TCP }
