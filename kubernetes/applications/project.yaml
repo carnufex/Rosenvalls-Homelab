@@ -31,6 +31,8 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: slack-ops-bot
     server: https://kubernetes.default.svc
+  - namespace: gatebound
+    server: https://kubernetes.default.svc
   clusterResourceWhitelist:
   - group: ""
     kind: Namespace

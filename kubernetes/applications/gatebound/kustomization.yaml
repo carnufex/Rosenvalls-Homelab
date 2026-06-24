@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ACTIVE: MariaDB only. The TFS server and Next.js website stay scaffold-only
+# until their images are published to GHCR (see README.md). Same approach as
+# matplan — don't deploy runtime manifests with images that don't exist yet.
+resources:
+  - ns.yaml
+  - mariadb-externalsecret.yaml
+  - mariadb-pvc.yaml
+  - mariadb-service.yaml
+  - mariadb-deployment.yaml
+  # --- staged: uncomment once ghcr.io/carnufex/gatebound-* images exist ---
+  # - ghcr-image-pull-secret.yaml
+  # - tfs-config-configmap.yaml
+  # - tfs-deployment.yaml
+  # - tfs-service.yaml          # LoadBalancer (Cilium LB-IPAM) for TCP 7171/7172
+  # - web-deployment.yaml
+  # - web-service.yaml
+  # - web-bridges-deployment.yaml
+  # - web-httproute.yaml        # gatebound.rosenvall.se via gateway/external
+
+# Forgotten Server DB schema + GM seed, mounted into MariaDB's
+# /docker-entrypoint-initdb.d. Snapshot of the game repo at onboarding time;
+# refresh from Gatebound-2d and delete the PVC to re-init if the schema changes.
+configMapGenerator:
+  - name: gatebound-mariadb-init
+    files:
+      - db-init/01-schema.sql
+      - db-init/02-seed-gm.sql
+    options:
+      disableNameSuffixHash: true
