@@ -20,7 +20,7 @@ data:
     LIMIT=10000000000
     WARN=7000000000
     CRIT=9000000000
-    STALE_DAYS=40   # backups are monthly; older than this means a run was missed
+    STALE_DAYS=10   # backups are weekly; older than this means a run was missed
 
     sizejson="$(rclone size "${bucket}" --json 2>/dev/null)"
     bytes="$(printf '%s' "${sizejson}" | jq -r '.bytes // 0')"
