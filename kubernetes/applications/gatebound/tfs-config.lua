@@ -68,7 +68,7 @@ expFromPlayersLevelRange = 75
 -- NOTE: maxPlayers set to 0 means no limit
 -- NOTE: allowWalkthrough is only applicable to players
 -- NOTE: statusCountMaxPlayersPerIp allows you to only count up to X players per IP in status response (0 = disabled)
-ip = "play.rosenvall.se"  -- advertised game host (DDNS A-record -> home IP, DNS-only)
+ip = "217.31.161.63"  -- public home IP; TFS getIP() needs a literal IPv4 (no hostname resolution)
 bindOnlyGlobalAddress = false
 loginProtocolPort = 7171
 gameProtocolPort = 7172
