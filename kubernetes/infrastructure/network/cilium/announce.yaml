@@ -4,16 +4,16 @@ metadata:
   name: default-l2-announcement-policy
   namespace: kube-system
 spec:
+  # Announce (ARP) LoadBalancer IPs for the gateway services AND the gatebound
+  # namespace (TFS game server pins .223). Without this the IP is allocated but
+  # never advertised on the LAN, so it's unreachable. Matches the first-pool
+  # serviceSelector — by namespace, not gateway service name.
   serviceSelector:
     matchExpressions:
       - key: io.kubernetes.service.namespace
         operator: In
         values:
           - gateway
-      - key: io.kubernetes.service.name
-        operator: In
-        values:
-          - cilium-gateway-external
-          - cilium-gateway-internal
+          - gatebound
   externalIPs: false
   loadBalancerIPs: true
