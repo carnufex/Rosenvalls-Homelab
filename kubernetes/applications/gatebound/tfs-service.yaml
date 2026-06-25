@@ -12,7 +12,12 @@ metadata:
     io.cilium/lb-ipam-ips: "192.168.1.223"
 spec:
   type: LoadBalancer
-  externalTrafficPolicy: Local   # preserve client source IP (TFS rate-limits per IP)
+  # Cluster (not Local): with Cilium L2 announcement the IP is announced from an
+  # elected node that may not run the TFS pod; externalTrafficPolicy: Local would
+  # then black-hole traffic on that node. Cluster lets any node forward to the
+  # pod. Trade-off: client source IP is SNAT'd to a node IP, so TFS per-IP limits
+  # see the node — fine at friends scale.
+  externalTrafficPolicy: Cluster
   selector:
     app.kubernetes.io/name: gatebound-tfs
   ports:
