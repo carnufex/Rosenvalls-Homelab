@@ -45,13 +45,9 @@ spec:
             # NOTE: SERVER_PATH (TFS data for the calculators / live monster wiki)
             # is not mounted yet — those pages degrade until TFS data is shared.
             # Thin-client updater (see Gatebound-2d ops/client-updater/README.md).
-            # Fill these in once the gatebound-client R2 bucket + GitHub Release exist:
-            #   CLIENT_ASSETS_URL  = R2 public base (e.g. https://pub-xxxx.r2.dev)
-            #   CLIENT_DOWNLOAD_URL = the client zip's GitHub Release asset URL
-            # Until set, /api/updater returns "not configured" and /download shows
-            # "coming soon" — both degrade gracefully.
-            # - { name: CLIENT_ASSETS_URL, value: "" }
-            # - { name: CLIENT_DOWNLOAD_URL, value: "" }
+            # R2 public base for the graphics + the client zip's Release asset URL.
+            - { name: CLIENT_ASSETS_URL, value: "https://pub-c7aad8ba448f46128b5aa70b19f9d34c.r2.dev" }
+            - { name: CLIENT_DOWNLOAD_URL, value: "https://github.com/carnufex/Gatebound-client/releases/download/v1.0-client/gatebound-client-win.zip" }
           volumeMounts:
             - { name: sprites, mountPath: /sprites, readOnly: true }
           startupProbe:
