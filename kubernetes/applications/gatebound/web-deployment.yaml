@@ -26,7 +26,7 @@ spec:
         - name: gatebound-ghcr
       containers:
         - name: web
-          image: ghcr.io/carnufex/gatebound-web:sha-5d388c2
+          image: ghcr.io/carnufex/gatebound-web:sha-f45397e
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 3000 }
@@ -44,6 +44,14 @@ spec:
             - { name: SPR_PATH, value: /sprites/Tibia.spr }
             # NOTE: SERVER_PATH (TFS data for the calculators / live monster wiki)
             # is not mounted yet — those pages degrade until TFS data is shared.
+            # Thin-client updater (see Gatebound-2d ops/client-updater/README.md).
+            # Fill these in once the gatebound-client R2 bucket + GitHub Release exist:
+            #   CLIENT_ASSETS_URL  = R2 public base (e.g. https://pub-xxxx.r2.dev)
+            #   CLIENT_DOWNLOAD_URL = the client zip's GitHub Release asset URL
+            # Until set, /api/updater returns "not configured" and /download shows
+            # "coming soon" — both degrade gracefully.
+            # - { name: CLIENT_ASSETS_URL, value: "" }
+            # - { name: CLIENT_DOWNLOAD_URL, value: "" }
           volumeMounts:
             - { name: sprites, mountPath: /sprites, readOnly: true }
           startupProbe:
