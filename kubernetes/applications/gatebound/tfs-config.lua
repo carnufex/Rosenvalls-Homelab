@@ -19,7 +19,7 @@ boostedBossLootBonus = 250       -- Loot bonus percent for boosted boss
 boostedBossKillBonus = 3         -- Bosstiary kill multiplier for boosted boss
 
 -- Account Manager
-accountManager = true
+accountManager = false
 namelockManager = true
 newPlayerChooseVoc = true
 newPlayerSpawnPosX = 0
