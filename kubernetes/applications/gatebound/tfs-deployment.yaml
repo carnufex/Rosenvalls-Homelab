@@ -26,7 +26,7 @@ spec:
         - name: gatebound-ghcr
       containers:
         - name: tfs
-          image: ghcr.io/carnufex/gatebound-tfs:sha-abcdb8f
+          image: ghcr.io/carnufex/gatebound-tfs:sha-2f7dc1c
           imagePullPolicy: IfNotPresent
           env:
             # config.lua does mysqlPass = os.getenv("MYSQL_PASSWORD"); inject the
