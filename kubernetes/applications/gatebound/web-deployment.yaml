@@ -26,7 +26,7 @@ spec:
         - name: gatebound-ghcr
       containers:
         - name: web
-          image: ghcr.io/carnufex/gatebound-web:sha-44c4281
+          image: ghcr.io/carnufex/gatebound-web:sha-0d7e44a
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 3000 }
