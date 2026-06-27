@@ -10,11 +10,13 @@ Guardrails: a fixed whitelist of actions, protected namespaces that mutations
 refuse to touch, and a confirm step before anything destructive. The hard
 boundary is the ServiceAccount RBAC (scoped, deny-by-omission).
 """
+import json
 import logging
 import os
 import sys
 import threading
 import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import requests
 from kubernetes import client, config
@@ -48,6 +50,10 @@ if not APP_TOKEN.startswith("xapp-"):
 config.load_incluster_config()
 core = client.CoreV1Api()
 batch = client.BatchV1Api()
+crd = client.CustomObjectsApi()
+
+# Alerts that get a "Clean orphaned volumes" button posted with them.
+ACTIONABLE_ALERTS = {"LonghornNodeStorageLow"}
 
 
 # ---------------------------------------------------------------- remediations
@@ -112,6 +118,33 @@ def reset_prometheus():
     return msgs
 
 
+def clean_orphans():
+    """Delete orphaned Longhorn storage: PVs in the Released phase (no PVC bound)
+    and their backing Longhorn volume. Guardrail: ONLY Released, longhorn-backed
+    PVs are ever touched — a Bound (in-use) volume is never deleted."""
+    freed = []
+    for pv in core.list_persistent_volume().items:
+        if pv.status.phase != "Released":
+            continue
+        if not (pv.spec.storage_class_name or "").startswith("longhorn"):
+            continue
+        name = pv.metadata.name
+        try:  # the Longhorn volume frees the actual disk space
+            crd.delete_namespaced_custom_object(
+                group="longhorn.io", version="v1beta2",
+                namespace="longhorn-system", plural="volumes", name=name)
+        except Exception as e:  # noqa: BLE001
+            log.warning("delete longhorn volume %s: %s", name, e)
+        try:
+            core.delete_persistent_volume(name)
+        except Exception as e:  # noqa: BLE001
+            log.warning("delete pv %s: %s", name, e)
+        cr = pv.spec.claim_ref
+        claim = f"{cr.namespace}/{cr.name}" if cr else "-"
+        freed.append(f"{name[:18]}… ({claim})")
+    return freed
+
+
 # ------------------------------------------------------------------- block kit
 def menu_blocks():
     return [
@@ -122,6 +155,8 @@ def menu_blocks():
              "action_id": "status"},
             {"type": "button", "text": {"type": "plain_text", "text": "🧹 Clean failed jobs"},
              "action_id": "clean_jobs_confirm", "style": "primary"},
+            {"type": "button", "text": {"type": "plain_text", "text": "🗑️ Clean orphaned volumes"},
+             "action_id": "clean_orphans_confirm", "style": "primary"},
             {"type": "button", "text": {"type": "plain_text", "text": "♻️ Reset Prometheus volume"},
              "action_id": "reset_prom_confirm", "style": "danger"},
         ]},
@@ -159,9 +194,57 @@ def post_webhook(blocks, text):
         return
     try:
         r = requests.post(WEBHOOK_URL, json={"text": text, "blocks": blocks}, timeout=10)
-        log.info("posted menu via webhook: %s", r.status_code)
+        log.info("posted via webhook: %s", r.status_code)
     except Exception as e:  # noqa: BLE001
         log.warning("webhook post failed: %s", e)
+
+
+def post_actionable_alert(alert):
+    """Re-post a firing alert to Slack with a remediation button."""
+    labels = alert.get("labels", {})
+    ann = alert.get("annotations", {})
+    name = labels.get("alertname", "alert")
+    summary = ann.get("summary", name)
+    desc = ann.get("description", "")
+    blocks = [
+        {"type": "section", "text": {"type": "mrkdwn",
+         "text": f":warning: *{name}*\n{summary}\n{desc}"}},
+        {"type": "actions", "elements": [
+            {"type": "button", "text": {"type": "plain_text", "text": "🗑️ Clean orphaned volumes"},
+             "action_id": "clean_orphans_confirm", "style": "primary"},
+            {"type": "button", "text": {"type": "plain_text", "text": "📊 Cluster status"},
+             "action_id": "status"},
+        ]},
+    ]
+    post_webhook(blocks, summary)
+
+
+# Alertmanager posts firing alerts here (in-cluster ClusterIP, no public ingress).
+# Matching alerts get re-posted to Slack with an action button.
+class AlertReceiver(BaseHTTPRequestHandler):
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length", 0))
+        raw = self.rfile.read(length) if length else b"{}"
+        self.send_response(200)
+        self.end_headers()
+        try:
+            data = json.loads(raw)
+        except Exception:  # noqa: BLE001
+            return
+        for a in data.get("alerts", []):
+            if a.get("status") == "firing" and \
+                    a.get("labels", {}).get("alertname") in ACTIONABLE_ALERTS:
+                try:
+                    post_actionable_alert(a)
+                except Exception:  # noqa: BLE001
+                    log.exception("post_actionable_alert failed")
+
+    def log_message(self, *a):  # silence default request logging
+        pass
+
+
+def start_alert_http():
+    HTTPServer(("0.0.0.0", 8080), AlertReceiver).serve_forever()
 
 
 # --------------------------------------------------------------------- actions
@@ -187,6 +270,17 @@ def handle_action(action, response_url, user):
         msgs = reset_prometheus()
         respond(response_url, section(":white_check_mark: *Prometheus reset triggered*\n"
                                       + "\n".join(msgs) + f"\n_by {user}_"))
+    elif action == "clean_orphans_confirm":
+        respond(response_url, confirm_blocks(
+            "clean_orphans_do", "clean orphaned volumes",
+            "Delete all *Released* (orphaned) Longhorn PVs + their volumes? "
+            "Only unbound volumes are touched — nothing in use."))
+    elif action == "clean_orphans_do":
+        freed = clean_orphans()
+        body = (f":white_check_mark: Cleaned {len(freed)} orphaned volume(s)"
+                + ("\n• " + "\n• ".join(freed) if freed else " (none found)")
+                + f"\n_by {user}_")
+        respond(response_url, section(body))
     elif action == "cancel":
         respond(response_url, section("Cancelled. :wave:"))
     else:
@@ -224,6 +318,9 @@ def main():
             break
         time.sleep(1)
     log.info("Slack Socket Mode connected=%s — bot is live", connected)
+
+    threading.Thread(target=start_alert_http, daemon=True).start()
+    log.info("Alertmanager receiver listening on :8080")
 
     post_webhook(menu_blocks(), "Homelab Ops Bot online")
     threading.Event().wait()

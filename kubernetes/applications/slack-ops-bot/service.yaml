@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: slack-ops-bot
+  namespace: slack-ops-bot
+spec:
+  # ClusterIP only — Alertmanager (monitoring ns) posts firing alerts here so the
+  # bot can re-post them with an action button. No public ingress.
+  selector:
+    app.kubernetes.io/name: slack-ops-bot
+  ports:
+    - name: alert
+      port: 8080
+      targetPort: 8080

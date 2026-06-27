@@ -44,6 +44,9 @@ spec:
           envFrom:
             - secretRef:
                 name: slack-ops-bot
+          ports:
+            - name: alert
+              containerPort: 8080
           volumeMounts:
             - name: code
               mountPath: /app
