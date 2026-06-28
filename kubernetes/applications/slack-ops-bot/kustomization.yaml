@@ -9,8 +9,11 @@ resources:
   - service.yaml
 
 configMapGenerator:
-  # Hash suffix (default) so the Deployment's volume ref changes when bot.py
-  # changes → ArgoCD rolls the pod automatically and it picks up new code.
+  # Stable name (kustomize does not rewrite the Deployment volume ref to a hashed
+  # name in this setup, which would break the mount). Code changes need a manual
+  # `kubectl rollout restart deploy/slack-ops-bot -n slack-ops-bot` to take effect.
   - name: slack-ops-bot-code
     files:
       - bot.py
+    options:
+      disableNameSuffixHash: true
