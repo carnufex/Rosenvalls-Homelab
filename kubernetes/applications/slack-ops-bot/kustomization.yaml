@@ -9,8 +9,8 @@ resources:
   - service.yaml
 
 configMapGenerator:
+  # Hash suffix (default) so the Deployment's volume ref changes when bot.py
+  # changes → ArgoCD rolls the pod automatically and it picks up new code.
   - name: slack-ops-bot-code
     files:
       - bot.py
-    options:
-      disableNameSuffixHash: true
