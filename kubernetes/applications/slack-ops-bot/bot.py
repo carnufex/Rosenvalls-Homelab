@@ -179,6 +179,20 @@ def section(text):
     return [{"type": "section", "text": {"type": "mrkdwn", "text": text}}]
 
 
+def status_blocks():
+    # Cluster status + inline remediation buttons (ChatOps from the status msg).
+    return section(":bar_chart: *Cluster status*\n" + cluster_status()) + [
+        {"type": "actions", "elements": [
+            {"type": "button", "text": {"type": "plain_text", "text": "🧹 Clean failed jobs"},
+             "action_id": "clean_jobs_confirm", "style": "primary"},
+            {"type": "button", "text": {"type": "plain_text", "text": "🗑️ Clean orphaned volumes"},
+             "action_id": "clean_orphans_confirm"},
+            {"type": "button", "text": {"type": "plain_text", "text": "🔄 Refresh"},
+             "action_id": "status"},
+        ]},
+    ]
+
+
 def respond(response_url, blocks, text="Homelab Ops Bot"):
     # replace_original=False -> post a new message, keeping the persistent menu.
     try:
@@ -250,7 +264,7 @@ def start_alert_http():
 # --------------------------------------------------------------------- actions
 def handle_action(action, response_url, user):
     if action == "status":
-        respond(response_url, section(":bar_chart: *Cluster status*\n" + cluster_status()))
+        respond(response_url, status_blocks())
     elif action == "clean_jobs_confirm":
         respond(response_url, confirm_blocks(
             "clean_jobs_do", "clean failed jobs",
