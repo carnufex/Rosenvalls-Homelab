@@ -10,7 +10,7 @@ resources:
   - postgres.yaml
   - minio.yaml            # NFS-backed PV (192.168.1.230) + Deployment + bucket job
   - postgres-backup.yaml
-  # --- staged: enable once ghcr.io/carnufex/wedding-pov is published ---
-  # - ghcr-image-pull-secret.yaml   # ExternalSecret for the private GHCR pull (copy gatebound's)
-  # - web.yaml                      # Next.js app (image CHANGE-ME -> GHCR)
-  # - httproute.yaml                # brollop.rosenvall.se + brollop-media.rosenvall.se
+  # --- enabled: ghcr.io/carnufex/wedding-pov is published ---
+  - ghcr-image-pull-secret.yaml   # ExternalSecret for the private GHCR pull (shared homelab PAT)
+  - web.yaml                      # Next.js app
+  - httproute.yaml                # brollop.rosenvall.se + brollop-media.rosenvall.se
