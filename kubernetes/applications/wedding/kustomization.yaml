@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ACTIVE: the stateful backends (Postgres + MinIO) deploy now on public images.
+# The Next.js web tier + public routes stay scaffold-only until the Wedding-POV
+# repo publishes ghcr.io/carnufex/wedding-pov (same approach as matplan/gatebound).
+resources:
+  - ns.yaml
+  - externalsecret.yaml
+  - postgres.yaml
+  - minio.yaml            # NFS-backed PV (192.168.1.230) + Deployment + bucket job
+  - postgres-backup.yaml
+  # --- staged: enable once ghcr.io/carnufex/wedding-pov is published ---
+  # - ghcr-image-pull-secret.yaml   # ExternalSecret for the private GHCR pull (copy gatebound's)
+  # - web.yaml                      # Next.js app (image CHANGE-ME -> GHCR)
+  # - httproute.yaml                # brollop.rosenvall.se + brollop-media.rosenvall.se

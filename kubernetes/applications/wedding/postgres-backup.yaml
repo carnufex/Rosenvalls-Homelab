@@ -1,0 +1,53 @@
+# Daily pg_dump to a Longhorn volume — extra safety for the metadata (the photos
+# live in MinIO/NFS). Keeps the last ~14 dumps.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backup
+  namespace: wedding
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: wedding
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: dump
+              image: postgres:17-alpine
+              envFrom:
+                - secretRef:
+                    name: postgres-secret
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TS=$(date +%Y%m%d-%H%M%S)
+                  echo "Dumping to /backup/wedding-$TS.sql.gz"
+                  PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h postgres -U "$POSTGRES_USER" "$POSTGRES_DB" \
+                    | gzip > "/backup/wedding-$TS.sql.gz"
+                  ls -1t /backup/wedding-*.sql.gz | tail -n +15 | xargs -r rm -f
+                  echo "done"
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: postgres-backup
