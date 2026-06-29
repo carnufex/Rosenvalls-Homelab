@@ -12,7 +12,9 @@ spec:
     - name: external
       namespace: gateway
   hostnames:
-    - brollop.rosenvall.se
+    # bröllop.rosenvall.se in punycode (HTTPRoute/DNS/cert use ASCII; browsers
+    # display the ö). Single label, so the *.rosenvall.se wildcard cert covers it.
+    - xn--brllop-xxa.rosenvall.se
   rules:
     - backendRefs:
         - name: web

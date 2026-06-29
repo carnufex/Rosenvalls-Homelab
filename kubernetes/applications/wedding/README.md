@@ -40,11 +40,16 @@ Generated, not the app's CHANGE-ME placeholders. Pulled via ExternalSecret into
 
 ## Hostnames (flat — covered by the `*.rosenvall.se` wildcard cert)
 
-- Web: `brollop.rosenvall.se`
-- MinIO public (presigned uploads): `brollop-media.rosenvall.se`
+- Web: `bröllop.rosenvall.se` (punycode `xn--brllop-xxa.rosenvall.se`) — single
+  label, so the `*.rosenvall.se` wildcard cert covers it; browsers display the ö.
+- MinIO public (presigned uploads): `brollop-media.rosenvall.se` (flat, behind
+  the scenes — guests never see it).
 
 (The app's original `media.bröllop.rosenvall.se` is two labels deep and would not
-be covered by the wildcard — changed to flat names.)
+be covered by the wildcard, so the media endpoint stays a flat single label.)
+
+**DNS:** `xn--brllop-xxa.rosenvall.se` must resolve to the Cloudflare tunnel
+(covered if `*.rosenvall.se` is a wildcard record; otherwise add the record).
 
 ## To finish onboarding (after the image exists)
 
