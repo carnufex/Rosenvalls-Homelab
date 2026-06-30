@@ -15,6 +15,10 @@ resources:
   # Independent of the images, so active now; seed it with sprites-seed-pod.yaml
   # (see README "Sprite assets"). The TFS server does not use sprites.
   - sprites-pvc.yaml
+  # /play client shell (otclient.* + gb-loader + overrides + dat/otfi), seeded
+  # via kubectl cp; served same-origin by the web app's /play route. Tibia.spr is
+  # reused from the sprites PVC (not duplicated here).
+  - play-pvc.yaml
   # GHCR pull credential (reuses the matplan Bitwarden PAT) — needed before any
   # gatebound-* image can be pulled. Safe/inert until a deployment references it.
   - ghcr-image-pull-secret.yaml

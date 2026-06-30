@@ -1,0 +1,21 @@
+# Holds the in-browser /play client SHELL (otclient.html/js/wasm/data, gb-loader,
+# the FS overrides and Tibia.dat/.otfi) — ~56 MB, served same-origin by the web
+# app's /play catch-all route (PLAY_DIR=/play-assets). The big Tibia.spr is NOT
+# duplicated here: the route streams it from the gatebound-sprites PVC
+# (SPR_PATH=/sprites/Tibia.spr). Like the sprites volume, the client assets are
+# gitignored/not-in-image and seeded once with `kubectl cp` (a transient pod
+# mounts this rw while it is otherwise unused). web mounts it read-only.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gatebound-play
+  namespace: gatebound
+  annotations:
+    # Bind before the web workload that mounts it.
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 1Gi
