@@ -71,10 +71,11 @@ worker:
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 512Mi
     limits:
       cpu: 500m
-      memory: 512Mi
+      # 512Mi OOMKilled the worker every ~70s (460 restarts/2d); bump to 1Gi.
+      memory: 1Gi
   livenessProbe:
     timeoutSeconds: 5
   readinessProbe:
