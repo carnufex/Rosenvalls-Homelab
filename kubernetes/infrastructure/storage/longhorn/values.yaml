@@ -77,6 +77,10 @@ defaultSettings:
   # Keep zone anti-affinity soft so 2-replica volumes can still place one replica per worker.
   replicaZoneSoftAntiAffinity: true
   concurrentReplicaRebuildPerNodeLimit: 1
+  # Rebalance replicas off full nodes onto emptier ones. Without this, a node
+  # reboot (e.g. growing worker-01's disk) rebuilds its replicas elsewhere and
+  # they never move back, leaving one node empty while others hit 95% full.
+  replicaAutoBalance: best-effort
   replicaReplenishmentWaitInterval: 600
   backupstorePollInterval: 86400
   orphanResourceAutoDeletion: instance
