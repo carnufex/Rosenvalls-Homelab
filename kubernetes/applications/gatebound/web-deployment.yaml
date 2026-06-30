@@ -26,7 +26,7 @@ spec:
         - name: gatebound-ghcr
       containers:
         - name: web
-          image: ghcr.io/carnufex/gatebound-web:sha-8c4942f
+          image: ghcr.io/carnufex/gatebound-web:sha-448b1ce
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 3000 }
@@ -48,8 +48,14 @@ spec:
             # R2 public base for the graphics + the client zip's Release asset URL.
             - { name: CLIENT_ASSETS_URL, value: "https://pub-c7aad8ba448f46128b5aa70b19f9d34c.r2.dev" }
             - { name: CLIENT_DOWNLOAD_URL, value: "https://pub-c7aad8ba448f46128b5aa70b19f9d34c.r2.dev/gatebound-client-win.zip" }
+            # In-browser /play client shell (otclient.* + gb-loader + overrides +
+            # Tibia.dat/.otfi) on the gatebound-play PVC; the app's /play route
+            # streams them same-origin. Tibia.spr is reused from SPR_PATH (sprites
+            # PVC), not duplicated here.
+            - { name: PLAY_DIR, value: /play-assets }
           volumeMounts:
             - { name: sprites, mountPath: /sprites, readOnly: true }
+            - { name: play, mountPath: /play-assets, readOnly: true }
           startupProbe:
             httpGet: { path: /, port: http }
             periodSeconds: 5
@@ -71,4 +77,8 @@ spec:
         - name: sprites
           persistentVolumeClaim:
             claimName: gatebound-sprites
+            readOnly: true
+        - name: play
+          persistentVolumeClaim:
+            claimName: gatebound-play
             readOnly: true
