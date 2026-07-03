@@ -1,0 +1,16 @@
+# Image blobs + manifests. 50Gi gives ample headroom over the ~10Gi of current
+# artifacts; the weekly GC CronJob reclaims space from repeated :latest pushes.
+# Longhorn default SC has reclaimPolicy Retain — an accidental app/PVC deletion
+# does not destroy the volume data.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: registry-data
+  namespace: registry
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 50Gi

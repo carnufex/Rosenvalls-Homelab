@@ -1,0 +1,21 @@
+# Dedicated LAN IP (Cilium LB-IPAM + L2 announce; namespace whitelisted in
+# infrastructure/network/cilium/{ip-pool,announce}.yaml). DNS is a grey-cloud
+# A record registry.rosenvall.se -> 192.168.1.225, which beats the proxied
+# *.rosenvall.se wildcard, keeping pushes OFF the Cloudflare tunnel (its
+# ~100MB request cap would break layer uploads) and the registry LAN-only.
+# Port 443 -> 5000 so the plain hostname works as an image prefix.
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: registry
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.1.225"
+spec:
+  type: LoadBalancer
+  selector:
+    app: registry
+  ports:
+    - name: https
+      port: 443
+      targetPort: https

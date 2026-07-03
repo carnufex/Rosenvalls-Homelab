@@ -1,0 +1,55 @@
+# Weekly garbage collection — Distribution never reclaims blob space on its
+# own. --delete-untagged also removes UNTAGGED manifests, which is why every
+# digest-pinned mirror MUST carry a `pinned-<first8>` tag (see README): a bare
+# `crane copy src@sha256:... dst` without a tag would be collected here.
+#
+# Caveat (accepted): GC runs while the registry still serves; a push racing the
+# GC window (Sun 04:30) can be corrupted. The paranoid variant — scale the
+# deployment to 0 around the job — is documented in the README if this ever
+# bites. podAffinity co-schedules with the registry pod so the RWO Longhorn
+# volume can attach on the same node.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: registry-gc
+  namespace: registry
+spec:
+  schedule: "30 4 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 604800
+      template:
+        spec:
+          restartPolicy: Never
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      app: registry
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - name: gc
+              image: registry:3.1.1
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/registry
+                - garbage-collect
+                - /etc/distribution/config.yml
+                - --delete-untagged=true
+              volumeMounts:
+                - name: data
+                  mountPath: /var/lib/registry
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: registry-data

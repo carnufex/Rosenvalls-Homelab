@@ -1,0 +1,22 @@
+# Real Let's Encrypt cert (dns01 via Cloudflare, same issuer as gateway's
+# cert-wildcard) so BOTH Docker Desktop and Talos containerd trust the registry
+# with zero client/node configuration. The Deployment mounts the secret; a
+# weekly restart CronJob picks up renewals (Distribution does not hot-reload).
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: registry-tls
+  namespace: registry
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  dnsNames:
+    - registry.rosenvall.se
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  secretName: registry-tls
+  usages:
+    - digital signature
+    - key encipherment

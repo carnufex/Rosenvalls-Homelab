@@ -1,0 +1,79 @@
+# Distribution reads its TLS cert once at startup — it does NOT hot-reload the
+# secret when cert-manager renews it. This weekly restart bounds staleness to
+# <=7 days, comfortably inside Let's Encrypt's 30-day renewal overlap.
+# (Future nicety: stakater Reloader would make this event-driven; not worth a
+# cluster-wide controller for one deployment today.)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: registry-ops
+  namespace: registry
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: registry-ops
+  namespace: registry
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: registry-ops
+  namespace: registry
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+subjects:
+  - kind: ServiceAccount
+    name: registry-ops
+    namespace: registry
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: registry-ops
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: registry-cert-reload
+  namespace: registry
+spec:
+  schedule: "0 5 * * 1"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 604800
+      template:
+        spec:
+          serviceAccountName: registry-ops
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: rollout-restart
+              image: alpine/k8s:1.31.13
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - kubectl -n registry rollout restart deployment/registry
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
