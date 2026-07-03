@@ -1,4 +1,4 @@
-# Next.js app — STAGED until ghcr.io/carnufex/wedding-pov is published from the
+# Next.js app — STAGED until registry.rosenvall.se/carnufex/wedding-pov is published from the
 # Wedding-POV repo (image is CHANGE-ME there). Private image → needs the
 # ghcr-image-pull-secret (see kustomization staged list). initContainer runs
 # prisma migrate deploy before serving.
@@ -26,14 +26,14 @@ spec:
         - name: ghcr-image-pull
       initContainers:
         - name: migrate
-          image: ghcr.io/carnufex/wedding-pov:latest
+          image: registry.rosenvall.se/carnufex/wedding-pov:latest
           command: ["node", "node_modules/prisma/build/index.js", "migrate", "deploy"]
           envFrom:
             - secretRef:
                 name: web-secret
       containers:
         - name: web
-          image: ghcr.io/carnufex/wedding-pov:latest
+          image: registry.rosenvall.se/carnufex/wedding-pov:latest
           ports:
             - containerPort: 3000
           envFrom:

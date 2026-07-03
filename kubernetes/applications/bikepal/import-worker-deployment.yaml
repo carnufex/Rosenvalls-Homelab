@@ -21,7 +21,7 @@ spec:
         kubernetes.io/hostname: worker-02
       containers:
         - name: worker
-          image: ghcr.io/carnufex/bikepal-worker@sha256:d64bbe0e7b59260b5799dff16217c6e71bc16b1fc879ee8b85566df288c2053e
+          image: registry.rosenvall.se/carnufex/bikepal-worker@sha256:d64bbe0e7b59260b5799dff16217c6e71bc16b1fc879ee8b85566df288c2053e
           imagePullPolicy: IfNotPresent
           env:
             - name: JobRunner__WorkerName

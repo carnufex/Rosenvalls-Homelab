@@ -49,6 +49,30 @@ This is a deliberate exception to "direct node binding is intentionally disabled
 below — it is scoped to a single extra LoadBalancer IP for LAN IoT ingress, the
 Gateway remains the path for browser/OIDC traffic.
 
+### If the IoT device is on an isolated VLAN (it usually is)
+
+The `.224` LoadBalancer is **necessary but not sufficient** when the device lives
+on an isolated IoT VLAN. The cluster nodes (and therefore the Cilium L2-announced
+`.224`) are on the main LAN `192.168.1.0/24`; IoT devices are on a separate VLAN
+(e.g. VLAN 100 `192.168.100.0/24`, "PugNet IoT") that blocks IoT → LAN by design.
+
+Symptom of this exact gap: HA shows the device's values **once** at pairing (HA
+reaches *out* to the device — LAN → IoT is allowed) but they **never update**
+(the device's Outbound WebSocket is the device initiating *in* — IoT → LAN — and
+that is firewalled). HA logs `Sleeping device did not update within 7200 seconds
+interval` for the device.
+
+Fix is a **firewall pinhole on the UDM**, not a cluster change — and the fixed
+`.224` IP is what makes the rule stable. In UniFi Network → Security → Firewall /
+Traffic Rules, add an **Allow** rule *above* the IoT→LAN block:
+
+- Source: the IoT VLAN (ideally the single device IP)
+- Destination: `192.168.1.224`, port `8123/TCP`
+
+Return traffic is established/related and needs no extra rule. This is why the
+node-side cannot reach the device for push and a fixed target IP matters: it lets
+you scope the cross-VLAN allow to exactly one host:port.
+
 ## Seeding
 
 Seed the config PVC with:

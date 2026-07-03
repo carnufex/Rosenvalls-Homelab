@@ -21,7 +21,7 @@ spec:
       serviceAccountName: bikepal-runtime
       containers:
         - name: api
-          image: ghcr.io/carnufex/bikepal-api@sha256:99b9ffd24ca314acbf6c910bec4231f3a795c7084ff00dc069e9720f38253329
+          image: registry.rosenvall.se/carnufex/bikepal-api@sha256:99b9ffd24ca314acbf6c910bec4231f3a795c7084ff00dc069e9720f38253329
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
