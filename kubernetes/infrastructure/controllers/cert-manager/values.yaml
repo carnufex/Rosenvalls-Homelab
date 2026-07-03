@@ -4,3 +4,9 @@ global:
     namespace: "cert-manager"
 prometheus:
   enabled: false
+# dns01 self-checks must bypass the LAN resolver: the router negative-caches
+# freshly created _acme-challenge TXT records (observed blocking
+# registry.rosenvall.se issuance for 20+ min), and LAN DNS is irrelevant to
+# what Let's Encrypt sees anyway. Query public resolvers only.
+dns01RecursiveNameservers: "1.1.1.1:53,8.8.8.8:53"
+dns01RecursiveNameserversOnly: true
