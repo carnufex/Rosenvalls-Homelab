@@ -19,7 +19,7 @@ spec:
       serviceAccountName: hub-central-runtime
       containers:
         - name: hub-central
-          image: ghcr.io/carnufex/hub-central:sha-d340984
+          image: registry.rosenvall.se/carnufex/hub-central:sha-d340984
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
