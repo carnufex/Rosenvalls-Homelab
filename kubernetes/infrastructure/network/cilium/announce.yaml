@@ -5,8 +5,9 @@ metadata:
   namespace: kube-system
 spec:
   # Announce (ARP) LoadBalancer IPs for the gateway services, the gatebound
-  # namespace (TFS game server pins .223) AND the homeassistant namespace
-  # (homeassistant-lan pins .224 for push-based IoT, e.g. battery Shelly). Without
+  # namespace (TFS game server pins .223), the homeassistant namespace
+  # (homeassistant-lan pins .224 for push-based IoT, e.g. battery Shelly) AND
+  # the registry namespace (self-hosted container registry pins .225). Without
   # this the IP is allocated but never advertised on the LAN, so it's unreachable.
   # Must stay in sync with the first-pool serviceSelector in ip-pool.yaml — both
   # select by namespace, not by service name.
@@ -18,5 +19,6 @@ spec:
           - gateway
           - gatebound
           - homeassistant
+          - registry
   externalIPs: false
   loadBalancerIPs: true
