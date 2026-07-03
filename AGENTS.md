@@ -58,6 +58,26 @@ Always restore that secret before chasing downstream symptoms.
 - Keep bootstrap-only and break-glass secrets out of Git.
 - New app folders under `kubernetes/applications/<name>/` automatically become ArgoCD apps.
 - Do not add public `HTTPRoute` resources for a new app until the image, secrets, and health checks are known-good.
+- New namespaces must be whitelisted in THREE places: `kubernetes/applications/project.yaml`
+  (AppProject destinations), the ClusterSecretStore conditions
+  (`infrastructure/controllers/external-secrets/cluster-secret-store.yaml`), and — if the app
+  needs a LAN LoadBalancer IP — the Cilium selectors in
+  `infrastructure/network/cilium/{ip-pool,announce}.yaml`.
+
+## Container Images (GitHub Actions is billing-blocked — do not rely on it)
+
+- GitHub Actions has been billing-blocked account-wide since July 2026: workflow jobs never
+  start (not even self-hosted runners). Never push-and-wait-for-CI; never add workflows.
+- All homelab images are published to the self-hosted registry **`registry.rosenvall.se`**
+  (CNCF Distribution in-cluster, Cilium LB `192.168.1.225`, LAN-only grey-cloud DNS,
+  Let's Encrypt cert, htpasswd user `homelab`, password in Bitwarden `registry-password`).
+  Full runbook: `kubernetes/applications/registry/README.md`.
+- Publish flow: local `docker build` → `docker push registry.rosenvall.se/carnufex/<app>` →
+  bump tag/digest here (pinned apps) or `kubectl rollout restart` (`:latest` apps).
+- Mirroring images: `crane copy` only (digest-preserving); every digest-pinned artifact must
+  carry a `pinned-<first8>` tag or the weekly GC (`--delete-untagged`) will collect it.
+- `ghcr.io/carnufex/*` is read-only legacy: old images remain there as rollback and every
+  app's pull secret is dual-auth (ghcr.io + registry.rosenvall.se). Publish nothing new to GHCR.
 
 ## Repo-Local Skills
 
