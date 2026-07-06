@@ -32,7 +32,7 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: prepare-wireguard-config-dir
-          image: lscr.io/linuxserver/wireguard:1.0.20250521@sha256:b199fa09846365caec217ebf9cbf839a22b7bf836acfd367a59ed52b6984f174
+          image: lscr.io/linuxserver/wireguard:1.0.20250521@sha256:f33891344345b1f78705e723b633e3a3f94d08ae75ca1a5f48c5a449c35bf460
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
@@ -48,7 +48,7 @@ spec:
               mountPath: /config
       containers:
         - name: wireguard
-          image: lscr.io/linuxserver/wireguard:1.0.20250521@sha256:b199fa09846365caec217ebf9cbf839a22b7bf836acfd367a59ed52b6984f174
+          image: lscr.io/linuxserver/wireguard:1.0.20250521@sha256:f33891344345b1f78705e723b633e3a3f94d08ae75ca1a5f48c5a449c35bf460
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
@@ -91,7 +91,7 @@ spec:
             - name: health
               mountPath: /health
         - name: deluge
-          image: lscr.io/linuxserver/deluge:2.2.0@sha256:617ff555ddd2e10fb8934d12e6372e9e95d7f30dafe341c200d3d535fcead0a2
+          image: lscr.io/linuxserver/deluge:2.2.0@sha256:33a939576f7ecfc1227db1a0cb2afce030ce983e620ec9d93c956e3700e21fe9
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
