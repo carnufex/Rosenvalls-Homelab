@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Europe/Stockholm",
+  "kubernetes": {
+    "managerFilePatterns": ["/^kubernetes/.+\\.ya?ml$/"]
+  },
+  "ignorePaths": [
+    "kubernetes/infrastructure/network/cilium/charts/**",
+    "kubernetes/infrastructure/database/cloudnative-pg/vendor/**"
+  ],
+  "packageRules": [
+    {
+      "description": "Repo convention: all container images are pinned tag@digest; also catches same-tag rebuilds (linuxserver)",
+      "matchDatasources": ["docker"],
+      "pinDigests": true
+    },
+    {
+      "description": "registry.rosenvall.se is LAN-only — hosted Renovate cannot reach it; those images are published by their own build flow",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["registry.rosenvall.se/**"],
+      "enabled": false
+    },
+    {
+      "description": "Media stack: patch/minor/digest bundled into one weekly PR; majors arrive immediately as separate PRs",
+      "matchFileNames": ["kubernetes/applications/media/**"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+      "groupName": "media stack",
+      "schedule": ["before 6am on saturday"]
+    },
+    {
+      "description": "Plex tags are w.x.y.z-<hash>; default docker versioning would never find updates across hash suffixes",
+      "matchPackageNames": ["plexinc/pms-docker"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)-(?<revision>[a-f0-9]+)$"
+    },
+    {
+      "description": "MinIO date-based RELEASE tags",
+      "matchPackageNames": ["minio/minio", "minio/mc"],
+      "versioning": "regex:^RELEASE\\.(?<major>\\d{4})-(?<minor>\\d{2})-(?<patch>\\d{2})T.+$"
+    },
+    {
+      "description": "Stateful engines: majors imply one-way data migrations — hold behind Dependency Dashboard approval",
+      "matchPackageNames": ["postgres", "mariadb", "codeberg.org/forgejo/forgejo"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
