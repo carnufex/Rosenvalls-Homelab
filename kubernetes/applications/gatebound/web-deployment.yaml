@@ -48,6 +48,11 @@ spec:
             # R2 public base for the graphics + the client zip's Release asset URL.
             - { name: CLIENT_ASSETS_URL, value: "https://pub-c7aad8ba448f46128b5aa70b19f9d34c.r2.dev" }
             - { name: CLIENT_DOWNLOAD_URL, value: "https://pub-c7aad8ba448f46128b5aa70b19f9d34c.r2.dev/gatebound-client-win.zip" }
+            # Linux client (built from client-v1.2 / ee0fb60, WSL gcc-13 build —
+            # see docs/macos-release-runbook.md in Gatebound-2d for the mac gap).
+            # CLIENT_DOWNLOAD_URL_MAC stays unset on purpose: beta gate, needs a
+            # real Mac tester (macos-client-beta-gate decision 2026-07-02).
+            - { name: CLIENT_DOWNLOAD_URL_LINUX, value: "https://pub-c7aad8ba448f46128b5aa70b19f9d34c.r2.dev/releases/client-v1.2/gatebound-client-linux.tar.gz" }
             # In-browser /play client shell (otclient.* + gb-loader + overrides +
             # Tibia.dat/.otfi) on the gatebound-play PVC; the app's /play route
             # streams them same-origin. Tibia.spr is reused from SPR_PATH (sprites
