@@ -146,7 +146,7 @@ monkVocationEnabled = false
 familiarSystemEnabled = false
 wheelSystemEnabled = false
 bestiarySystemEnabled = false
-marketSystemEnabled = false
+marketSystemEnabled = true
 preySystemEnabled = false
 battlePassSystemEnabled = false
 weaponProficiencySystemEnabled = false
@@ -160,6 +160,11 @@ enableItemTierDisplay = false
 enableItemUpgradeClassification = false
 enableQuickLoot = false
 quickLootMaxCorpses = 30
+
+-- Gatebound monster rarity (magic/rare/epic/legendary spawns). Read by
+-- data/scripts via Gatebound.configFlag, not by the engine. OFF in prod
+-- until the rarity client patch is shipped to R2.
+monsterRarityEnabled = false
 
 -- Enable Task Hunt / Task Board system.
 -- Requires compatible AstraClient/OTCv8 support.
