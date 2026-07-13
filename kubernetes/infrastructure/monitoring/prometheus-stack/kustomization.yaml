@@ -15,6 +15,9 @@ resources:
   - daily-health-check-cronjob.yaml
   - longhorn-weekly-trend-configmap.yaml
   - longhorn-weekly-trend-cronjob.yaml
+  - proxmox-storage-alert-externalsecret.yaml
+  - proxmox-storage-alert-configmap.yaml
+  - proxmox-storage-alert-cronjob.yaml
 
 helmCharts:
   - name: kube-prometheus-stack

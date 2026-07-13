@@ -1,0 +1,72 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: proxmox-storage-alert
+  namespace: monitoring
+spec:
+  # Every 30 min. A thin pool can go from ~85% to full in under an hour under
+  # load, so we check often enough to leave time to act.
+  schedule: "*/30 * * * *"
+  timeZone: Europe/Stockholm
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: check
+              image: alpine/k8s:1.31.13
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - /scripts/proxmox-storage-alert.sh
+              env:
+                - name: THRESHOLD
+                  value: "85"
+                - name: PVE_URL
+                  value: "https://192.168.1.111:8006/api2/json"
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: slack
+                  mountPath: /etc/slack
+                  readOnly: true
+                - name: proxmox
+                  mountPath: /etc/proxmox
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+          volumes:
+            - name: script
+              configMap:
+                name: proxmox-storage-alert
+                defaultMode: 0555
+            - name: slack
+              secret:
+                secretName: alertmanager-slack
+            - name: proxmox
+              secret:
+                secretName: proxmox-monitoring-token

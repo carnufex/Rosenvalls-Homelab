@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxmox-storage-alert
+  namespace: monitoring
+data:
+  # Alert-only Proxmox storage-fill check. Silent when every pool is below
+  # THRESHOLD; posts to Slack only when a pool is filling. Prometheus does NOT
+  # scrape Proxmox, so this closes the blind spot that caused the 2026-07-13
+  # local-lvm-full io-error outage (thin pool hit 100% -> QEMU froze the VMs).
+  proxmox-storage-alert.sh: |
+    #!/bin/sh
+    set -eu
+
+    THRESHOLD="${THRESHOLD:-85}"
+    PVE_URL="${PVE_URL:-https://192.168.1.111:8006/api2/json}"
+    WEBHOOK="$(cat /etc/slack/webhook-url)"
+    TOKEN="$(cat /etc/proxmox/token)"
+
+    slack() {
+      # $1 = JSON-safe text
+      payload="$(jq -n --arg t "$1" '{text:$t}')"
+      curl -sk --max-time 15 -X POST -H 'Content-type: application/json' \
+        --data "$payload" "$WEBHOOK" >/dev/null 2>&1 || true
+    }
+
+    # Query storage usage across all Proxmox nodes in one call.
+    if ! resp="$(curl -sk --max-time 20 \
+        -H "Authorization: PVEAPIToken=${TOKEN}" \
+        "${PVE_URL}/cluster/resources?type=storage")"; then
+      slack ":rotating_light: *Proxmox storage-check FAILED* — could not reach the Proxmox API at ${PVE_URL}. The control node or Proxmox host may be down. Investigate."
+      echo "ERROR: Proxmox API unreachable"
+      exit 0
+    fi
+
+    # Lines for every pool at/above the threshold.
+    alerts="$(printf '%s' "$resp" | jq -r --argjson t "$THRESHOLD" '
+      .data[]
+      | select(.maxdisk > 0)
+      | (.disk / .maxdisk * 100) as $pct
+      | select($pct >= $t)
+      | "• *\(.node)/\(.storage)* — \($pct|floor)% used (\((.disk/1073741824)|floor)/\((.maxdisk/1073741824)|floor) GB)"
+    ')"
+
+    if [ -n "$alerts" ]; then
+      slack ":warning: *Proxmox storage filling up* (≥${THRESHOLD}%)
+    ${alerts}
+
+    _A full pool freezes VMs with \`io-error\` and can take down the control plane. Free space, delete unused disks, or move a disk to WD-red before it reaches 100%._"
+      echo "ALERT sent:"; printf '%s\n' "$alerts"
+    else
+      echo "OK — all Proxmox storage pools below ${THRESHOLD}%"
+    fi
