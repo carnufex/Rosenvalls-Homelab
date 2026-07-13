@@ -44,6 +44,9 @@ spec:
             - name: RESEND_API_KEY
               valueFrom:
                 secretKeyRef: { name: gatebound-web-secrets, key: RESEND_API_KEY }
+            # Character bazaar + web market buy. Flipped ON 2026-07-13 after the
+            # Warden telemetry + gbserial escrow verification landed (sha-8d721d2).
+            - { name: WEB_ECONOMY_FEATURES, value: "on" }
             - { name: SPR_PATH, value: /sprites/Tibia.spr }
             # NOTE: SERVER_PATH (TFS data for the calculators / live monster wiki)
             # is not mounted yet — those pages degrade until TFS data is shared.
