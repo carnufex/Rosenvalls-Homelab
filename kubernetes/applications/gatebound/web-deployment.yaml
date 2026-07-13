@@ -26,7 +26,7 @@ spec:
         - name: gatebound-ghcr
       containers:
         - name: web
-          image: registry.rosenvall.se/carnufex/gatebound-web:sha-5646ba2
+          image: registry.rosenvall.se/carnufex/gatebound-web:sha-1fbbaab
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 3000 }
