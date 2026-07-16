@@ -1,0 +1,60 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cilium-envoy-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: cilium-envoy
+      rules:
+        # THE outage detector (2026-07-15): after the io-error node reboots,
+        # worker-01's cilium-envoy came up but could not reach the cilium-agent
+        # xDS stream ("gRPC config stream to xds-grpc-cilium closed ...
+        # Connection refused"), so it held ZERO listeners. That node announces
+        # the gateway LB IPs (.220/.222), so every internal *.rosenvall.local
+        # service died from the LAN — while in-cluster probes still passed
+        # (BPF-LB just picked another node's healthy Envoy). Nothing alerted.
+        # A healthy Envoy holds 4 listeners; 0 means it has no config at all.
+        - alert: CiliumEnvoyNoListeners
+          expr: envoy_listener_manager_total_listeners_active == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "cilium-envoy on {{ $labels.node }} has no listeners"
+            description: >-
+              cilium-envoy on node {{ $labels.node }} has 0 active listeners — it
+              has lost its xDS config stream to cilium-agent. If this node
+              announces a gateway LB IP (192.168.1.220 internal / .222 external),
+              all traffic to it from the LAN is blackholed even though in-cluster
+              probes still succeed. Fix: kubectl -n kube-system delete pod
+              <cilium-envoy pod on that node> (restarting cilium-agent alone is
+              NOT enough — cilium-envoy is a separate DaemonSet).
+        # Envoy up but rejecting/failing config pushes: config is drifting stale.
+        - alert: CiliumEnvoyLdsUpdateFailing
+          expr: >-
+            increase(envoy_listener_manager_lds_update_failure[15m]) > 0
+            or increase(envoy_listener_manager_lds_update_rejected[15m]) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "cilium-envoy on {{ $labels.node }} failing listener updates"
+            description: >-
+              cilium-envoy on node {{ $labels.node }} is failing or rejecting LDS
+              (listener) updates, so its gateway config is going stale. Routes
+              added or changed since then will not take effect on this node.
+        # Envoy process unhealthy (0 = LIVE; anything else = draining/initializing).
+        - alert: CiliumEnvoyNotLive
+          expr: envoy_server_live != 1 or envoy_server_state != 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "cilium-envoy on {{ $labels.node }} not live"
+            description: >-
+              cilium-envoy on node {{ $labels.node }} reports server_live!=1 or a
+              non-LIVE server_state for 10m. Gateway traffic handled by this node
+              may fail.

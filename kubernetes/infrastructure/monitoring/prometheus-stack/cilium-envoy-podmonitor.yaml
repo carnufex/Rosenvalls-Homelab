@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cilium-envoy
+  namespace: monitoring
+  labels:
+    # Required for the kube-prometheus-stack Prometheus to select this
+    # (spec.podMonitorSelector matches release=kube-prometheus-stack).
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - kube-system
+  selector:
+    matchLabels:
+      k8s-app: cilium-envoy
+  podMetricsEndpoints:
+    - port: envoy-metrics
+      path: /metrics
+      interval: 60s
+      relabelings:
+        # Envoy metrics carry no node identity; the alert needs to name the node
+        # whose Envoy is broken, so surface it from pod metadata.
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+      metricRelabelings:
+        # cilium-envoy exposes ~940 KB / ~thousands of series per pod. We only
+        # need the handful below, so drop everything else — scraping it all
+        # would blow up Prometheus cardinality and disk for no benefit.
+        - sourceLabels: [__name__]
+          regex: >-
+            envoy_(listener_manager_total_listeners_active|server_live|server_state|listener_manager_lds_update_(success|failure|rejected))
+          action: keep

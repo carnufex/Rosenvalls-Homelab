@@ -18,6 +18,8 @@ resources:
   - proxmox-storage-alert-externalsecret.yaml
   - proxmox-storage-alert-configmap.yaml
   - proxmox-storage-alert-cronjob.yaml
+  - cilium-envoy-podmonitor.yaml
+  - cilium-envoy-alerts.yaml
 
 helmCharts:
   - name: kube-prometheus-stack
