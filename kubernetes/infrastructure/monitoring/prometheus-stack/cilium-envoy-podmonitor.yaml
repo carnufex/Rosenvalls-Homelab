@@ -21,8 +21,11 @@ spec:
       relabelings:
         # Envoy metrics carry no node identity; the alert needs to name the node
         # whose Envoy is broken, so surface it from pod metadata.
+        # `action: replace` is the CRD default; spell it out or the defaulted
+        # field shows up as permanent ArgoCD drift on this app.
         - sourceLabels: [__meta_kubernetes_pod_node_name]
           targetLabel: node
+          action: replace
       metricRelabelings:
         # cilium-envoy exposes ~940 KB / ~thousands of series per pod. We only
         # need the handful below, so drop everything else — scraping it all
