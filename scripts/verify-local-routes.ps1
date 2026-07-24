@@ -1,7 +1,6 @@
 param(
     [string]$GatewayIp = "192.168.1.220",
     [string[]]$Hosts = @(
-        "homeassistant.rosenvall.local",
         "radarr.rosenvall.local",
         "sonarr.rosenvall.local",
         "jackett.rosenvall.local",
@@ -12,8 +11,7 @@ param(
         "authentik.rosenvall.local",
         "grafana.rosenvall.local",
         "prometheus.rosenvall.local",
-        "longhorn.rosenvall.local",
-        "ragflow.rosenvall.local"
+        "longhorn.rosenvall.local"
     )
 )
 

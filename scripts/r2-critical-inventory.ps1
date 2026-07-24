@@ -27,7 +27,7 @@ function Get-Classification {
         return "KEEP"
     }
 
-    if ($Path -match "^(backupstore|volumes|authentik/live|authentik/dr|longhorn|manual|migration|plex|seerr|radarr|sonarr|jackett|deluge|homeassistant)") {
+    if ($Path -match "^(backupstore|volumes|authentik/live|authentik/dr|longhorn|manual|migration|plex|seerr|radarr|sonarr|jackett|deluge)") {
         return "DELETE"
     }
 

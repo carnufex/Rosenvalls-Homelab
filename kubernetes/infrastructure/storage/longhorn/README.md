@@ -15,6 +15,7 @@ This directory contains the configuration for Longhorn, a distributed block stor
 - `longhorn` (default): general workloads
 - `longhorn-critical`: critical stateful data, retained volumes, replica count 2
 - `longhorn-observability`: monitoring data, replica count 2
+- `longhorn-observability-single`: disposable/high-churn monitoring data, replica count 1; Prometheus TSDB must not consume critical rebuild capacity
 
 ## Scheduling Contract
 

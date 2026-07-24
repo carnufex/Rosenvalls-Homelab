@@ -12,7 +12,6 @@ creates cluster application providers.
 | Rosenvall DevOps | Active | `https://devops.rosenvall.se/auth/callback` |
 | Grafana | Active after sync | `https://grafana.rosenvall.local/login/generic_oauth` |
 | Headlamp | Active | `https://headlamp.rosenvall.se/oidc-callback` |
-| RAGFlow | Provider only | `https://ragflow.rosenvall.local/v1/user/oauth/callback/oidc` |
 
 Use native OIDC for apps in this table. Proxy-based protection is limited to
 the explicit exceptions below.
@@ -30,8 +29,6 @@ Required keys:
 - `GRAFANA_CLIENT_SECRET`
 - `HEADLAMP_CLIENT_ID`
 - `HEADLAMP_CLIENT_SECRET`
-- `RAGFLOW_CLIENT_ID`
-- `RAGFLOW_CLIENT_SECRET`
 - `SEERR_CLIENT_ID`
 - `SEERR_CLIENT_SECRET`
 - `PLEX_CLIENT_ID`
@@ -58,8 +55,6 @@ Blueprint-managed groups:
 - `Grafana Viewers`
 - `Kubernetes Admins`
 - `Kubernetes Viewers`
-- `RAGFlow Users`
-
 The default `profile` scope mapping includes a `groups` claim. Headlamp
 Kubernetes RBAC uses the kube-apiserver OIDC group prefix
 `authentik:`, so the read-only ClusterRoleBinding references
@@ -81,22 +76,10 @@ Add users from the Authentik admin UI:
    - `ArgoCD Admins` or `ArgoCD Viewers` for ArgoCD.
    - `Kubernetes Viewers` or `Kubernetes Admins` for Headlamp/Kubernetes UI access.
    - `Grafana Admins`, `Grafana Editors`, or `Grafana Viewers` for Grafana.
-   - `RAGFlow Users` for RAGFlow when it is enabled.
 
 Apps with `policy_engine_mode: any` and no group binding are available to any
 authenticated Authentik user. Add policy bindings before granting access to
 broader user populations.
-
-## RAGFlow Caveat
-
-RAGFlow is not switched to Authentik login yet. The upstream Helm chart writes
-`ragflow.service_conf` into a ConfigMap, which would expose the OAuth client
-secret if configured directly from GitOps values.
-
-`REGISTER_ENABLED=0` is set to prevent new local sign-ups while this is
-pending, but existing local users may still sign in. Treat RAGFlow as
-internal-only until its OAuth client secret can be mounted from a Secret or the
-chart gains secret-aware OIDC configuration.
 
 ## Verification
 

@@ -24,8 +24,7 @@ This secret is intentionally out-of-band. If it disappears, `ClusterSecretStore/
 - Longhorn and CloudNativePG backup credentials
 
 Some application namespaces use dedicated `ClusterSecretStore` objects with a
-single-namespace condition, such as `bitwarden-secretsmanager-matplan`,
-`bitwarden-secretsmanager-bikepal`, and
+single-namespace condition, such as `bitwarden-secretsmanager-matplan` and
 `bitwarden-secretsmanager-rosenvall-devops`. These stores narrow where each
 ExternalSecret may be used. They still depend on the manual
 `bitwarden-access-token` bootstrap secret unless they are moved to a separate

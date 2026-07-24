@@ -1,7 +1,7 @@
 param(
     [int]$PreviewTtlHours = 24,
     [int]$TopPods = 15,
-    [string[]]$AllowedOutOfSyncApps = @("ragflow-helm"),
+    [string[]]$AllowedOutOfSyncApps = @(),
     [string]$InClusterGatewayCheckNamespace = "cloudflare",
     [string]$InClusterGatewayCheckImage = "curlimages/curl:8.8.0",
     [switch]$SkipInClusterGatewayChecks,

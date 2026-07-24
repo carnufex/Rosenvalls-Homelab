@@ -150,11 +150,6 @@ data:
       gzip -t "$work/app-configs/plex.tar.gz"
     }
 
-    capture_config homeassistant homeassistant 'app.kubernetes.io/name=homeassistant' homeassistant /config \
-      --exclude='config/.cache' \
-      --exclude='config/deps' \
-      --exclude='config/tts'
-
     capture_plex_config
 
     capture_config radarr media 'app.kubernetes.io/name=radarr' radarr /config \

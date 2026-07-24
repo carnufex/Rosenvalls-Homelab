@@ -5,7 +5,6 @@ namespace: external-secrets
 resources:
   - namespace.yaml
   - cluster-secret-store.yaml
-  - cluster-secret-store-bikepal.yaml
   - cluster-secret-store-matplan.yaml
   - cluster-secret-store-rosenvall-devops.yaml
   - certs.yaml

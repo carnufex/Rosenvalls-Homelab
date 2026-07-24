@@ -100,7 +100,7 @@ staged (commented) in `kustomization.yaml`.
    Add a **production** Dockerfile (`next build` + `next start`, multi-stage) and
    push to `ghcr.io/carnufex/gatebound-web:<tag>`.
 3. Both are private → this repo needs a `ghcr-image-pull-secret.yaml`
-   ExternalSecret (copy the bikepal/matplan pattern).
+   ExternalSecret (copy the matplan pattern).
 
 ## To finish onboarding (back here, after images exist)
 

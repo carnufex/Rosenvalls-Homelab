@@ -69,7 +69,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "sum(kube_deployment_status_replicas_unavailable{namespace=~\"hub-central|homeassistant|media\",deployment=~\"hub-central|homeassistant|deluge-vpn|jackett|overseerr|plex|radarr|sonarr\"})",
+              "expr": "sum(kube_deployment_status_replicas_unavailable{namespace=~\"hub-central|media\",deployment=~\"hub-central|deluge-vpn|jackett|overseerr|plex|radarr|sonarr\"})",
               "instant": true,
               "legendFormat": "Unavailable replicas",
               "range": false,
@@ -135,7 +135,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "sum(max by (namespace, pod, container) (kube_pod_container_status_waiting_reason{namespace=~\"hub-central|homeassistant|media\",reason=\"CrashLoopBackOff\"}))",
+              "expr": "sum(max by (namespace, pod, container) (kube_pod_container_status_waiting_reason{namespace=~\"hub-central|media\",reason=\"CrashLoopBackOff\"}))",
               "instant": true,
               "legendFormat": "CrashLoop containers",
               "range": false,
@@ -201,7 +201,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "sum(kube_persistentvolumeclaim_status_phase{namespace=~\"homeassistant|media\",phase=\"Pending\",persistentvolumeclaim=~\"homeassistant-config|deluge-config|jackett-config|media-library|overseerr-config|plex-config|radarr-config|sonarr-config\"})",
+              "expr": "sum(kube_persistentvolumeclaim_status_phase{namespace=\"media\",phase=\"Pending\",persistentvolumeclaim=~\"deluge-config|jackett-config|media-library|overseerr-config|plex-config|radarr-config|sonarr-config\"})",
               "instant": true,
               "legendFormat": "Pending PVCs",
               "range": false,
@@ -365,7 +365,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "100 * kube_deployment_status_replicas_available{namespace=~\"hub-central|homeassistant|media\",deployment=~\"hub-central|homeassistant|deluge-vpn|jackett|overseerr|plex|radarr|sonarr\"} / clamp_min(kube_deployment_spec_replicas{namespace=~\"hub-central|homeassistant|media\",deployment=~\"hub-central|homeassistant|deluge-vpn|jackett|overseerr|plex|radarr|sonarr\"}, 1)",
+              "expr": "100 * kube_deployment_status_replicas_available{namespace=~\"hub-central|media\",deployment=~\"hub-central|deluge-vpn|jackett|overseerr|plex|radarr|sonarr\"} / clamp_min(kube_deployment_spec_replicas{namespace=~\"hub-central|media\",deployment=~\"hub-central|deluge-vpn|jackett|overseerr|plex|radarr|sonarr\"}, 1)",
               "instant": true,
               "legendFormat": "{{namespace}}/{{deployment}}",
               "range": false,
@@ -434,7 +434,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "sum by (namespace, pod) (increase(kube_pod_container_status_restarts_total{namespace=~\"hub-central|homeassistant|media\"}[24h])) > 0",
+              "expr": "sum by (namespace, pod) (increase(kube_pod_container_status_restarts_total{namespace=~\"hub-central|media\"}[24h])) > 0",
               "format": "table",
               "instant": true,
               "range": false,
@@ -521,7 +521,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "kube_persistentvolumeclaim_status_phase{namespace=~\"homeassistant|media\",phase!=\"Bound\",persistentvolumeclaim=~\"homeassistant-config|deluge-config|jackett-config|media-library|overseerr-config|plex-config|radarr-config|sonarr-config\"} == 1",
+              "expr": "kube_persistentvolumeclaim_status_phase{namespace=\"media\",phase!=\"Bound\",persistentvolumeclaim=~\"deluge-config|jackett-config|media-library|overseerr-config|plex-config|radarr-config|sonarr-config\"} == 1",
               "format": "table",
               "instant": true,
               "range": false,

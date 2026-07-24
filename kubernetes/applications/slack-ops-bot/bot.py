@@ -33,7 +33,7 @@ WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 # Mutations never touch these namespaces (databases, platform, the bot itself).
 PROTECTED_NS = {
     "kube-system", "longhorn-system", "external-secrets", "cnpg-system",
-    "authentik", "gateway", "cert-manager", "argocd", "bikepal", "matplan",
+    "authentik", "gateway", "cert-manager", "argocd", "matplan",
     "slack-ops-bot",
 }
 

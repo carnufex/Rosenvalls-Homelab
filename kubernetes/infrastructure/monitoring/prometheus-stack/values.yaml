@@ -140,7 +140,7 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: longhorn-observability
+          storageClassName: longhorn-observability-single
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:

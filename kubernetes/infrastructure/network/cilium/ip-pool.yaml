@@ -5,15 +5,9 @@ metadata:
 spec:
   # Serves LoadBalancer services in the gateway namespace (the two Cilium
   # gateways: .220 internal, .222 external), the gatebound namespace (the TFS
-  # game server, which pins .223 via io.cilium/lb-ipam-ips), the
-  # homeassistant namespace (homeassistant-lan pins .224 so push-based IoT like
-  # battery Shelly devices can reach HA's plain ws://...:8123 endpoint — the
-  # internal Gateway's self-signed CA is not usable by such devices), and the
-  # registry namespace (the self-hosted container registry pins .225 —
-  # registry.rosenvall.se, grey-cloud DNS; it must NOT sit behind the gateway
-  # because it is cluster-recovery infrastructure and docker pushes need a
-  # direct path). Selecting by namespace rather than name so each of those
-  # services is eligible.
+  # game server, which pins .223 via io.cilium/lb-ipam-ips), and the registry
+  # namespace (the self-hosted container registry pins .225). Selecting by
+  # namespace rather than name so each of those services is eligible.
   # NOTE: any new namespace added here must also be added to the matching
   # CiliumL2AnnouncementPolicy in announce.yaml, or the IP is allocated but never
   # advertised on the LAN.
@@ -24,7 +18,6 @@ spec:
         values:
           - gateway
           - gatebound
-          - homeassistant
           - registry
   blocks:
     - start: 192.168.1.220

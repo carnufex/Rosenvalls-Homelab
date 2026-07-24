@@ -7,15 +7,10 @@ spec:
   description: User applications
   sourceRepos:
   - https://github.com/carnufex/Rosenvalls-Homelab.git
-  - https://github.com/infiniflow/ragflow.git
   destinations:
   - namespace: rosenvall-devops
     server: https://kubernetes.default.svc
   - namespace: rosenvall-devops-pipelines
-    server: https://kubernetes.default.svc
-  - namespace: bikepal
-    server: https://kubernetes.default.svc
-  - namespace: homeassistant
     server: https://kubernetes.default.svc
   - namespace: hub-central
     server: https://kubernetes.default.svc
@@ -26,8 +21,6 @@ spec:
   - namespace: media
     server: https://kubernetes.default.svc
   - namespace: ollama
-    server: https://kubernetes.default.svc
-  - namespace: ragflow
     server: https://kubernetes.default.svc
   - namespace: slack-ops-bot
     server: https://kubernetes.default.svc
