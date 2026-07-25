@@ -29,7 +29,7 @@ This directory contains the configuration for Longhorn, a distributed block stor
 
 ## Backup
 
-- `RecurringJob/default-hourly-snapshot` keeps 24 hourly local snapshots for volumes in the `default` group.
+- `RecurringJob/default-hourly-snapshot` keeps 7 daily local snapshots for volumes in the `default` group. The resource keeps its legacy name to avoid creating a second recurring job.
 - `BackupTarget/default` is intentionally disabled so Longhorn does not poll or write to Cloudflare R2.
 - Cloudflare R2 is not an active Longhorn backup backend because Class A operations can exceed the free tier.
 - The next active backup target should be local S3-compatible storage, such as MinIO on storage outside Longhorn's own data disks.
