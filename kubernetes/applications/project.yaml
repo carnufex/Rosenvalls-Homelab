@@ -26,8 +26,6 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: gatebound
     server: https://kubernetes.default.svc
-  - namespace: wedding
-    server: https://kubernetes.default.svc
   - namespace: registry
     server: https://kubernetes.default.svc
   clusterResourceWhitelist:
