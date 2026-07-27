@@ -19,5 +19,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: plex-oauth2-proxy
-          port: 4180
+        - name: plex
+          port: 32400

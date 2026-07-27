@@ -130,8 +130,9 @@ This verifies the WireGuard interface, policy routing, external IP through the t
   - `https://overseerr.rosenvall.local` (legacy alias)
   - `https://deluge.rosenvall.local`
   - `https://plex.rosenvall.local`
-- Public `https://seerr.rosenvall.se` and `https://plex.rosenvall.se` are explicit Authentik proxy exceptions using `oauth2-proxy`.
-- Plex on the pinned worker's port `32400` remains the primary compatibility path for native clients and discovery traffic.
-- Plex advertises only `https://plex.rosenvall.local:443` and `http://192.168.1.211:32400` to native clients. Do not advertise `https://plex.rosenvall.se:443` while it is protected by Authentik/Cloudflare, because Plex TV/native clients need a direct Plex endpoint.
-- Public Plex browser traffic goes through Authentik first, then `plex-oauth2-proxy` forwards to `plex.media.svc.cluster.local:32400`. If `curl -k -I --resolve plex.rosenvall.se:443:192.168.1.222 https://plex.rosenvall.se` works but normal `https://plex.rosenvall.se` returns Cloudflare `503`, fix the Cloudflare Tunnel public hostname/origin entry rather than restarting Plex.
+- Public `https://seerr.rosenvall.se` is an explicit Authentik proxy exception using `oauth2-proxy`.
+- Public `https://plex.rosenvall.se` routes directly to Plex so native Plex clients, TV apps, and cast targets can reach the server without an Authentik browser session. Access control for this hostname is Plex's own authentication and server claim.
+- Plex on the pinned worker's port `32400` remains the primary LAN compatibility path for native clients and discovery traffic.
+- Plex advertises `https://plex.rosenvall.se:443`, `https://plex.rosenvall.local:443`, and `http://192.168.1.211:32400` to native clients.
+- If `curl -k -I --resolve plex.rosenvall.se:443:192.168.1.222 https://plex.rosenvall.se/identity` works but normal `https://plex.rosenvall.se/identity` fails, fix the Cloudflare Tunnel public hostname/origin entry rather than restarting Plex.
 - Guest/IoT TV clients need an explicit firewall allow rule to reach the direct Plex endpoint `192.168.1.211:32400`. Keep that rule narrow to the TV/Guest/IoT source network and the Plex port.
