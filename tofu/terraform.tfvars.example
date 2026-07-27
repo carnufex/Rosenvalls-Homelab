@@ -46,6 +46,7 @@ nodes_config = {
   # "worker-04" = {
   #   host_node          = "host1"
   #   machine_type       = "worker"
+  #   longhorn_create_default_disk = false # host1 example has only a 30G Longhorn disk; keep it compute-only unless enlarged.
   #   boot_disk_size_gib = 32
   #   ip                 = "192.168.1.214"
   #   vm_id              = 8005

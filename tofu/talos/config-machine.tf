@@ -8,16 +8,17 @@ data "talos_machine_configuration" "this" {
   config_patches = concat(
     [
       templatefile("${path.module}/machine-config/${each.value.machine_type}.yaml.tftpl", {
-        disks              = each.value.disks
-        cilium_values      = var.cilium.values
-        cilium_install     = var.cilium.install
-        vip                = var.cluster.endpoint
-        hostname           = each.key
-        node_ip            = each.value.ip
-        gateway            = var.cluster.gateway
-        igpu               = each.value.igpu
-        gpu_node_exclusive = lookup(each.value, "gpu_node_exclusive", false)
-        extra_labels       = lookup(each.value, "extra_labels", {})
+        disks                        = each.value.disks
+        cilium_values                = var.cilium.values
+        cilium_install               = var.cilium.install
+        vip                          = var.cluster.endpoint
+        hostname                     = each.key
+        node_ip                      = each.value.ip
+        gateway                      = var.cluster.gateway
+        igpu                         = each.value.igpu
+        gpu_node_exclusive           = lookup(each.value, "gpu_node_exclusive", false)
+        longhorn_create_default_disk = lookup(each.value, "longhorn_create_default_disk", true)
+        extra_labels                 = lookup(each.value, "extra_labels", {})
       })
     ],
     # Conditionally add GPU patches for GPU-enabled worker nodes

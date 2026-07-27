@@ -22,11 +22,14 @@ data:
           | ([$n.status.diskStatus[].storageAvailable] | add) as $avail
           | ([$n.status.diskStatus[].storageMaximum]   | add) as $max
           | ([$n.status.diskStatus[].storageScheduled] | add) as $sched
-          | "• \($n.metadata.name): \((($max-$avail)/1073741824)|floor)/\(($max/1073741824)|floor) GiB used, *\(($avail/1073741824)|floor) GiB free*, \((($sched*100)/$max)|floor)% scheduled"')"
+          | ($n.spec.allowScheduling != false) as $allow
+          | "• \($n.metadata.name): \((($max-$avail)/1073741824)|floor)/\(($max/1073741824)|floor) GiB used, *\(($avail/1073741824)|floor) GiB free*, \((($sched*100)/$max)|floor)% scheduled\(if $allow then "" else " (scheduling off)" end)"')"
 
     # Flag if the tightest node is low on real free space.
     low="$(kubectl get nodes.longhorn.io -n longhorn-system -o json 2>/dev/null \
-      | jq -r '[.items[] | ([.status.diskStatus[].storageAvailable] | add)] | min | (./1073741824) | floor')"
+      | jq -r '[.items[] | select(.spec.allowScheduling != false) | ([.status.diskStatus[].storageAvailable] | add)]
+               | if length == 0 then 999999 else min end
+               | (./1073741824) | floor')"
     emoji=":bar_chart:"
     [ -n "${low}" ] && [ "${low}" -lt 15 ] && emoji=":warning:"
 

@@ -7,7 +7,9 @@ cluster:
 
 machine:
   nodeLabels:
+%{ if longhorn_create_default_disk }
     node.longhorn.io/create-default-disk: "true"
+%{ endif }
 %{ if igpu }
     gpu: "true"
 %{ endif }

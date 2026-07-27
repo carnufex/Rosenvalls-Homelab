@@ -15,7 +15,8 @@ variable "defaults_worker" {
       subsystem_id = string
       iommu_group  = number
     }))
-    extra_labels = map(string)
+    longhorn_create_default_disk = bool
+    extra_labels                 = map(string)
     disks = map(object({
       device      = string
       size        = string
@@ -25,16 +26,17 @@ variable "defaults_worker" {
     }))
   })
   default = {
-    machine_type       = "worker"
-    boot_disk_size_gib = 64
-    cpu                = 4
-    cpu_units          = 1024
-    ram_dedicated      = 8192
-    igpu               = false
-    gpu_node_exclusive = false
-    gpu_devices        = []
-    gpu_device_meta    = {}
-    extra_labels       = {}
+    machine_type                 = "worker"
+    boot_disk_size_gib           = 64
+    cpu                          = 4
+    cpu_units                    = 1024
+    ram_dedicated                = 8192
+    igpu                         = false
+    gpu_node_exclusive           = false
+    gpu_devices                  = []
+    gpu_device_meta              = {}
+    longhorn_create_default_disk = true
+    extra_labels                 = {}
     disks = {
       longhorn = {
         device      = "/dev/sdb"

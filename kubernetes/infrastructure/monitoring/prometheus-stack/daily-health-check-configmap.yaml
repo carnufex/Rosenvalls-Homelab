@@ -19,8 +19,11 @@ data:
     ${1}"; }
 
     # --- Nodes ---
-    n_total="$(kubectl get nodes --no-headers 2>/dev/null | wc -l | tr -d ' ')"
-    n_notready="$(kubectl get nodes --no-headers 2>/dev/null | awk '$2!="Ready"{print $1}')"
+    n_total="$(kubectl get nodes -o name 2>/dev/null | wc -l | tr -d ' ')"
+    n_notready="$(kubectl get nodes -o json 2>/dev/null \
+      | jq -r '.items[]
+        | select(([.status.conditions[] | select(.type=="Ready" and .status=="True")] | length) == 0)
+        | .metadata.name')"
     [ -n "${n_notready}" ] && note ":red_circle: Nodes not Ready: $(echo ${n_notready} | tr '\n' ' ')"
     n_ready="$((n_total - $(echo "${n_notready}" | grep -c .)))"
 
@@ -64,8 +67,8 @@ data:
 
     # --- Longhorn free space (lowest nodes — the recurring bottleneck) ---
     lh_free="$(kubectl get nodes.longhorn.io -n longhorn-system -o json 2>/dev/null \
-      | jq -r '[.items[] | {n:.metadata.name, avail:([.status.diskStatus[].storageAvailable]|add)}]
-               | sort_by(.avail) | .[] | "    \(.n): \(.avail/1073741824 | floor) GiB free"' 2>/dev/null \
+      | jq -r '[.items[] | {n:.metadata.name, sched:(.spec.allowScheduling != false), avail:([.status.diskStatus[].storageAvailable]|add)}]
+               | sort_by(.avail) | .[] | "    \(.n): \(.avail/1073741824 | floor) GiB free\(if .sched then "" else " (scheduling off)" end)"' 2>/dev/null \
       | head -5)"
 
     # --- Compose & post ---
