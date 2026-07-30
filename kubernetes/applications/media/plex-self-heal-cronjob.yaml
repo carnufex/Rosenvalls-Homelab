@@ -16,6 +16,7 @@ spec:
         app.kubernetes.io/name: plex-self-heal
     spec:
       backoffLimit: 0
+      ttlSecondsAfterFinished: 1800
       template:
         metadata:
           labels:
@@ -34,8 +35,8 @@ spec:
                   namespace="${POD_NAMESPACE:-media}"
 
                   if ! kubectl -n "$namespace" wait --for=condition=Ready pod -l app.kubernetes.io/name=plex --timeout=30s; then
-                    echo "Plex pod is not Ready; leaving remediation to Kubernetes probes."
-                    exit 1
+                    echo "Plex pod is not Ready; Kubernetes probes and deployment alerts own this state."
+                    exit 0
                   fi
 
                   pod="$(kubectl -n "$namespace" get pod -l app.kubernetes.io/name=plex -o jsonpath='{.items[0].metadata.name}')"
@@ -43,13 +44,13 @@ spec:
                   if ! kubectl -n "$namespace" exec "$pod" -- sh -c 'curl -fsS --max-time 10 http://127.0.0.1:32400/identity | grep -q MediaContainer'; then
                     echo "Plex identity endpoint failed inside the pod; deleting pod for clean remount/restart."
                     kubectl -n "$namespace" delete pod "$pod" --wait=false
-                    exit 1
+                    exit 0
                   fi
 
                   if ! kubectl -n "$namespace" exec "$pod" -- sh -c 'dir="/config/Library/Application Support/Plex Media Server/Codecs"; [ ! -d "$dir" ] || ! find "$dir" -type f -name EasyAudioEncoder ! -perm -111 | grep -q .'; then
                     echo "Plex EasyAudioEncoder cache contains non-executable binaries; deleting pod so initContainer repairs cache."
                     kubectl -n "$namespace" delete pod "$pod" --wait=false
-                    exit 1
+                    exit 0
                   fi
 
                   echo "Plex semantic health checks passed."
