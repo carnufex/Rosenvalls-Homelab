@@ -89,15 +89,34 @@ $manifest = [ordered]@{
     kind       = "Pod"
     metadata   = [ordered]@{ name = $podName; namespace = $Namespace }
     spec       = [ordered]@{
-        restartPolicy    = "Never"
-        securityContext  = [ordered]@{ runAsUser = 1000; runAsGroup = 1000 }
-        containers       = @([ordered]@{
-            name         = "verify"
-            image        = "busybox:1.36.1"
-            command      = @("sh", "-c", "sleep 3600")
-            volumeMounts = @([ordered]@{ name = "nfs-export"; mountPath = "/target" })
+        restartPolicy                = "Never"
+        automountServiceAccountToken = $false
+        enableServiceLinks           = $false
+        imagePullSecrets             = @([ordered]@{ name = "immich-image-pull" })
+        securityContext              = [ordered]@{
+            runAsNonRoot   = $true
+            runAsUser      = 1000
+            runAsGroup     = 1000
+            fsGroup        = 1000
+            seccompProfile = [ordered]@{ type = "RuntimeDefault" }
+        }
+        containers                   = @([ordered]@{
+            name            = "verify"
+            image           = "registry.rosenvall.se/library/busybox:pinned-73aaf090@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662"
+            imagePullPolicy = "IfNotPresent"
+            command         = @("sh", "-c", "sleep 3600")
+            resources       = [ordered]@{
+                requests = [ordered]@{ cpu = "10m"; memory = "16Mi" }
+                limits   = [ordered]@{ cpu = "100m"; memory = "32Mi" }
+            }
+            securityContext = [ordered]@{
+                allowPrivilegeEscalation = $false
+                readOnlyRootFilesystem   = $true
+                capabilities             = [ordered]@{ drop = @("ALL") }
+            }
+            volumeMounts    = @([ordered]@{ name = "nfs-export"; mountPath = "/target"; subPath = ".verification" })
         })
-        volumes          = @([ordered]@{
+        volumes                      = @([ordered]@{
             name = "nfs-export"
             nfs  = [ordered]@{ server = $Server; path = $Path }
         })

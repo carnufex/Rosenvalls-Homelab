@@ -77,17 +77,65 @@ Use these after:
 nfs-01 is separate from the media NFS VM at 192.168.1.230. It is VM 8011 at
 192.168.1.231, with a 2048 GiB WD-red disk carrying serial NFS01DATA.
 
-Preflight and review the exact OpenTofu plan. It must add only the Debian image
-and nfs-01; it must not replace Talos VMs or an existing WD Red volume.
+The current full OpenTofu plan contains unrelated drift. Provisioning `nfs-01`
+is therefore an exceptional, targeted operation. **Do not run an unscoped
+`tofu plan`/`apply`, and never apply a full plan, until that drift is repaired
+and reviewed separately.** Only the two exact resource addresses below are in
+scope.
 
 ~~~powershell
-tofu -chdir=tofu fmt -check -recursive
+tofu -chdir=tofu fmt -check nfs.tf variables.tf outputs.tf
 tofu -chdir=tofu validate
-tofu -chdir=tofu plan -out=nfs-01.tfplan
-tofu -chdir=tofu show nfs-01.tfplan
-tofu -chdir=tofu apply nfs-01.tfplan
+
+function Assert-SavedTofuPlan {
+    param(
+        [string]$PlanName,
+        [string[]]$ExpectedAddresses,
+        [int]$Creates,
+        [int]$Updates,
+        [int]$Deletes
+    )
+    $jsonPath = ".\tofu\$PlanName.json"
+    tofu -chdir=tofu show -json "$PlanName.tfplan" |
+        Set-Content -LiteralPath $jsonPath -Encoding utf8
+    if ($LASTEXITCODE -ne 0) { throw "Unable to render saved plan $PlanName." }
+    $plan = Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json
+    $mutations = @($plan.resource_changes | Where-Object {
+        $actions = @($_.change.actions)
+        ($actions -contains "create") -or
+        ($actions -contains "update") -or
+        ($actions -contains "delete")
+    })
+    $actualCreates = @($mutations | Where-Object { @($_.change.actions) -contains "create" }).Count
+    $actualUpdates = @($mutations | Where-Object { @($_.change.actions) -contains "update" }).Count
+    $actualDeletes = @($mutations | Where-Object { @($_.change.actions) -contains "delete" }).Count
+    if ($actualCreates -ne $Creates -or $actualUpdates -ne $Updates -or $actualDeletes -ne $Deletes) {
+        throw "Saved plan gate failed: expected ${Creates}C/${Updates}U/${Deletes}D, got ${actualCreates}C/${actualUpdates}U/${actualDeletes}D."
+    }
+    $addressDiff = @(Compare-Object ($ExpectedAddresses | Sort-Object) ($mutations.address | Sort-Object))
+    if ($addressDiff.Count) { throw "Saved plan contains an unexpected mutation address." }
+}
+
+$createAddresses = @(
+    'proxmox_virtual_environment_download_file.nfs_debian["nfs"]'
+    'proxmox_virtual_environment_vm.nfs["nfs"]'
+)
+tofu -chdir=tofu plan `
+    "-target=$($createAddresses[0])" `
+    "-target=$($createAddresses[1])" `
+    -out=nfs-01-create.tfplan
+if ($LASTEXITCODE -ne 0) { throw "Targeted nfs-01 plan failed." }
+Assert-SavedTofuPlan -PlanName nfs-01-create -ExpectedAddresses $createAddresses -Creates 2 -Updates 0 -Deletes 0
+tofu -chdir=tofu show nfs-01-create.tfplan
+# Apply this exact saved plan only; do not replace it with an unscoped plan.
+tofu -chdir=tofu apply nfs-01-create.tfplan
 tofu -chdir=tofu output nfs_server
 ~~~
+
+Targeted applies can leave the root `nfs_server` output absent or stale. That
+does not justify an unscoped apply: confirm the managed VM with
+`tofu -chdir=tofu state show 'proxmox_virtual_environment_vm.nfs["nfs"]'` and
+repair state outputs only as part of the separately reviewed drift work.
 
 After SSH is reachable, bootstrap and prove the export from a disposable
 Kubernetes pod:
@@ -112,9 +160,19 @@ ssh debian@192.168.1.231 "set -e; findmnt /srv/nfs/immich; systemctl is-active n
 ~~~
 
 The QEMU agent starts disabled because the package is not present yet. After
-bootstrap, set agent_enabled = true in ignored local tofu/terraform.tfvars,
-review a new tofu -chdir=tofu plan, then run tofu -chdir=tofu apply after
-confirming it is only the agent update.
+bootstrap, set `agent_enabled = true` in ignored local
+`tofu/terraform.tfvars`, then use a second VM-only saved plan. It must contain
+exactly `0C/1U/0D` at the one VM address before applying that exact file:
+
+~~~powershell
+$vmAddress = 'proxmox_virtual_environment_vm.nfs["nfs"]'
+tofu -chdir=tofu plan "-target=$vmAddress" -out=nfs-01-agent.tfplan
+if ($LASTEXITCODE -ne 0) { throw "Targeted qemu-agent plan failed." }
+Assert-SavedTofuPlan -PlanName nfs-01-agent -ExpectedAddresses @($vmAddress) -Creates 0 -Updates 1 -Deletes 0
+tofu -chdir=tofu show nfs-01-agent.tfplan
+# Apply this exact saved plan only; full/unscoped apply remains prohibited.
+tofu -chdir=tofu apply nfs-01-agent.tfplan
+~~~
 
 nfs-01 is protected with OpenTofu prevent_destroy. For a real recovery,
 preserve or restore the NFS data first and deliberately change that protection

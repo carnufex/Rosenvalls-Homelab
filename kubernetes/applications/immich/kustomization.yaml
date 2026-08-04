@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ns.yaml
+  - image-pull-secret.yaml
   - database-password.yaml
   - library-storage.yaml
   - database-pvc.yaml

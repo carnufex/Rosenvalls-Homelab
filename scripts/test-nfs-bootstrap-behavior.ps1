@@ -174,6 +174,7 @@ touch "$TEST_ROOT/formatted"; echo mkfs >>"$TEST_ROOT/log"
 EOF
 write_stub install <<'EOF'
 #!/usr/bin/env bash
+echo "install:$*" >>"$TEST_ROOT/log"
 directory=false
 for arg in "$@"; do [[ "$arg" == -d ]] && directory=true; last="$arg"; done
 if "$directory"; then mkdir -p "$last"; else : >"$last"; fi
@@ -188,11 +189,11 @@ touch "$TEST_ROOT/mounted"; echo mount >>"$TEST_ROOT/log"
 EOF
 write_stub chown <<'EOF'
 #!/usr/bin/env bash
-:
+echo "chown:$*" >>"$TEST_ROOT/log"
 EOF
 write_stub chmod <<'EOF'
 #!/usr/bin/env bash
-:
+echo "chmod:$*" >>"$TEST_ROOT/log"
 EOF
 write_stub systemctl <<'EOF'
 #!/usr/bin/env bash
@@ -225,8 +226,12 @@ assert_no_destructive() { ! grep -Eq 'parted-mutate|mkfs' "$log"; }
 normal="$root/normal"
 run_case blank "$normal" 0
 grep -qx parted-mutate "$log"; grep -qx mkfs "$log"; grep -q lsblk-after-apt "$log"
+test -d "$normal/.verification" || { echo "Missing blank-disk .verification directory." >&2; exit 91; }
+grep -Fqx "install:-d -o 1000 -g 1000 -m 0700 $normal/.verification" "$log" || { echo "Missing hardened blank-disk .verification install." >&2; exit 92; }
 run_case existing "$root/existing" 0
 ! grep -qx parted-mutate "$log"; ! grep -qx mkfs "$log"; grep -q lsblk-after-apt "$log"
+test -d "$root/existing/.verification" || { echo "Missing existing-disk .verification directory." >&2; exit 93; }
+grep -Fqx "install:-d -o 1000 -g 1000 -m 0700 $root/existing/.verification" "$log" || { echo "Missing hardened existing-disk .verification install." >&2; exit 94; }
 run_case changed "$root/changed" 1 || true; assert_no_destructive
 mkdir -p "$root/nonempty"; : >"$root/nonempty/file"
 run_case blank "$root/nonempty" 1 || true; assert_no_destructive

@@ -85,22 +85,63 @@ else {
 }
 
 $verifier = Get-Content -LiteralPath $scriptPaths[1] -Raw
+$verifierCompact = $verifier -replace '\s+', ' '
 foreach ($gate in @(
     'finally {',
     'Remove-Item -LiteralPath $manifestPath',
     'kubectl delete pod $podName',
     '.nfs-write-check-',
+    'automountServiceAccountToken = $false',
+    'enableServiceLinks = $false',
+    'imagePullSecrets = @([ordered]@{ name = "immich-image-pull" })',
+    'seccompProfile = [ordered]@{ type = "RuntimeDefault" }',
+    'runAsNonRoot = $true',
     'runAsUser = 1000',
     'runAsGroup = 1000',
+    'fsGroup = 1000',
+    'allowPrivilegeEscalation = $false',
+    'readOnlyRootFilesystem = $true',
+    'capabilities = [ordered]@{ drop = @("ALL") }',
+    'requests = [ordered]@{ cpu = "10m"; memory = "16Mi" }',
+    'limits = [ordered]@{ cpu = "100m"; memory = "32Mi" }',
+    'subPath = ".verification"',
     'ConvertTo-Json',
     'trap cleanup_marker EXIT INT TERM',
     'DNS-1123 label',
     'Test-SafeNfsServer',
     'Test-CanonicalAbsolutePath'
 )) {
-    if (-not $verifier.Contains($gate)) {
+    if (-not $verifierCompact.Contains($gate)) {
         throw "Missing NFS verifier gate: $gate"
     }
+}
+if ($verifier -notmatch 'registry\.rosenvall\.se/library/busybox:pinned-(?<short>[0-9a-f]{8})@sha256:\k<short>[0-9a-f]{56}') {
+    throw "NFS verifier image is not a digest-pinned, GC-safe BusyBox mirror."
+}
+
+$pullSecretPath = Join-Path $PSScriptRoot "..\kubernetes\applications\immich\image-pull-secret.yaml"
+if (-not (Test-Path -LiteralPath $pullSecretPath)) {
+    throw "Immich image-pull ExternalSecret is missing."
+}
+$pullSecret = Get-Content -LiteralPath $pullSecretPath -Raw
+foreach ($gate in @(
+    'namespace: immich',
+    'kind: ClusterSecretStore',
+    'name: bitwarden-secretsmanager',
+    'name: immich-image-pull',
+    'type: kubernetes.io/dockerconfigjson',
+    '"ghcr.io"',
+    '"registry.rosenvall.se"',
+    '09b625aa-6a80-46bb-bf35-b41901624bb3',
+    '227aad11-f6ec-4696-ae94-b47c00a93cd1'
+)) {
+    if (-not $pullSecret.Contains($gate)) {
+        throw "Missing Immich image-pull secret gate: $gate"
+    }
+}
+$immichKustomization = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\kubernetes\applications\immich\kustomization.yaml") -Raw
+if (-not $immichKustomization.Contains('  - image-pull-secret.yaml')) {
+    throw "Immich kustomization does not include image-pull-secret.yaml."
 }
 
 Write-Host "[OK] NFS bootstrap and export verifier static safety checks passed." -ForegroundColor Green

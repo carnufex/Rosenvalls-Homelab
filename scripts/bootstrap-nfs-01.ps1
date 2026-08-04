@@ -192,6 +192,7 @@ install -m 0644 "$fstab_tmp" /etc/fstab
 if ! mountpoint -q "$export_path"; then mount "$export_path"; fi
 verify_export_mount
 chown 1000:1000 "$export_path"; chmod 0775 "$export_path"
+install -d -o 1000 -g 1000 -m 0700 "$export_path/.verification"
 install -d -m 0755 /etc/exports.d /etc/systemd/system/nfs-kernel-server.service.d
 printf '%s %s\n' "$export_path" "$allowed_clients" > /etc/exports.d/immich.exports
 cat > /etc/systemd/system/nfs-kernel-server.service.d/immich-nfs-ordering.conf <<EOF
