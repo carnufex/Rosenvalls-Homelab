@@ -58,11 +58,23 @@ Immich writes nightly compressed database backups under `/data/backups`, so they
 reside on the same WD Red filesystem as the library. Longhorn snapshots protect
 only the live PostgreSQL volume from short-term local failures.
 
-There is currently no automated backup of the WD Red export, and a database
-backup on that same filesystem is not an independent copy. Keep the original
-wedding photos outside Immich and add a separate backup before treating Immich
-as the only library. A complete restore needs both the media directories and a
-matching database backup.
+`CronJob/immich-onedrive-backup` runs daily at 04:20 Europe/Stockholm and syncs
+the complete `/data` tree to `OneDrive:/Rosenvalls-Homelab/immich/current`.
+Replaced or deleted remote files are moved to
+`OneDrive:/Rosenvalls-Homelab/immich/versions/<timestamp>` by `--backup-dir`,
+so a bad source-side delete is recoverable from OneDrive.
+
+The backup is intentionally not wrapped in `rclone crypt`; original photos and
+database backup archives are readable in OneDrive.
+
+The backup job depends on this Bitwarden Secrets Manager entry:
+
+- `HOMEASSISTANT_RCLONE_CONFIG`: the full `rclone.conf` content used for the
+  Home Assistant OneDrive backup remote, stored base64-encoded so JSON quotes
+  in the rclone OAuth token survive CLI transport
+
+A complete restore needs both the media directories and a matching database
+backup from `/data/backups`.
 
 Useful checks:
 

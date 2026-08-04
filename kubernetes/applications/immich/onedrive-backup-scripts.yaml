@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-onedrive-backup-scripts
+  namespace: immich
+data:
+  backup.sh: |
+    #!/bin/sh
+    set -eu
+
+    log() {
+      printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"
+    }
+
+    if [ -z "$(find /data -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+      log "/data is empty; refusing to sync an empty Immich library to OneDrive."
+      exit 1
+    fi
+
+    if [ ! -d /data/backups ]; then
+      log "Warning: /data/backups does not exist. Media will be backed up, but no Immich database dump was found."
+    fi
+
+    umask 077
+    mkdir -p "$RCLONE_CACHE_DIR"
+
+    remote="${RCLONE_REMOTE:-}"
+    if [ -z "$remote" ]; then
+      remote="$(rclone listremotes | head -n 1 | sed 's/:$//')"
+    fi
+    if [ -z "$remote" ]; then
+      log "No rclone remote found in $RCLONE_CONFIG."
+      exit 1
+    fi
+
+    stamp="$(date -u +%Y-%m-%dT%H%M%SZ)"
+    current_remote="$remote:Rosenvalls-Homelab/immich/current"
+    version_remote="$remote:Rosenvalls-Homelab/immich/versions/$stamp"
+
+    log "Starting Immich backup to $current_remote."
+    rclone sync /data "$current_remote" --backup-dir "$version_remote" --create-empty-src-dirs --transfers 4 --checkers 8 --tpslimit 4 --tpslimit-burst 8 --retries 5 --low-level-retries 20 --stats 5m --stats-one-line --log-level INFO
+
+    if [ -d /data/backups ]; then
+      log "Checking database backup directory on OneDrive."
+      rclone check /data/backups "$current_remote/backups" --one-way --size-only --log-level INFO
+    fi
+
+    rclone size "$current_remote"
+    log "Immich backup to OneDrive complete."

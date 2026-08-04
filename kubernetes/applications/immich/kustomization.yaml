@@ -6,6 +6,9 @@ resources:
   - image-pull-secret.yaml
   - database-password.yaml
   - library-storage.yaml
+  - onedrive-backup-externalsecret.yaml
+  - onedrive-backup-scripts.yaml
+  - onedrive-backup-cronjob.yaml
   - database-pvc.yaml
   - database-service.yaml
   - database-deployment.yaml
