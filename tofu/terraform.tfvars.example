@@ -67,4 +67,23 @@ nodes_config = {
   #     "topology.kubernetes.io/zone"       = "host1"
   #   }
   # }
+  # Example compute-only worker on a smaller Proxmox host. Setting disks to an
+  # explicit empty map prevents inheriting the default 100G Longhorn disk.
+  # "worker-05" = {
+  #   host_node                    = "secondary-pve"
+  #   machine_type                 = "worker"
+  #   longhorn_create_default_disk = false
+  #   boot_disk_size_gib           = 32
+  #   ip                           = "192.168.1.215"
+  #   vm_id                        = 8006
+  #   cpu                          = 4
+  #   ram_dedicated                = 6144
+  #   igpu                         = false
+  #   disks                        = {}
+  #   extra_labels = {
+  #     "homelab.rosenvall.se/compute-only" = "true"
+  #     "homelab.rosenvall.se/proxmox-host" = "secondary-pve"
+  #     "topology.kubernetes.io/zone"       = "secondary-pve"
+  #   }
+  # }
 }

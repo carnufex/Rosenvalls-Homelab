@@ -30,9 +30,9 @@ machine:
         routes:
           - network: 0.0.0.0/0
             gateway: ${gateway}
+%{ if length(disks) > 0 }
   kubelet:
     extraMounts:
-%{ if length(disks) > 0 }
 %{ for disk_name, disk in disks }
       - destination: ${disk.mountpoint}
         type: bind
@@ -42,9 +42,6 @@ machine:
           - rshared
           - rw
 %{ endfor }
-%{ endif }
-
-%{ if length(disks) > 0 }
   disks:
 %{ for disk_name, disk in disks }
     - device: ${disk.device}

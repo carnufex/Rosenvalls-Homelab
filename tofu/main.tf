@@ -12,11 +12,17 @@ locals {
       ),
       { for k, v in config : k => v if v != null },
       {
-        disks = {
-          for disk_name, disk_defaults in try(local.node_defaults[config.machine_type].disks, {}) :
+        # An omitted disks map inherits the machine-type defaults. An explicit
+        # empty map creates a compute-only worker without a dedicated Longhorn
+        # disk. Per-disk overrides still inherit unspecified default fields.
+        disks = config.disks == null ? try(local.node_defaults[config.machine_type].disks, {}) : {
+          for disk_name, disk_config in config.disks :
           disk_name => merge(
-            disk_defaults,
-            coalesce(lookup(coalesce(config.disks, {}), disk_name, null), {})
+            {
+              for k, v in try(local.node_defaults[config.machine_type].disks[disk_name], disk_config) :
+              k => v if v != null
+            },
+            { for k, v in disk_config : k => v if v != null }
           )
         }
       },
