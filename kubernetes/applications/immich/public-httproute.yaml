@@ -1,5 +1,5 @@
-# Staged intentionally. Add this file to kustomization.yaml only after the
-# initial admin account has been created through the internal route.
+# The initial administrator account was created through the internal route
+# before this public route was enabled.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

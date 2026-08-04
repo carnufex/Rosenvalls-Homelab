@@ -6,12 +6,10 @@ share links for guests who do not have an Immich account.
 ## Endpoints
 
 - Initial/internal setup: `https://immich.rosenvall.local`
-- Public endpoint after activation: `https://immich.rosenvall.se`
+- Public endpoint: `https://immich.rosenvall.se`
 
-The public `HTTPRoute` is deliberately staged in `public-httproute.yaml` but is
-not included by `kustomization.yaml`. Create the first administrator through the
-internal endpoint before enabling it. Otherwise an internet visitor could claim
-the initial administrator account.
+The public `HTTPRoute` is active. The first administrator was created through
+the internal endpoint before it was enabled.
 
 ## Runtime layout
 
@@ -42,8 +40,7 @@ than generating a new one.
    is recovery material for the retained database PVC; never paste it into Git.
 4. In Administration > Settings, set the external domain to
    `https://immich.rosenvall.se` and keep the nightly database backup enabled.
-5. Add `public-httproute.yaml` to `kustomization.yaml`, push, and verify that the
-   route is `Accepted` before sharing links.
+5. Verify that `HTTPRoute/immich-public` is `Accepted` before sharing links.
 
 ## Sharing wedding photos
 
