@@ -55,7 +55,7 @@ try {
     try { & (Join-Path $PSScriptRoot "bootstrap-nfs-01.ps1") -AllowedClients @(); throw "Bootstrap accepted empty AllowedClients." }
     catch { if ($_.Exception.Message -ne "AllowedClients must not be empty.") { throw } }
 
-    $markerMatch = [regex]::Match($verifier, '(?s)Invoke-PodShell .*? -Script @"\r?\n(.*?)\r?\n"@')
+    $markerMatch = [regex]::Match($verifier, '(?s)Invoke-NfsProbeScript .*? -Script @"\r?\n(.*?)\r?\n"@')
     if (-not $markerMatch.Success) { throw "Unable to extract verifier marker payload." }
     $markerPayload = $markerMatch.Groups[1].Value
     $markerPayload = $markerPayload.Replace(([string][char]96 + '$'), '$')

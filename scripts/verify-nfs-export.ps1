@@ -30,6 +30,30 @@ function Assert-NfsExportParameters {
     if (-not (Test-CanonicalAbsolutePath $Path)) { throw "Path must be a canonical absolute component path." }
 }
 
+function Invoke-NfsProbeScript {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Namespace,
+        [Parameter(Mandatory = $true)]
+        [string]$PodName,
+        [Parameter(Mandatory = $true)]
+        [string]$Script,
+        [string]$Container
+    )
+
+    if (-not (Get-Command kubectl -ErrorAction SilentlyContinue)) {
+        throw "Required command 'kubectl' was not found in PATH."
+    }
+    $kubectlArgs = @("exec", "-i", "-n", $Namespace)
+    if ($Container) { $kubectlArgs += @("-c", $Container) }
+    $kubectlArgs += @($PodName, "--", "sh")
+    $output = $Script | & kubectl @kubectlArgs 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw ("NFS probe failed in {0}/{1}.{2}{3}" -f $Namespace, $PodName, [Environment]::NewLine, ($output | Out-String))
+    }
+    return $output
+}
+
 if ($MyInvocation.InvocationName -eq '.') { return }
 Assert-NfsExportParameters -Namespace $Namespace -Server $Server -Path $Path
 
@@ -66,7 +90,7 @@ try {
     [IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json -Depth 12), [Text.UTF8Encoding]::new($false))
     Invoke-Kubectl apply -f $manifestPath | Out-Null
     Invoke-Kubectl wait --for=condition=Ready "pod/$podName" -n $Namespace --timeout=120s | Out-Null
-    $output = Invoke-PodShell -Namespace $Namespace -PodName $podName -Script @"
+    $output = Invoke-NfsProbeScript -Namespace $Namespace -PodName $podName -Script @"
 set -eu
 marker="/target/$markerName"
 cleanup_marker() { rm -f -- "`$marker"; }
