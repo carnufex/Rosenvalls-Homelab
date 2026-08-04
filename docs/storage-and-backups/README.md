@@ -8,6 +8,7 @@ This page documents the current storage model and the backup posture it enables 
 - Worker nodes are the effective storage failure domains.
 - Talos `EPHEMERAL` storage on the boot disk is separate from the dedicated Longhorn data disk.
 - The media library is not stored in Longhorn.
+- The Immich library is not stored in Longhorn.
 
 ## Longhorn Profiles
 
@@ -60,6 +61,22 @@ Plex mounts the same export as:
 - `/tv`
 - `/movies`
 - `/familjefilmer`
+
+## Immich Library Model
+
+Immich uses a separate NFS VM and disk from the media stack:
+
+- Proxmox host: `desktop`
+- VM: `nfs-01`
+- VMID: `8011`
+- IP: `192.168.1.231`
+- data disk: 2 TiB allocation on the 4 TB WD Red storage
+- export path: `/srv/nfs/immich`
+- Kubernetes PV: `immich-library-wd-red`
+- Kubernetes PVC: `immich/immich-library-wd-red`
+
+The media NFS export at `192.168.1.230:/srv/nfs/media` is unrelated and must
+not be used by Immich.
 
 ## Backup Posture
 
@@ -124,6 +141,13 @@ That means:
 - the media disk needs its own file-level backup or `rsync` policy
 - the old Docker host can be treated as the temporary migration source, not as a durable backup
 - do not destroy VM `100` with "destroy unreferenced disks" while it still has an `unused` reference to the media qcow2
+
+### Immich Library
+
+The WD Red NFS export on `192.168.1.231` is also outside Longhorn. There is no
+automated backup for it today. Immich's database backups under `/data/backups`
+share the same disk and do not protect against disk loss; retain the original
+photos elsewhere until an independent backup is configured.
 
 ### Cluster Access Artifacts
 

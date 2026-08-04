@@ -21,8 +21,8 @@ the initial administrator account.
 - PostgreSQL 14 with VectorChord: the exact digest used by the Immich v3.1.0
   release compose file
 - Valkey 9: the exact digest used by the Immich v3.1.0 release compose file
-- Media: NFS `192.168.1.230:/srv/nfs/media`, mounted with the existing
-  `wedding-minio` subdirectory at `/data`
+- Media: the dedicated 2 TiB WD Red-backed NFS export
+  `192.168.1.231:/srv/nfs/immich`, mounted directly at `/data`
 - Database: 10 GiB `longhorn-critical` PVC with two Longhorn replicas and daily
   local snapshots
 - ML model cache and Valkey state: disposable `emptyDir` volumes
@@ -58,13 +58,14 @@ Cloudflare Tunnel and is subject to Cloudflare request-size and transfer limits.
 ## Backup and recovery
 
 Immich writes nightly compressed database backups under `/data/backups`, so they
-reside on the NAS alongside the library. Longhorn snapshots protect only the
-live PostgreSQL volume from short-term local failures.
+reside on the same WD Red filesystem as the library. Longhorn snapshots protect
+only the live PostgreSQL volume from short-term local failures.
 
-Neither copy is an off-site backup. Keep the original wedding photos somewhere
-outside this Immich/NAS storage and add a separate off-site copy before treating
-Immich as the only library. A complete restore needs both the media directories
-and a matching database backup.
+There is currently no automated backup of the WD Red export, and a database
+backup on that same filesystem is not an independent copy. Keep the original
+wedding photos outside Immich and add a separate backup before treating Immich
+as the only library. A complete restore needs both the media directories and a
+matching database backup.
 
 Useful checks:
 
