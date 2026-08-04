@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ns.yaml
+  - database-password.yaml
+  - library-storage.yaml
+  - database-pvc.yaml
+  - database-service.yaml
+  - database-deployment.yaml
+  - valkey-service.yaml
+  - valkey-deployment.yaml
+  - machine-learning-service.yaml
+  - machine-learning-deployment.yaml
+  - server-service.yaml
+  - server-deployment.yaml
+  - internal-httproute.yaml
+
+# Enable only after the first admin account has been created through
+# https://immich.rosenvall.local. Exposing the setup page before that would let
+# an internet visitor claim the initial administrator account.
+#  - public-httproute.yaml

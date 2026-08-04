@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-postgresql
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  selector:
+    app.kubernetes.io/name: immich-postgresql
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: postgresql
