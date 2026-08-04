@@ -61,14 +61,65 @@ Use these after:
 .\scripts\r2-backup-audit.ps1
 .\scripts\r2-critical-inventory.ps1
 .\scripts\build-r2-dr-kit.ps1
+.\scripts\bootstrap-nfs-01.ps1
 .\scripts\seed-homeassistant.ps1
 .\scripts\seed-media-configs.ps1
 .\scripts\verify-local-routes.ps1
 .\scripts\verify-media-nfs.ps1
+.\scripts\verify-nfs-export.ps1
 .\scripts\verify-deluge-vpn.ps1
 ```
 
 `pvc-seed-utils.ps1` is an internal helper used by seeding scripts. Do not run it directly.
+
+## Generic NFS Export (nfs-01)
+
+nfs-01 is separate from the media NFS VM at 192.168.1.230. It is VM 8011 at
+192.168.1.231, with a 2048 GiB WD-red disk carrying serial NFS01DATA.
+
+Preflight and review the exact OpenTofu plan. It must add only the Debian image
+and nfs-01; it must not replace Talos VMs or an existing WD Red volume.
+
+~~~powershell
+tofu -chdir=tofu fmt -check -recursive
+tofu -chdir=tofu validate
+tofu -chdir=tofu plan -out=nfs-01.tfplan
+tofu -chdir=tofu show nfs-01.tfplan
+tofu -chdir=tofu apply nfs-01.tfplan
+tofu -chdir=tofu output nfs_server
+~~~
+
+After SSH is reachable, bootstrap and prove the export from a disposable
+Kubernetes pod:
+
+~~~powershell
+.\scripts\bootstrap-nfs-01.ps1
+.\scripts\verify-nfs-export.ps1
+~~~
+
+Bootstrap formats only one non-root disk with serial NFS01DATA, an
+approximately 2 TiB byte size, no signatures, and no partition layout. Reruns
+accept only one GPT/ext4 partition labeled immich-nfs; every other state
+aborts for manual investigation.
+
+Prove reboot persistence:
+
+~~~powershell
+ssh debian@192.168.1.231 "sudo reboot"
+# Wait for SSH as debian to return.
+ssh debian@192.168.1.231 "set -e; findmnt /srv/nfs/immich; systemctl is-active nfs-kernel-server; sudo exportfs -v"
+.\scripts\verify-nfs-export.ps1
+~~~
+
+The QEMU agent starts disabled because the package is not present yet. After
+bootstrap, set agent_enabled = true in ignored local tofu/terraform.tfvars,
+review a new tofu -chdir=tofu plan, then run tofu -chdir=tofu apply after
+confirming it is only the agent update.
+
+nfs-01 is protected with OpenTofu prevent_destroy. For a real recovery,
+preserve or restore the NFS data first and deliberately change that protection
+in a reviewed recovery operation. Never use destruction as troubleshooting for
+this VM or the WD Red disk.
 
 ## High-Value Checks
 
