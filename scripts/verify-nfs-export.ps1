@@ -47,11 +47,31 @@ function Invoke-NfsProbeScript {
     $kubectlArgs = @("exec", "-i", "-n", $Namespace)
     if ($Container) { $kubectlArgs += @("-c", $Container) }
     $kubectlArgs += @($PodName, "--", "sh")
-    $output = $Script | & kubectl @kubectlArgs 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        throw ("NFS probe failed in {0}/{1}.{2}{3}" -f $Namespace, $PodName, [Environment]::NewLine, ($output | Out-String))
+    $normalizedScript = $Script.Replace("`r`n", "`n").Replace("`r", "`n")
+    $startInfo = [Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = (Get-Command kubectl).Source
+    $startInfo.Arguments = $kubectlArgs -join " "
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardInput = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $process = [Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    if (-not $process.Start()) { throw "Failed to start kubectl for the NFS probe." }
+    $stdout = $process.StandardOutput.ReadToEndAsync()
+    $stderr = $process.StandardError.ReadToEndAsync()
+    $scriptBytes = [Text.UTF8Encoding]::new($false).GetBytes($normalizedScript)
+    $process.StandardInput.BaseStream.Write($scriptBytes, 0, $scriptBytes.Length)
+    $process.StandardInput.BaseStream.Flush()
+    $process.StandardInput.Close()
+    $process.WaitForExit()
+    $output = $stdout.Result
+    $errorOutput = $stderr.Result
+    if ($process.ExitCode -ne 0) {
+        throw ("NFS probe failed in {0}/{1} with exit code {2}.{3}STDOUT:{3}{4}STDERR:{3}{5}" -f $Namespace, $PodName, $process.ExitCode, [Environment]::NewLine, $output, $errorOutput)
     }
-    return $output
+    return $output + $errorOutput
 }
 
 if ($MyInvocation.InvocationName -eq '.') { return }
