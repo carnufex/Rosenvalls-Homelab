@@ -12,6 +12,24 @@ cluster_endpoint = "192.168.1.200" # VIP
 gateway          = "192.168.1.1"
 talos_version    = "v1.8.3"
 
+# Disabled by default. Set enabled = true only after supplying at least one
+# non-sensitive SSH public key and confirming the WD Red disk is available.
+# Keep agent_enabled false until Task 4 guest bootstrap installs and starts
+# qemu-guest-agent; then set it true in the local terraform.tfvars.
+nfs_server = {
+  enabled            = false
+  host_node          = "desktop"
+  vm_id              = 8011
+  name               = "nfs-01"
+  ip                 = "192.168.1.231"
+  gateway            = "192.168.1.1"
+  boot_datastore     = "local-lvm"
+  data_datastore     = "WD-red"
+  data_disk_size_gib = 2048
+  agent_enabled      = false
+  ssh_public_keys    = []
+}
+
 nodes_config = {
   "control-01" = {
     host_node     = "pve"
