@@ -72,11 +72,15 @@ Rebuild an empty media root after confirmed data loss:
 .\scripts\verify-media-nfs.ps1
 ```
 
-If Radarr and Sonarr must forget the old library before the new empty export comes online, reset their config PVCs while preserving a local backup inside each PVC:
+If Radarr and Sonarr must forget the old library, clear only their library records. Do not reset their whole config PVCs; root folders, indexers, API keys, auth, and download clients should be preserved:
 
 ```powershell
-.\scripts\reset-arr-configs.ps1
+.\scripts\clear-arr-libraries.ps1
 ```
+
+This uses the Radarr/Sonarr APIs with `deleteFiles=false`.
+
+If the media disk was lost and Deluge starts against a new empty `/lagring/downloads`, clear Deluge's old queue before starting it. Otherwise Deluge can resume every pre-loss torrent even when Radarr/Sonarr libraries are empty. Back up `/config/state` first, then remove `torrents.state`, `torrents.fastresume`, their `.bak` files, and stale `*.torrent` files.
 
 If Radarr, Sonarr, or Seerr remain in `ContainerCreating` after a node restart, check the config PVCs before changing app manifests:
 
