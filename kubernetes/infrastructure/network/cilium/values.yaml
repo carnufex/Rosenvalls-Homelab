@@ -3,6 +3,8 @@ ipam:
 
 kubeProxyReplacement: true
 
+upgradeCompatibility: "1.16"
+
 securityContext:
   capabilities:
     ciliumAgent:
