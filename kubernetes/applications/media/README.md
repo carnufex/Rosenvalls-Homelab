@@ -12,6 +12,7 @@ This app groups the local-only media stack that used to run under Docker Compose
 ## Runtime Contract
 
 - `PersistentVolume/media-library` and `PersistentVolumeClaim/media-library` represent the shared NFS export on `192.168.1.230:/srv/nfs/media`. The active target is VM `media-nfs-01` (`8010`) on `host1`, where `/srv/nfs/media` is mounted from VM `100`'s existing qcow2 media disk on the `lagring` storage.
+- `media-nfs-01` should not use Proxmox `onboot` directly. Host1 uses `media-nfs-01-vm.service`, installed by `scripts/configure-host1-media-nfs-vm-autostart.ps1`, so the VM starts only after `/media/lagring` is mounted and `/media/lagring/images/100/vm-100-disk-0.qcow2` exists.
 - Each app keeps its own Longhorn-backed config PVC.
 - The namespace is explicitly marked `pod-security.kubernetes.io/enforce=privileged` because Plex uses `hostNetwork` and the WireGuard sidecar needs elevated network privileges.
 - Plex scheduling requires a worker labeled `homelab.rosenvall.se/lan-special=true`.
