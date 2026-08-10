@@ -2,23 +2,24 @@ param(
     [string]$Host1SshHost = "192.168.1.111",
     [string]$AliasIp = "192.168.1.230",
     [string]$Interface = "vmbr0",
-    [string]$StoragePath = "/mnt/pve/lagring",
+    [string]$StoragePath = "/media/lagring",
     [string]$SourcePath = "",
     [string]$ExportPath = "/srv/nfs/media",
     [string[]]$AllowedClients = @(
         "192.168.1.211(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
         "192.168.1.212(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
         "192.168.1.213(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
-        "192.168.1.214(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)"
+        "192.168.1.214(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
+        "192.168.1.217(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
+        "192.168.1.218(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
+        "192.168.1.219(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
+        "192.168.1.232(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
+        "192.168.1.233(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)"
     ),
-    [switch]$AllowDeprecatedHostLevelNfs
+    [switch]$InitializeEmptyMediaRoot
 )
 
 $ErrorActionPreference = "Stop"
-
-if (-not $AllowDeprecatedHostLevelNfs) {
-    throw "Deprecated host-level NFS path. Use .\scripts\provision-host1-media-nfs-vm.ps1 for the current media-nfs-01 VM design, or pass -AllowDeprecatedHostLevelNfs for an intentional rollback."
-}
 
 if (Test-Path env:KUBECONFIG) {
     $poolStop = & kubectl get ciliumloadbalancerippool first-pool -o jsonpath='{.spec.blocks[0].stop}' 2>$null
@@ -37,6 +38,15 @@ storage_path="__STORAGE_PATH__"
 source_path="__SOURCE_PATH__"
 export_path="__EXPORT_PATH__"
 allowed_clients="__ALLOWED_CLIENTS__"
+initialize_empty="__INITIALIZE_EMPTY__"
+
+alias_ip="${alias_ip%$'\r'}"
+interface="${interface%$'\r'}"
+storage_path="${storage_path%$'\r'}"
+source_path="${source_path%$'\r'}"
+export_path="${export_path%$'\r'}"
+allowed_clients="${allowed_clients%$'\r'}"
+initialize_empty="${initialize_empty%$'\r'}"
 
 if ! ip link show "${interface}" >/dev/null 2>&1; then
   echo "Interface ${interface} does not exist on host1." >&2
@@ -86,18 +96,43 @@ if [[ -z "${source_path}" ]]; then
 fi
 
 if [[ -z "${source_path}" ]]; then
-  echo "Could not auto-detect the existing media library under ${storage_path}." >&2
-  echo "Re-run with -SourcePath set to the directory containing downloads/tv/movies/familjefilmer." >&2
+  source_path="${storage_path}/media"
+fi
+
+if ! mountpoint -q "${storage_path}"; then
+  echo "${storage_path} is not a mountpoint. Refusing to export a root-filesystem fallback." >&2
   exit 1
 fi
 
+if findmnt -T "${storage_path}" -no OPTIONS | grep -qw ro; then
+  if [[ "${initialize_empty}" != "true" ]]; then
+    echo "${storage_path} is mounted read-only. Re-run with -InitializeEmptyMediaRoot if intentionally rebuilding the empty media root." >&2
+    exit 1
+  fi
+  mount -o remount,rw "${storage_path}"
+fi
+
 if [[ ! -d "${source_path}" ]]; then
-  echo "Source path ${source_path} does not exist. Refusing to create a new empty media root automatically." >&2
-  exit 1
+  if [[ "${initialize_empty}" != "true" ]]; then
+    echo "Source path ${source_path} does not exist. Re-run with -InitializeEmptyMediaRoot to create a new empty media root." >&2
+    exit 1
+  fi
+  mkdir -p "${source_path}"
 fi
 
 echo "Using media source path: ${source_path}"
 echo "Using stable NFS export path: ${export_path}"
+
+if systemctl list-unit-files media-nfs-01-vm.service >/dev/null 2>&1; then
+  systemctl disable --now media-nfs-01-vm.service >/dev/null 2>&1 || true
+fi
+
+if command -v qm >/dev/null 2>&1 && qm config 8010 >/dev/null 2>&1; then
+  qm set 8010 --onboot 0 >/dev/null || true
+  if qm status 8010 | grep -q "status: running"; then
+    qm shutdown 8010 --timeout 60 || qm stop 8010
+  fi
+fi
 
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends nfs-kernel-server nfs-common
@@ -127,12 +162,8 @@ mount_unit=""
 if [[ "$(readlink -f "${source_path}")" != "$(readlink -f "${export_path}")" ]]; then
   mount_unit="$(systemd-escape -p --suffix=mount "${export_path}")"
   if mountpoint -q "${export_path}"; then
-    current_source="$(findmnt -n -o SOURCE --target "${export_path}" || true)"
-    if [[ -z "${current_source}" ]]; then
-      echo "${export_path} is a mountpoint, but findmnt could not determine its source. Refusing to change it automatically." >&2
-      exit 1
-    fi
-    if [[ "$(readlink -f "${current_source}")" != "$(readlink -f "${source_path}")" ]]; then
+    if [[ "$(stat -Lc '%d:%i' "${export_path}")" != "$(stat -Lc '%d:%i' "${source_path}")" ]]; then
+      current_source="$(findmnt -n -o SOURCE --target "${export_path}" || true)"
       echo "${export_path} is already a mountpoint for ${current_source}, not ${source_path}. Refusing to change it automatically." >&2
       exit 1
     fi
@@ -210,13 +241,20 @@ $remote = $remote.Replace("__STORAGE_PATH__", $StoragePath)
 $remote = $remote.Replace("__SOURCE_PATH__", $SourcePath)
 $remote = $remote.Replace("__EXPORT_PATH__", $ExportPath)
 $remote = $remote.Replace("__ALLOWED_CLIENTS__", $allowedClientsJoined)
-$remote = $remote.Replace("`r`n", "`n")
+$remote = $remote.Replace("__INITIALIZE_EMPTY__", $InitializeEmptyMediaRoot.IsPresent.ToString().ToLowerInvariant())
+$remote = $remote.Replace("`r`n", "`n").Replace("`r", "")
 
 $tempScript = [System.IO.Path]::GetTempFileName()
+$remoteScript = "/tmp/host1-media-nfs-$([System.Guid]::NewGuid().ToString("n")).sh"
 try {
     $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
     [System.IO.File]::WriteAllText($tempScript, $remote, $utf8NoBom)
-    Get-Content -LiteralPath $tempScript -Raw | ssh -o StrictHostKeyChecking=accept-new "root@$Host1SshHost" "bash -se"
+    scp -q -o StrictHostKeyChecking=accept-new $tempScript "root@${Host1SshHost}:$remoteScript"
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to copy host1 media NFS script to $Host1SshHost."
+    }
+
+    ssh -o StrictHostKeyChecking=accept-new "root@$Host1SshHost" "bash '$remoteScript'; rc=`$?; rm -f '$remoteScript'; exit `$rc"
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to configure host1 media NFS."
     }

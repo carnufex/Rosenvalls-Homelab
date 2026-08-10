@@ -37,7 +37,7 @@ fi
 pvesm set "${host1_storage}" \
   --nodes "${host1_node}" \
   --is_mountpoint yes \
-  --content backup,images
+  --content backup
 
 for vmid in ${desktop_vm_ids}; do
   config="/etc/pve/nodes/${desktop_node}/qemu-server/${vmid}.conf"
