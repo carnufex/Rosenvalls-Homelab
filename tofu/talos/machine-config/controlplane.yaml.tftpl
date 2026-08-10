@@ -11,6 +11,10 @@ machine:
           - bind
           - rshared
           - rw
+  nodeLabels:
+%{ for label_key, label_value in extra_labels ~}
+    ${label_key}: "${label_value}"
+%{ endfor ~}
   network:
     hostname: ${hostname}
     interfaces:
