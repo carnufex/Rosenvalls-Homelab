@@ -82,6 +82,12 @@ This uses the Radarr/Sonarr APIs with `deleteFiles=false`.
 
 If the media disk was lost and Deluge starts against a new empty `/lagring/downloads`, clear Deluge's old queue before starting it. Otherwise Deluge can resume every pre-loss torrent even when Radarr/Sonarr libraries are empty. Back up `/config/state` first, then remove `torrents.state`, `torrents.fastresume`, their `.bak` files, and stale `*.torrent` files.
 
+Seerr also keeps independent request and availability state in `PersistentVolumeClaim/overseerr-config` under `/app/config/db/db.sqlite3`. After a full media-library loss, clear Seerr's media/request/watchlist rows while preserving users and settings:
+
+```powershell
+.\scripts\clear-seerr-media-state.ps1
+```
+
 If Radarr, Sonarr, or Seerr remain in `ContainerCreating` after a node restart, check the config PVCs before changing app manifests:
 
 ```powershell
