@@ -52,6 +52,21 @@ spec:
             - .spec.data[].remoteRef.conversionStrategy
             - .spec.data[].remoteRef.decodingStrategy
             - .spec.data[].remoteRef.metadataPolicy
+        - kind: Secret
+          name: cilium-ca
+          namespace: kube-system
+          jsonPointers:
+            - /data
+        - kind: Secret
+          name: hubble-relay-client-certs
+          namespace: kube-system
+          jsonPointers:
+            - /data
+        - kind: Secret
+          name: hubble-server-certs
+          namespace: kube-system
+          jsonPointers:
+            - /data
         - group: admissionregistration.k8s.io
           kind: MutatingWebhookConfiguration
           jqPathExpressions:
