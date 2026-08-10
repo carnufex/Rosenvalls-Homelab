@@ -14,7 +14,9 @@ param(
         "192.168.1.212(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
         "192.168.1.213(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
         "192.168.1.214(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
-        "192.168.1.217(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)"
+        "192.168.1.217(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
+        "192.168.1.218(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)",
+        "192.168.1.219(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)"
     )
 )
 

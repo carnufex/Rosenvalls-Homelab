@@ -26,7 +26,7 @@ spec:
               command: ["/bin/sh", "/scripts/backup.sh"]
               env:
                 - name: RCLONE_CONFIG
-                  value: /config/rclone/rclone.conf
+                  value: /work/rclone/rclone.conf
                 - name: RCLONE_CACHE_DIR
                   value: /work/cache
               resources:

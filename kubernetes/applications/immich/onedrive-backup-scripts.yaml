@@ -22,7 +22,9 @@ data:
     fi
 
     umask 077
-    mkdir -p "$RCLONE_CACHE_DIR"
+    mkdir -p "$RCLONE_CACHE_DIR" "$(dirname "$RCLONE_CONFIG")"
+    cp /config/rclone/rclone.conf "$RCLONE_CONFIG"
+    chmod 0600 "$RCLONE_CONFIG"
 
     remote="${RCLONE_REMOTE:-}"
     if [ -z "$remote" ]; then
@@ -38,7 +40,7 @@ data:
     version_remote="$remote:Rosenvalls-Homelab/immich/versions/$stamp"
 
     log "Starting Immich backup to $current_remote."
-    rclone sync /data "$current_remote" --backup-dir "$version_remote" --create-empty-src-dirs --transfers 4 --checkers 8 --tpslimit 4 --tpslimit-burst 8 --retries 5 --low-level-retries 20 --stats 5m --stats-one-line --log-level INFO
+    rclone sync /data "$current_remote" --backup-dir "$version_remote" --create-empty-src-dirs --exclude "/lost+found/**" --exclude "/lost+found" --transfers 4 --checkers 8 --tpslimit 4 --tpslimit-burst 8 --retries 5 --low-level-retries 20 --stats 5m --stats-one-line --log-level INFO
 
     if [ -d /data/backups ]; then
       log "Checking database backup directory on OneDrive."
