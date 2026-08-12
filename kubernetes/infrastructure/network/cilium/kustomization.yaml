@@ -1,4 +1,4 @@
-﻿apiVersion: kustomize.config.k8s.io/v1beta1
+apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
@@ -12,7 +12,7 @@ helmCharts:
     releaseName: cilium
     namespace: kube-system
     valuesFile: values.yaml
-    kubeVersion: v1.33.13
+    kubeVersion: v1.35.7
 
 patches:
   - path: deployment-hardening-patch.yaml

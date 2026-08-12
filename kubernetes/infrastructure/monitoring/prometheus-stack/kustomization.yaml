@@ -29,7 +29,7 @@ helmCharts:
     namespace: monitoring
     valuesFile: values.yaml
     includeCRDs: true
-    kubeVersion: v1.31.1
+    kubeVersion: v1.35.7
 
 patches:
   - path: deployment-hardening-patch.yaml

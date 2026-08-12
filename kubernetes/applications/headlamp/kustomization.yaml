@@ -16,7 +16,7 @@ helmCharts:
     releaseName: headlamp
     namespace: headlamp
     valuesFile: values.yaml
-    kubeVersion: v1.31.1
+    kubeVersion: v1.35.7
 
 patches:
   - target:
