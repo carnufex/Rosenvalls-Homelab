@@ -1,4 +1,4 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
+﻿apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
@@ -8,11 +8,11 @@ resources:
 helmCharts:
   - name: cilium
     repo: https://helm.cilium.io/
-    version: 1.18.12
+    version: 1.19.6
     releaseName: cilium
     namespace: kube-system
     valuesFile: values.yaml
-    kubeVersion: v1.31.1
+    kubeVersion: v1.33.13
 
 patches:
   - path: deployment-hardening-patch.yaml
