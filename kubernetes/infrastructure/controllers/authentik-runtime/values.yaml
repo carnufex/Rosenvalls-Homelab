@@ -74,8 +74,8 @@ worker:
       memory: 512Mi
     limits:
       cpu: 500m
-      # 512Mi OOMKilled the worker every ~70s (460 restarts/2d); bump to 1Gi.
-      memory: 1Gi
+      # 1Gi OOMKilled the worker during startup/background-job bursts after the 2026-08 maintenance rollout.
+      memory: 2Gi
   livenessProbe:
     timeoutSeconds: 5
   readinessProbe:
