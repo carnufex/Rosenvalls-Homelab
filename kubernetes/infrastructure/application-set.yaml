@@ -15,6 +15,7 @@ spec:
     metadata:
       name: '{{.path.basename}}'
       annotations:
+        argocd.argoproj.io/compare-options: ServerSideDiff=true
         argocd.argoproj.io/sync-wave: '{{ if eq .path.basename "gateway-api" }}0{{ else if eq .path.basename "cilium" }}1{{ else if eq .path.basename "longhorn" }}2{{ else if eq .path.basename "cloudnative-pg" }}3{{ else if eq .path.basename "cert-manager" }}4{{ else if eq .path.basename "external-secrets" }}5{{ else if eq .path.basename "gateway" }}6{{ else if eq .path.basename "cloudflared" }}7{{ else if eq .path.basename "argocd" }}8{{ else if eq .path.basename "authentik-db-prereqs" }}9{{ else if eq .path.basename "authentik-runtime" }}10{{ else if eq .path.basename "authentik-db-ops" }}11{{ else if eq .path.basename "r2-critical-dr" }}12{{ else if or (eq .path.basename "loki-stack") (eq .path.basename "prometheus-stack") (eq .path.basename "metrics-server") }}11{{ else }}12{{ end }}'
         argocd.argoproj.io/depends-on: '{{ if eq .path.basename "external-secrets" }}argocd/cert-manager{{ else if eq .path.basename "cloudnative-pg" }}argocd/longhorn{{ else if eq .path.basename "gateway" }}argocd/cert-manager{{ else if eq .path.basename "cloudflared" }}argocd/external-secrets,argocd/gateway{{ else if eq .path.basename "argocd" }}argocd/external-secrets,argocd/gateway{{ else if eq .path.basename "authentik-db-prereqs" }}argocd/cloudnative-pg,argocd/external-secrets{{ else if eq .path.basename "authentik-runtime" }}argocd/authentik-db-prereqs,argocd/gateway{{ else if eq .path.basename "authentik-db-ops" }}argocd/authentik-db-prereqs{{ else if eq .path.basename "r2-critical-dr" }}argocd/external-secrets,argocd/authentik-db-prereqs{{ else if or (eq .path.basename "loki-stack") (eq .path.basename "prometheus-stack") }}argocd/longhorn,argocd/gateway{{ else }}{{ end }}'
     spec:
@@ -39,7 +40,6 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
-          - RespectIgnoreDifferences=true
       ignoreDifferences:
         - group: apps
           kind: StatefulSet
