@@ -71,11 +71,11 @@ worker:
   resources:
     requests:
       cpu: 100m
-      memory: 1Gi
+      memory: 2Gi
     limits:
       cpu: 500m
-      # 2Gi OOMKilled the worker during startup/background-job bursts after the 2026-08 maintenance rollout.
-      memory: 4Gi
+      # 4Gi OOMKilled the worker during startup/background-job bursts after the 2026-08 maintenance rollout.
+      memory: 8Gi
   livenessProbe:
     timeoutSeconds: 5
   readinessProbe:
