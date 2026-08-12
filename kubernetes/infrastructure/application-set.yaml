@@ -11,6 +11,8 @@ spec:
       revision: HEAD
       directories:
       - path: kubernetes/infrastructure/*/*
+      - path: kubernetes/infrastructure/network/cilium
+        exclude: true
   template:
     metadata:
       name: '{{.path.basename}}'

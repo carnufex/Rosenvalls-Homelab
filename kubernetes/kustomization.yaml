@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - infrastructure/project.yaml
+  - infrastructure/cilium-application.yaml
   - infrastructure/application-set.yaml
   - applications/project.yaml
   - applications/application-set.yaml
