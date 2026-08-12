@@ -10,8 +10,8 @@ resources:
 helmCharts:
   - name: argo-cd
     repo: https://argoproj.github.io/argo-helm
-    version: 7.7.16 # Using a stable version compatible with v2.13.x
+    version: 7.9.1 # Argo CD v2.14.x
     releaseName: argocd
     namespace: argocd
     valuesFile: values.yaml
-    kubeVersion: v1.31.1
+    kubeVersion: v1.35.7
