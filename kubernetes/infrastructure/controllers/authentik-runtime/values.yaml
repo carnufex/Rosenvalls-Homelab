@@ -76,7 +76,10 @@ server:
 worker:
   enabled: true
   deploymentStrategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   resources:
     requests:
       cpu: 500m
