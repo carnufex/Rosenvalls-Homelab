@@ -61,6 +61,13 @@ blueprints:
 
 server:
   enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
   service:
     annotations: {}
     labels: {}
@@ -68,14 +75,24 @@ server:
 
 worker:
   enabled: true
+  deploymentStrategy:
+    type: Recreate
   resources:
     requests:
-      cpu: 100m
-      memory: 2Gi
+      cpu: 500m
+      memory: 6Gi
     limits:
       cpu: 500m
-      # 4Gi OOMKilled the worker during startup/background-job bursts after the 2026-08 maintenance rollout.
-      memory: 8Gi
+      memory: 7Gi
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: homelab.rosenvall.se/memory-tier
+                operator: In
+                values:
+                  - large
   livenessProbe:
     timeoutSeconds: 5
   readinessProbe:
@@ -116,6 +133,13 @@ redis:
       enabled: true
       size: 1Gi
       storageClass: longhorn-critical
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
 prometheus:
   rules:

@@ -4,5 +4,6 @@ namespace: authentik
 
 resources:
   - namespace.yaml
+  - resource-guardrails.yaml
   - external-secret.yaml
   - database.yaml

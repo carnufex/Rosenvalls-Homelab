@@ -4,6 +4,15 @@ Authentik is the cluster identity provider for native OIDC integrations.
 This directory owns the Authentik Helm release and the blueprint ConfigMap that
 creates cluster application providers.
 
+## Capacity Guardrails
+
+The Authentik worker can use several GiB while processing startup and
+background-job bursts. It is restricted to nodes labeled
+`homelab.rosenvall.se/memory-tier=large`, with a 6Gi memory request and a 7Gi
+limit. A `LimitRange` and `ResourceQuota` in `authentik-db-prereqs` provide
+namespace-level guardrails. Keep at least one labeled node with 12Gi assigned
+RAM before rolling out changes that recreate the worker.
+
 ## Native OIDC Apps
 
 | App | Status | Callback / issuer |
