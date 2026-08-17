@@ -1,0 +1,14 @@
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: prometheus-daily-snapshot
+  namespace: longhorn-system
+spec:
+  name: prometheus-daily-snapshot
+  task: snapshot
+  cron: "30 2 * * *"
+  retain: 1
+  concurrency: 1
+  labels:
+    backup-tier: disposable
+    cadence: daily

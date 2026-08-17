@@ -139,6 +139,13 @@ prometheus:
           failureThreshold: 240
     storageSpec:
       volumeClaimTemplate:
+        metadata:
+          # PVC recurring-job labels override Longhorn's default group. The
+          # Prometheus TSDB has high block churn and is explicitly disposable,
+          # so retaining seven local snapshots can exceed the 100 GiB node disk.
+          labels:
+            recurring-job.longhorn.io/source: enabled
+            recurring-job.longhorn.io/prometheus-daily-snapshot: enabled
         spec:
           storageClassName: longhorn-observability-single
           accessModes: ["ReadWriteOnce"]

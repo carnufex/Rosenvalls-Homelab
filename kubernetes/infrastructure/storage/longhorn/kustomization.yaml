@@ -7,6 +7,7 @@ resources:
   - http-route.yaml
   - backup-target-disabled.yaml
   - recurring-jobs.yaml
+  - prometheus-recurring-job.yaml
   - storage-class-critical.yaml
   - storage-class-observability.yaml
   - storage-class-observability-single.yaml
