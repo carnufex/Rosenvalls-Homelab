@@ -16,6 +16,7 @@ data:
     body="$(kubectl get nodes.longhorn.io -n longhorn-system -o json 2>/dev/null \
       | jq -r '
           .items
+          | map(select(((.status.diskStatus // {}) | length) > 0))
           | sort_by([.status.diskStatus[].storageAvailable] | add)
           | .[]
           | . as $n
@@ -27,7 +28,10 @@ data:
 
     # Flag if the tightest node is low on real free space.
     low="$(kubectl get nodes.longhorn.io -n longhorn-system -o json 2>/dev/null \
-      | jq -r '[.items[] | select(.spec.allowScheduling != false) | ([.status.diskStatus[].storageAvailable] | add)]
+      | jq -r '[.items[]
+                 | select(.spec.allowScheduling != false)
+                 | ([.status.diskStatus[].storageAvailable] | add)
+                 | select(. != null)]
                | if length == 0 then 999999 else min end
                | (./1073741824) | floor')"
     emoji=":bar_chart:"

@@ -67,7 +67,10 @@ data:
 
     # --- Longhorn free space (lowest nodes — the recurring bottleneck) ---
     lh_free="$(kubectl get nodes.longhorn.io -n longhorn-system -o json 2>/dev/null \
-      | jq -r '[.items[] | {n:.metadata.name, sched:(.spec.allowScheduling != false), avail:([.status.diskStatus[].storageAvailable]|add)}]
+      | jq -r '[.items[]
+                 | ([.status.diskStatus[].storageAvailable] | add) as $avail
+                 | select($avail != null)
+                 | {n:.metadata.name, sched:(.spec.allowScheduling != false), avail:$avail}]
                | sort_by(.avail) | .[] | "    \(.n): \(.avail/1073741824 | floor) GiB free\(if .sched then "" else " (scheduling off)" end)"' 2>/dev/null \
       | head -5)"
 
