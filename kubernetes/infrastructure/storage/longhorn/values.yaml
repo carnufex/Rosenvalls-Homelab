@@ -73,7 +73,9 @@ defaultSettings:
   # Tolerate short virtualization/network latency spikes before a responsive
   # replica is evicted. Longhorn permits 8-30 seconds for the V1 engine.
   engineReplicaTimeout: 15
-  taintToleration: 'true'
+  # Keep Longhorn's managed system pods schedulable on the GPU worker if that
+  # node is tainted; this setting requires key=value:effect syntax.
+  taintToleration: 'gpu=true:NoSchedule'
   defaultDataPath: /var/lib/longhorn/
   autoDeletePodWhenVolumeDetachedUnexpectedly: true
   autoSalvage: true
