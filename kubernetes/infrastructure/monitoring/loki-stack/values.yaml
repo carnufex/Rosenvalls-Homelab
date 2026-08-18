@@ -1,5 +1,11 @@
 loki:
   enabled: true
+  securityContext:
+    fsGroup: 10001
+    fsGroupChangePolicy: OnRootMismatch
+    runAsGroup: 10001
+    runAsNonRoot: true
+    runAsUser: 10001
   persistence:
     enabled: true
     storageClassName: longhorn
