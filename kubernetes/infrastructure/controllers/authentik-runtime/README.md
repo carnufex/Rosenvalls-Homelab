@@ -8,10 +8,17 @@ creates cluster application providers.
 
 The Authentik worker can use several GiB while processing startup and
 background-job bursts. It is restricted to nodes labeled
-`homelab.rosenvall.se/memory-tier=large`, with a 6Gi memory request and a 7Gi
-limit. A `LimitRange` and `ResourceQuota` in `authentik-db-prereqs` provide
-namespace-level guardrails. Keep at least one labeled node with 12Gi assigned
-RAM before rolling out changes that recreate the worker.
+`homelab.rosenvall.se/memory-tier=large`, prefers compute-only nodes, and has a
+6Gi memory request with a 7Gi limit. A `LimitRange` and `ResourceQuota` in
+`authentik-db-prereqs` provide namespace-level guardrails. Keep at least one
+labeled node with 12Gi assigned RAM before rolling out changes that recreate
+the worker.
+
+Authentik 2025.10 removed Redis. Do not re-enable the bundled Redis chart or
+restore `AUTHENTIK_REDIS__*` settings. Version 2025.10.4 is the minimum allowed
+patch because it deletes expired PostgreSQL channel messages in chunks; older
+patches can accumulate millions of rows and OOM-loop the worker during
+`clean_expired_models`.
 
 ## Native OIDC Apps
 

@@ -24,6 +24,17 @@ loki:
         instance_addr: 127.0.0.1
         kvstore:
           store: inmemory
+    compactor:
+      working_directory: /data/loki/compactor
+      shared_store: filesystem
+      compaction_interval: 10m
+      retention_enabled: true
+      retention_delete_delay: 2h
+      retention_delete_worker_count: 25
+    limits_config:
+      # Filesystem-backed Loki does not delete logs based on free disk space.
+      # Keep one week for homelab troubleshooting and bound the 10Gi PVC.
+      retention_period: 168h
     schema_config:
       configs:
         - from: 2020-10-24

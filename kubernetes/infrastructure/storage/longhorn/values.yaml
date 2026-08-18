@@ -65,9 +65,14 @@ defaultSettings:
   defaultReplicaCount: 2
   guaranteedEngineManagerCPU: 0.2
   guaranteedReplicaManagerCPU: 0.2
-  storageOverProvisioningPercentage: 300
+  # Keep enough thin-provisioning flexibility for small homelab volumes without
+  # allowing a 100 GiB disk to accept 300 GiB of nominal replica allocations.
+  storageOverProvisioningPercentage: 200
   storageReservedPercentageForDefaultDisk: 10
   storageMinimalAvailablePercentage: 10
+  # Tolerate short virtualization/network latency spikes before a responsive
+  # replica is evicted. Longhorn permits 8-30 seconds for the V1 engine.
+  engineReplicaTimeout: 15
   taintToleration: 'true'
   defaultDataPath: /var/lib/longhorn/
   autoDeletePodWhenVolumeDetachedUnexpectedly: true

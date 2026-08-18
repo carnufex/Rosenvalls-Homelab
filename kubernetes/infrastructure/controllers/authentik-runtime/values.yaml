@@ -3,6 +3,9 @@ global:
   fullnameOverride: ""
   namespaceOverride: ""
   additionalLabels: {}
+  # 2025.10.4 is an image-only patch; the latest 2025.10 chart is 2025.10.3.
+  image:
+    tag: 2025.10.4
   revisionHistoryLimit: 3
   env: []
   envFrom:
@@ -51,8 +54,6 @@ authentik:
     password: file:///secrets/authentik/password
     port: "5432"
     sslmode: require
-  redis:
-    password: "env://AUTHENTIK_REDIS__PASSWORD"
 
 blueprints:
   configMaps:
@@ -96,6 +97,14 @@ worker:
                 operator: In
                 values:
                   - large
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: homelab.rosenvall.se/compute-only
+                operator: In
+                values:
+                  - "true"
   livenessProbe:
     timeoutSeconds: 5
   readinessProbe:
@@ -123,26 +132,6 @@ geoip:
     secretName: ""
     accountId: "account_id"
     licenseKey: "license_key"
-
-redis:
-  enabled: true
-  architecture: standalone
-  auth:
-    enabled: true
-    existingSecret: authentik-core-secrets
-    existingSecretPasswordKey: redis-password
-  master:
-    persistence:
-      enabled: true
-      size: 1Gi
-      storageClass: longhorn-critical
-    resources:
-      requests:
-        cpu: 100m
-        memory: 256Mi
-      limits:
-        cpu: 500m
-        memory: 512Mi
 
 prometheus:
   rules:

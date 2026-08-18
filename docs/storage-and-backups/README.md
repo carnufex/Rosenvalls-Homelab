@@ -21,9 +21,19 @@ This page documents the current storage model and the backup posture it enables 
 Longhorn keeps:
 
 - `defaultReplicaCount=2`
+- `storageOverProvisioningPercentage=200`
 - strict node-level anti-affinity
 - soft zone anti-affinity while `host1` has limited Longhorn capacity
 - `allowVolumeCreationWithDegradedAvailability=false`
+
+The large WD Red and `lagring` disks are NFS/media failure domains, not
+Longhorn replica disks. Do not place multiple Longhorn VM disks on one of those
+physical disks and count them as independent replicas. Add dedicated SSD-backed
+data disks on workers on different Proxmox hosts when expanding Longhorn.
+
+Loki retains seven days of logs. Prometheus retains three days/20 GB and uses a
+single-replica observability StorageClass. Observability data is disposable and
+must not consume critical replica rebuild capacity.
 
 Kubernetes nodes should carry `homelab.rosenvall.se/proxmox-host` and
 `topology.kubernetes.io/zone` labels for the physical Proxmox host. Those labels
