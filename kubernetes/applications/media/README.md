@@ -17,7 +17,8 @@ This app groups the local-only media stack that used to run under Docker Compose
 - Each app keeps its own Longhorn-backed config PVC.
 - The namespace is explicitly marked `pod-security.kubernetes.io/enforce=privileged` because Plex uses `hostNetwork` and the WireGuard sidecar needs elevated network privileges.
 - Plex scheduling requires a worker labeled `homelab.rosenvall.se/lan-special=true`.
-- Radarr, Sonarr, Jackett, Seerr, and Deluge-VPN prefer workers labeled `homelab.rosenvall.se/proxmox-host=host1`; this keeps non-hostNetwork media workloads close to the NFS VM without making scheduling impossible if `host1` is down.
+- Radarr, Sonarr, Jackett, and Seerr prefer workers labeled `homelab.rosenvall.se/proxmox-host=host1`.
+- Deluge-VPN requires `homelab.rosenvall.se/proxmox-host=host1`. Its sustained download I/O otherwise creates avoidable NFS wait on remote Proxmox hosts, and the media export itself is unavailable when host1 is down anyway.
 - Internal browser access is handled with `HTTPRoute` resources on `gateway/internal`, so LAN clients should resolve `*.rosenvall.local` to `192.168.1.220` on the UDM.
 - Media configs are seeded from `Downloads\media` before cutover, but the deployments are now managed directly in Git and scaled individually as each app is validated.
 
