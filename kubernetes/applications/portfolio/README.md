@@ -11,6 +11,15 @@ pull credential.
 | Exposure | `HTTPRoute` on `gateway/external` (Cloudflare tunnel wildcard) |
 | Replicas | 2, RollingUpdate, restricted PSS, read-only root FS |
 
+## Onboarding notes (learned 2026-08-21)
+
+A new app folder alone is not enough — two allow-lists must name the namespace, or the app
+sits in `Unknown` / `SecretSyncedError`:
+
+1. `kubernetes/applications/project.yaml` — AppProject `applications` → `spec.destinations`.
+2. `kubernetes/infrastructure/controllers/external-secrets/cluster-secret-store.yaml` —
+   ClusterSecretStore `bitwarden-secretsmanager` → `spec.conditions[0].namespaces`.
+
 ## Deploy a new version
 
 ```powershell
