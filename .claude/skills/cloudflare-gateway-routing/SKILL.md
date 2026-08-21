@@ -76,3 +76,22 @@ its note on `bitwarden-access-token`.
 ## Canonical hostnames
 
 - ArgoCD: `https://argo.rosenvall.se` (legacy alias: `https://argocd.rosenvall.se`)
+
+## Internal gateway & LAN LoadBalancers (not Cloudflare)
+
+- `gateway/internal` serves `*.rosenvall.local` on a Cilium LB IP announced via L2 on
+  the LAN. If those hosts die while `*.rosenvall.se` still works, restart the
+  `cilium-envoy` pod on the announcing node (memory
+  `cilium-envoy-xds-disconnect-gateways-down`). Note: with a VPN active on the
+  workstation, `*.rosenvall.local` may NXDOMAIN in Git Bash — not a cluster fault
+  (memory `vpn-dns-local-zone-blindspot`).
+- Raw TCP/UDP services (Gatebound TFS 7171/7172 → 192.168.1.223, registry → .225,
+  Home Assistant IoT push → .224, Plex direct for native clients) use
+  `Service: LoadBalancer` from the Cilium IP pool — the namespace must be in both the
+  `ip-pool.yaml` and `announce.yaml` selectors under
+  `kubernetes/infrastructure/network/cilium/`.
+- `registry.rosenvall.se` is a grey-cloud (DNS-only) record → LAN-only, never through
+  the tunnel. Keep it that way.
+- cert-manager DNS-01 uses the Cloudflare API token from External Secrets. Commit
+  `a2a22bf` (2026-08-03) restored the Cloudflare DNS cleanup — if wildcard renewals
+  fail, check for leftover `_acme-challenge` TXT records in the zone first.

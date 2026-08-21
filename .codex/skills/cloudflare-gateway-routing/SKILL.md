@@ -1,28 +1,97 @@
+---
+name: cloudflare-gateway-routing
+description: >-
+  Work on or debug public ingress/routing for the Rosenvalls-Homelab cluster:
+  Cloudflare Tunnel (cloudflared) → Cilium Gateway API (gateway/external) →
+  HTTPRoute → backend service, for hosts under *.rosenvall.se. Use when a public
+  site is unreachable, returns Cloudflare 5xx (especially 530), a TLS/cert error,
+  or when adding/changing a public HTTPRoute, gateway listener, or wildcard
+  certificate.
+---
+
 # Cloudflare Gateway Routing
 
-Use this guide when working on public routing in `Rosenvalls-Homelab`.
+Use this when working on **public** routing in `Rosenvalls-Homelab`. For
+internal-only services use `gateway/internal` instead of `gateway/external`.
 
-## Current Model
+## Traffic model
 
-- `cloudflared` runs in-cluster.
-- Tunnel traffic for `*.rosenvall.se` is forwarded to `https://cilium-gateway-external.gateway.svc.cluster.local:443`.
-- Gateway API listeners then route traffic to backend services through `HTTPRoute`.
+```
+client → Cloudflare edge → Cloudflare Tunnel → cloudflared (ns: cloudflare)
+       → https://cilium-gateway-external.gateway.svc.cluster.local:443
+       → Gateway "external" (ns: gateway, HTTPS listener, cert-wildcard)
+       → HTTPRoute (host *.rosenvall.se) → backend Service
+```
 
-## Diagnostic Sequence
+- `cloudflared` runs in-cluster in namespace `cloudflare`.
+- The HTTPS listener on `gateway/external` is served by the `cert-wildcard`
+  certificate in namespace `gateway`.
+- Authentik's HTTPRoute is attached to **both** internal and external gateways so
+  OIDC works for public apps; most other monitoring routes should stay internal.
 
-1. Confirm DNS resolves.
-2. Confirm `cloudflared` is running.
-3. Confirm `cert-wildcard` is `Ready`.
-4. Confirm `gateway/external` has a healthy HTTPS listener.
-5. Confirm the target `HTTPRoute` is `Accepted`.
+## Diagnostic sequence
 
-## Common Failure Pattern
+Walk it edge-inward and stop at the first failure:
 
-If external requests return Cloudflare `530`, first check:
+1. **DNS** resolves the host to Cloudflare.
+2. **cloudflared** is running and the tunnel is connected.
+3. **cert-wildcard** is `Ready`.
+4. **gateway/external** has a healthy HTTPS listener (no error conditions).
+5. **HTTPRoute** for the host is `Accepted` and bound to `external`.
 
-- missing `cloudflared-secret`
-- missing `cloudflare-api-token-secret`
-- `cert-wildcard` not issued
-- `Gateway` listener reporting `InvalidCertificateRef`
+```powershell
+$env:KUBECONFIG = "$PWD\tofu\output\kubeconfig"
 
-These are usually caused upstream by a broken External Secrets chain.
+kubectl get pods -n cloudflare
+kubectl logs -n cloudflare deploy/cloudflared --tail=50
+kubectl get certificate -n gateway cert-wildcard
+kubectl get gateway -n gateway external -o yaml      # inspect .status.listeners conditions
+kubectl get httproute -A
+kubectl describe httproute <name> -n <namespace>      # look for Accepted / ResolvedRefs
+```
+
+## Common failure: Cloudflare 530
+
+A `530` means Cloudflare reached the tunnel but the **origin path inside the
+cluster failed**. Check, in this order:
+
+- `cloudflared-secret` / tunnel token missing → cloudflared can't connect
+- `cloudflare-api-token-secret` missing → cert-manager DNS-01 can't validate
+- `cert-wildcard` not issued → HTTPS listener has no usable cert
+- `gateway/external` listener reporting `InvalidCertificateRef`
+
+These are almost always **downstream of a broken External Secrets chain**, which
+is in turn usually the Bitwarden bootstrap secret. Before editing routing config,
+confirm the secret chain is healthy — see the **cluster-diagnostics** skill and
+its note on `bitwarden-access-token`.
+
+## When adding or changing a public route
+
+- Attach the `HTTPRoute` to `parentRefs: name: external, namespace: gateway`.
+- Use a `*.rosenvall.se` hostname; the wildcard cert already covers it.
+- Add the public `HTTPRoute` **last**, only after the app's image, secrets, and
+  health checks are confirmed good (see **gitops-app-onboarding**).
+- Push to `origin` — ArgoCD will revert anything applied only with `kubectl`.
+
+## Canonical hostnames
+
+- ArgoCD: `https://argo.rosenvall.se` (legacy alias: `https://argocd.rosenvall.se`)
+
+## Internal gateway & LAN LoadBalancers (not Cloudflare)
+
+- `gateway/internal` serves `*.rosenvall.local` on a Cilium LB IP announced via L2 on
+  the LAN. If those hosts die while `*.rosenvall.se` still works, restart the
+  `cilium-envoy` pod on the announcing node (memory
+  `cilium-envoy-xds-disconnect-gateways-down`). Note: with a VPN active on the
+  workstation, `*.rosenvall.local` may NXDOMAIN in Git Bash — not a cluster fault
+  (memory `vpn-dns-local-zone-blindspot`).
+- Raw TCP/UDP services (Gatebound TFS 7171/7172 → 192.168.1.223, registry → .225,
+  Home Assistant IoT push → .224, Plex direct for native clients) use
+  `Service: LoadBalancer` from the Cilium IP pool — the namespace must be in both the
+  `ip-pool.yaml` and `announce.yaml` selectors under
+  `kubernetes/infrastructure/network/cilium/`.
+- `registry.rosenvall.se` is a grey-cloud (DNS-only) record → LAN-only, never through
+  the tunnel. Keep it that way.
+- cert-manager DNS-01 uses the Cloudflare API token from External Secrets. Commit
+  `a2a22bf` (2026-08-03) restored the Cloudflare DNS cleanup — if wildcard renewals
+  fail, check for leftover `_acme-challenge` TXT records in the zone first.

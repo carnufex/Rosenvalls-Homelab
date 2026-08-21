@@ -95,3 +95,25 @@ kubectl get secret bitwarden-access-token -n external-secrets
 - The repo is the source of truth: a fix that is not pushed to `origin` will be
   reverted by ArgoCD on the next sync.
 - See also: **gitops-app-onboarding** when the failure is a newly added app.
+
+## Recurring-failure cheat sheet (from past incidents — details in project memory)
+
+- Broad, simultaneous failures across unrelated namespaces → the Bitwarden bootstrap
+  secret (above). Check it before anything else.
+- `*.rosenvall.local` dead from the LAN while `*.rosenvall.se` works → the announcing
+  node's `cilium-envoy` lost xDS; restart that `cilium-envoy` pod
+  (memory `cilium-envoy-xds-disconnect-gateways-down`).
+- Longhorn volume `degraded` and not healing → check node free space first, then prune
+  `Released` PVs + orphan Longhorn volumes (memory `longhorn-storage-pressure`). Longhorn
+  only schedules on the disk nodes; small/compute-only workers are excluded on purpose.
+- `DiskPressure` / mass evictions on one worker → something writes to the node overlay
+  disk (e.g. Plex transcode), not Longhorn (memory `plex-transcode-not-mounted`).
+- Proxmox thin-pool full → VMs freeze with io-error; a CronJob alerts `#homelab-alerts`
+  at ≥85% pool fill (memory `incident-lvm-full-io-error`, `proxmox-storage-alert`).
+- Slack is alert-only: Alertmanager + `daily-health-check` + `r2-dr-report` +
+  `deluge-vpn-leak-check` post to `#homelab-alerts` only when something is wrong.
+- Use the repo's scripts before hand-rolling checks: `scripts/cluster-health-report.ps1`,
+  `scripts/post-power-loss-check.ps1`, `scripts/preflight-core.ps1`,
+  `scripts/verify-media-nfs.ps1`, `scripts/verify-local-routes.ps1`.
+- Never run `tofu apply` to "fix" a live cluster without a plan review — Talos image
+  drift makes the plan cascade (memory `talos-image-drift-gotcha`).
