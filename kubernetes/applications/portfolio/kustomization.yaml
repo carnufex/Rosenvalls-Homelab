@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# rosenvall.se portfolio (Next.js, static). Image: registry.rosenvall.se/carnufex/portfolio,
+# built locally from github.com/carnufex/rosenvall-portfolio and pinned by sha tag in
+# deployment.yaml. No secrets besides the registry pull credential.
+resources:
+  - ns.yaml
+  - image-pull-secret.yaml
+  - deployment.yaml
+  - service.yaml
+  - httproute.yaml          # portfolio.rosenvall.se (staging) → apex when approved
