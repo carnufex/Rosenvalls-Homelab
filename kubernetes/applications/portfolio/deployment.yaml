@@ -32,7 +32,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: web
-          image: registry.rosenvall.se/carnufex/portfolio:sha-5f44f2f
+          image: registry.rosenvall.se/carnufex/portfolio:sha-7ee9e68
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 3000 }
