@@ -32,7 +32,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: web
-          image: registry.rosenvall.se/carnufex/ngm:sha-c436d56
+          image: registry.rosenvall.se/carnufex/ngm:sha-6633483
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 3000 }
@@ -43,6 +43,13 @@ spec:
             - { name: NEXT_TELEMETRY_DISABLED, value: "1" }
             - { name: NGM_DB_URL, value: "file:/data/ngm.db" }
             - { name: NGM_BASE_URL, value: "https://träna.rosenvall.se" }
+            # Google-inloggning aktiveras när secret ngm-google finns (se README).
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef: { name: ngm-google, key: client-id, optional: true }
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef: { name: ngm-google, key: client-secret, optional: true }
           resources:
             requests: { cpu: 50m, memory: 160Mi }
             limits: { memory: 512Mi }
