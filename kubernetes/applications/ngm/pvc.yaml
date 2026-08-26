@@ -1,0 +1,13 @@
+# SQLite database for the NGM test environment. Small on purpose — Longhorn
+# capacity is tight; the app stores text-only training data.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ngm-data
+  namespace: ngm
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi

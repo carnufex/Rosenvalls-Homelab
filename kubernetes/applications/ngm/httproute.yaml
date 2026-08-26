@@ -1,0 +1,26 @@
+# Publishes NGM at träna.rosenvall.se. The hostname is the punycode form of
+# "träna" (IDN labels are not valid Kubernetes hostnames in Unicode form);
+# browsers translate träna.rosenvall.se to this label automatically. Covered by
+# the existing *.rosenvall.se wildcard DNS record and wildcard certificate.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ngm
+  namespace: ngm
+spec:
+  hostnames:
+    - xn--trna-moa.rosenvall.se
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external
+      namespace: gateway
+      sectionName: https
+  rules:
+    - matches:
+        - path: { type: PathPrefix, value: / }
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: ngm
+          port: 3000
