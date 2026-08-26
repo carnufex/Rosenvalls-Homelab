@@ -8,8 +8,10 @@ Source: `carnufex/NextGenerationMe` → `web/` (Next.js 15, standalone output, S
 - **Image**: `registry.rosenvall.se/carnufex/ngm:sha-<gitshort>` — built locally from
   `NextGenerationMe/web/`, pushed to the self-hosted registry, tag bumped here to deploy.
 - **Storage**: SQLite on the `ngm-data` Longhorn PVC (2Gi, RWO) → single replica + Recreate.
-- **Secrets** (Bitwarden via ExternalSecrets): `registry-password` (image pull),
-  `ngm-admin-password` → env `NGM_ADMIN_PASSWORD` (trainer login `crille`, seeded on first boot).
+- **Secrets** (Bitwarden via ExternalSecrets): `registry-password` (image pull).
+  The trainer password lives in the app database and is changed in the app
+  (`/t/losenord`). On a FRESH database the seed creates trainer `crille` with the
+  default password `ngm-admin` — log in and change it immediately.
 - **Auth model**: trainers log in with username/password; clients use personal invite links
   (`/join/<token>`) created from the trainer dashboard.
 
