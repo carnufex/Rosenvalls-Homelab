@@ -1,4 +1,4 @@
-﻿# NGM (trÃ¤na.rosenvall.se) â€” Next.js 15 standalone, SQLite on the ngm-data PVC.
+﻿# NGM (träna.rosenvall.se) — Next.js 15 standalone, SQLite on the ngm-data PVC.
 # Test environment: single replica + Recreate because SQLite lives on an RWO volume.
 # Image is built locally and pushed to the self-hosted registry (see
 # NextGenerationMe/web/README.md). Pinned by sha tag; bump to deploy.
