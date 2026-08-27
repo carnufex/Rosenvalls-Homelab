@@ -25,7 +25,7 @@ newPlayerChooseVoc = true
 newPlayerSpawnPosX = 0
 newPlayerSpawnPosY = 0
 newPlayerSpawnPosZ = 0
-newPlayerTownId = 1
+newPlayerTownId = 8
 newPlayerLevel = 8
 newPlayerMagicLevel = 0
 newPlayerHealth = 185
@@ -75,11 +75,11 @@ gameProtocolPort = 7172
 statusProtocolPort = 7171
 adminPort = 7170
 maxPlayers = 500
-motd = "Welcome to The Forgotten Server!"
+motd = "Welcome to Gatebound!"
 onePlayerOnlinePerAccount = true
 allowClones = false
 allowWalkthrough = true
-serverName = "Forgotten"
+serverName = "Gatebound"
 statusTimeout = 5000
 statusCountMaxPlayersPerIp = 0
 replaceKickOnLogin = true
@@ -123,7 +123,7 @@ deathLosePercent = -1
 -- use any other value to disable the rent system
 houseLevel = 150
 housePriceEachSQM = 1000
-houseRentPeriod = "never"
+houseRentPeriod = "monthly"
 houseOwnedByAccount = false
 houseDoorShowPrice = true
 onlyInvitedCanMoveHouseItems = true
@@ -252,7 +252,7 @@ allowMountInPz = false
 -- Crystal Lua NPCs are loaded from data/npc/crystalserver (preferred),
 -- then data/npc/crystal and data/npc/npc_Crystal_Server_15x for compatibility.
 -- XML NPCs remain supported in both modes.
-npcSystem = "tfs"
+npcSystem = "crystal"
 
 -- Forge Tier Abilities
 -- Formula: chance = A * tier^2 + B * tier + C
@@ -300,8 +300,8 @@ RANGE_ROTATE_ITEM_INTERVAL = 250
 
 -- Map
 -- NOTE: set mapName WITHOUT .otbm at the end
-mapName = "world"
-mapAuthor = "Skyyzyy"
+mapName = "otservbr"
+mapAuthor = "Gabriel Desastre"
 
 -- Market
 marketOfferDuration = 30 * 24 * 60 * 60
@@ -562,3 +562,11 @@ combatChainSkillFormulaSword = 1.1
 combatChainSkillFormulaFist = 1.0
 combatChainSkillFormulaDistance = 0.9
 combatChainSkillFormulaWandsAndRods = 1.0
+
+-- Gatebound-systemen fran juli 2026 (dev-verifierade; aktiveras vid varldsbytet).
+-- Kinship = Rest (alt-rotation, +25% exp till offline-alts). Bond togs bort
+-- 2026-08-24 -- party-systemet ager redan "spela ihop".
+kinshipEnabled = true
+trainingDummiesEnabled = true
+idleFishingEnabled = true
+fishing2Enabled = true

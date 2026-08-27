@@ -26,7 +26,7 @@ spec:
         - name: gatebound-ghcr
       containers:
         - name: tfs
-          image: registry.rosenvall.se/carnufex/gatebound-tfs:sha-34c27df
+          image: registry.rosenvall.se/carnufex/gatebound-tfs:sha-2c2db64
           imagePullPolicy: IfNotPresent
           env:
             # config.lua does mysqlPass = os.getenv("MYSQL_PASSWORD"); inject the
@@ -61,10 +61,15 @@ spec:
           resources:
             requests:
               cpu: 250m
-              memory: 512Mi
+              # The OTServBR world is a different weight class than the old map:
+              # measured 1.7 GB steady state and a 2.9 GB PEAK during map load
+              # (191 MB otbm, 84 516 spawns, release build, 2026-08-27). The old
+              # 512Mi/2Gi pair would have OOMKilled the pod mid-load and
+              # crashlooped it. Request the steady state, allow for the peak.
+              memory: 2Gi
             limits:
               cpu: "2"
-              memory: 2Gi
+              memory: 4Gi
       volumes:
         - name: config
           configMap:
