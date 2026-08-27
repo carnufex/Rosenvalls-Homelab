@@ -16,6 +16,22 @@ Source: `carnufex/NextGenerationMe` → `web/` (Next.js 15, standalone output, S
   a trainer), trainer login by username or email, personal invite links (`/join/<token>`)
   for trainer-created clients, and optional Google login.
 
+## Daily trainer digest email
+
+A CronJob (`ngm-digest`, 07:00 Europe/Stockholm) calls `/api/digest` with a shared
+key. The endpoint emails each trainer a summary of the last 24h (logged workouts,
+deviations, comments, quiet clients) — only when there is something to report.
+
+1. Cron key (required for the endpoint to accept calls):
+   `kubectl -n ngm create secret generic ngm-cron --from-literal=key=<RANDOM>`
+2. SMTP (required for actual sending; until it exists the endpoint reports
+   "SMTP ej konfigurerat" and skips):
+   `kubectl -n ngm create secret generic ngm-mail --from-literal=smtp-url=smtp://USER:PASS@HOST:587 --from-literal=from="NGM <ngm@rosenvall.se>"`
+   Works with any SMTP provider (Resend: `smtp://resend:API_KEY@smtp.resend.com:587`,
+   Gmail app password, etc.).
+3. Restart: `kubectl -n ngm rollout restart deployment/ngm`.
+4. Admin preview without sending: log in as admin and open `/api/digest?preview=1`.
+
 ## Enabling Google login
 
 1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials): create an

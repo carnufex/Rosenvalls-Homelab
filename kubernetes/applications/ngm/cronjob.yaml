@@ -1,0 +1,55 @@
+# Daily trainer digest: calls /api/digest with the shared cron key.
+# Uses the ngm image (node + fetch) so no extra image needs mirroring; the
+# pinned tag here never needs bumping — any app image works as a curl runner.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ngm-digest
+  namespace: ngm
+spec:
+  schedule: "0 7 * * *"
+  timeZone: Europe/Stockholm
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 120
+      template:
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: ngm-image-pull
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: digest
+              image: registry.rosenvall.se/carnufex/ngm:sha-cffe16b
+              command:
+                - node
+                - -e
+                - |
+                  fetch("http://ngm.ngm.svc.cluster.local:3000/api/digest", {
+                    headers: { "x-ngm-cron-key": process.env.NGM_CRON_KEY ?? "" },
+                  })
+                    .then(async (r) => {
+                      const body = await r.text();
+                      console.log(r.status, body);
+                      if (!r.ok) process.exit(1);
+                    })
+                    .catch((e) => { console.error(e); process.exit(1); });
+              env:
+                - name: NGM_CRON_KEY
+                  valueFrom:
+                    secretKeyRef: { name: ngm-cron, key: key }
+              resources:
+                requests: { cpu: 10m, memory: 32Mi }
+                limits: { memory: 128Mi }
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: [ALL] }

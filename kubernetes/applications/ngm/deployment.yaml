@@ -32,7 +32,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: web
-          image: registry.rosenvall.se/carnufex/ngm:sha-cffe16b
+          image: registry.rosenvall.se/carnufex/ngm:sha-0453fff
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 3000 }
@@ -50,6 +50,16 @@ spec:
             - name: GOOGLE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef: { name: ngm-google, key: client-secret, optional: true }
+            # Digest-cron (secret ngm-cron) och e-post (secret ngm-mail) — se README.
+            - name: NGM_CRON_KEY
+              valueFrom:
+                secretKeyRef: { name: ngm-cron, key: key, optional: true }
+            - name: SMTP_URL
+              valueFrom:
+                secretKeyRef: { name: ngm-mail, key: smtp-url, optional: true }
+            - name: MAIL_FROM
+              valueFrom:
+                secretKeyRef: { name: ngm-mail, key: from, optional: true }
           resources:
             requests: { cpu: 50m, memory: 160Mi }
             limits: { memory: 512Mi }
