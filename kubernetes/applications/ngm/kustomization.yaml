@@ -4,7 +4,11 @@ resources:
   - ns.yaml
   - image-pull-secret.yaml
   - pvc.yaml
+  - database.yaml
   - deployment.yaml
   - service.yaml
   - httproute.yaml
   - cronjob.yaml
+  - db-backup-externalsecret.yaml
+  - db-backup-scripts.yaml
+  - db-backup-cronjob.yaml

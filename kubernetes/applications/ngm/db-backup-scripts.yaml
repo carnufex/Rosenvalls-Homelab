@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ngm-db-backup-scripts
+  namespace: ngm
+data:
+  dump.sh: |
+    #!/bin/sh
+    set -eu
+    stamp="$(date -u +%Y-%m-%dT%H%M%SZ)"
+    echo "pg_dump av $PGDATABASE fran $PGHOST till /work/ngm-$stamp.dump"
+    pg_dump --format=custom --file="/work/ngm-$stamp.dump"
+    ls -lh /work
+  upload.sh: |
+    #!/bin/sh
+    set -eu
+
+    log() {
+      printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"
+    }
+
+    if [ -z "$(find /work -maxdepth 1 -name 'ngm-*.dump' -print -quit)" ]; then
+      log "Ingen dump i /work — pg_dump-steget har inte lyckats."
+      exit 1
+    fi
+
+    umask 077
+    mkdir -p "$RCLONE_CACHE_DIR" "$(dirname "$RCLONE_CONFIG")"
+    cp /config/rclone/rclone.conf "$RCLONE_CONFIG"
+    chmod 0600 "$RCLONE_CONFIG"
+
+    remote="${RCLONE_REMOTE:-}"
+    if [ -z "$remote" ]; then
+      remote="$(rclone listremotes | head -n 1 | sed 's/:$//')"
+    fi
+    if [ -z "$remote" ]; then
+      log "Ingen rclone-remote i $RCLONE_CONFIG."
+      exit 1
+    fi
+
+    dest="$remote:Rosenvalls-Homelab/ngm/dumps"
+    log "Laddar upp dumpar till $dest."
+    rclone copy /work "$dest" --include 'ngm-*.dump' --transfers 2 --tpslimit 4 --retries 5 --low-level-retries 20 --log-level INFO
+    log "Rensar dumpar aldre an 60 dagar."
+    rclone delete "$dest" --min-age 60d --include 'ngm-*.dump' --log-level INFO || true
+    rclone ls "$dest" | tail -n 5
+    log "NGM-databasbackup till OneDrive klar."

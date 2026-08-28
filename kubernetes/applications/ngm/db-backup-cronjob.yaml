@@ -1,0 +1,80 @@
+# Daglig pg_dump av NGM-databasen till OneDrive (rclone, samma mönster som
+# Immich-backupen). Init-containern dumpar, huvudcontainern laddar upp och
+# rensar dumpar äldre än 60 dagar.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ngm-db-backup
+  namespace: ngm
+spec:
+  schedule: "30 3 * * *"
+  timeZone: Europe/Stockholm
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 604800
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: dump
+              image: ghcr.io/cloudnative-pg/postgresql:17
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "/scripts/dump.sh"]
+              env:
+                - name: PGHOST
+                  value: ngm-postgresql-rw
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef: { name: ngm-postgresql-app, key: dbname }
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef: { name: ngm-postgresql-app, key: username }
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef: { name: ngm-postgresql-app, key: password }
+              resources:
+                requests: { cpu: 50m, memory: 128Mi }
+                limits: { cpu: 500m, memory: 256Mi }
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities: { drop: [ALL] }
+              volumeMounts:
+                - { name: scripts, mountPath: /scripts, readOnly: true }
+                - { name: work, mountPath: /work }
+          containers:
+            - name: upload
+              image: rclone/rclone:1.70.3@sha256:34c729127386abec1c610b2aa024e39b4498dc2b4a72a0798ae21fbdc1b0493b
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "/scripts/upload.sh"]
+              env:
+                - name: RCLONE_CONFIG
+                  value: /work/rclone/rclone.conf
+                - name: RCLONE_CACHE_DIR
+                  value: /work/cache
+              resources:
+                requests: { cpu: 50m, memory: 128Mi }
+                limits: { cpu: 500m, memory: 512Mi }
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities: { drop: [ALL] }
+              volumeMounts:
+                - { name: scripts, mountPath: /scripts, readOnly: true }
+                - { name: rclone-config, mountPath: /config/rclone, readOnly: true }
+                - { name: work, mountPath: /work }
+          volumes:
+            - name: scripts
+              configMap:
+                name: ngm-db-backup-scripts
+                defaultMode: 0555
+            - name: rclone-config
+              secret:
+                secretName: ngm-onedrive-backup
+            - name: work
+              emptyDir: {}

@@ -42,6 +42,10 @@ spec:
             - { name: HOSTNAME, value: "0.0.0.0" }
             - { name: NEXT_TELEMETRY_DISABLED, value: "1" }
             - { name: NGM_DB_URL, value: "file:/data/ngm.db" }
+            # Postgres (CNPG-genererad appanvändare) — används av bilder från och med PG-migreringen.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef: { name: ngm-postgresql-app, key: uri, optional: true }
             - { name: NGM_BASE_URL, value: "https://träna.rosenvall.se" }
             # Google-inloggning aktiveras när secret ngm-google finns (se README).
             - name: GOOGLE_CLIENT_ID
