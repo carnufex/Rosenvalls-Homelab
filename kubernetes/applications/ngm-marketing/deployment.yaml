@@ -1,0 +1,67 @@
+# NGM marketing site (nextgenerationme.com) — static nginx-unprivileged.
+# Image built locally from carnufex/NextGenerationMe:marketing/ and pushed to the
+# self-hosted registry. Pinned by sha tag; bump to deploy.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngm-marketing
+  namespace: ngm-marketing
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ngm-marketing
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ngm-marketing
+    spec:
+      imagePullSecrets:
+        - name: ngm-marketing-image-pull
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: web
+          image: registry.rosenvall.se/carnufex/ngm-marketing:sha-eb31b2e
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 8080 }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+          startupProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 3
+            failureThreshold: 20
+          livenessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ngm-marketing

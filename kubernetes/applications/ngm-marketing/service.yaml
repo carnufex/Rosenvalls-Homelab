@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngm-marketing
+  namespace: ngm-marketing
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: ngm-marketing
+  ports:
+    - { name: http, port: 8080, targetPort: http, protocol: TCP }
