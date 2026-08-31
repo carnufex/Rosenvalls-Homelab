@@ -33,7 +33,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: web
-          image: registry.rosenvall.se/carnufex/ngm:sha-c5e778a
+          image: registry.rosenvall.se/carnufex/ngm:sha-c762fe8
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 3000 }
@@ -55,6 +55,14 @@ spec:
             - name: GOOGLE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef: { name: ngm-google, key: client-secret, optional: true }
+            # Polar AccessLink aktiveras när secret ngm-polar finns (client-id/client-secret
+            # från admin.polaraccesslink.com; redirect-URL: https://träna.rosenvall.se/api/polar/callback).
+            - name: POLAR_CLIENT_ID
+              valueFrom:
+                secretKeyRef: { name: ngm-polar, key: client-id, optional: true }
+            - name: POLAR_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef: { name: ngm-polar, key: client-secret, optional: true }
             # Digest-cron (secret ngm-cron) och e-post (secret ngm-mail) — se README.
             - name: NGM_CRON_KEY
               valueFrom:
