@@ -1,4 +1,4 @@
-# NGM marketing site (nextgenerationme.com) — static nginx-unprivileged.
+﻿# NGM marketing site (nextgenerationme.com) â€” static nginx-unprivileged.
 # Image built locally from carnufex/NextGenerationMe:marketing/ and pushed to the
 # self-hosted registry. Pinned by sha tag; bump to deploy.
 apiVersion: apps/v1
@@ -29,7 +29,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: web
-          image: registry.rosenvall.se/carnufex/ngm-marketing:sha-eb31b2e
+          image: registry.rosenvall.se/carnufex/ngm-marketing:sha-3a50a60
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 8080 }
