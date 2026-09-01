@@ -9,6 +9,7 @@ resources:
   - service.yaml
   - httproute.yaml
   - cronjob.yaml
+  - cronjob-polar-sync.yaml
   - db-backup-externalsecret.yaml
   - db-backup-scripts.yaml
   - db-backup-cronjob.yaml
