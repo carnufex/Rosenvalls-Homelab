@@ -90,7 +90,10 @@ defaultSettings:
   replicaAutoBalance: best-effort
   replicaReplenishmentWaitInterval: 600
   backupstorePollInterval: 86400
-  orphanResourceAutoDeletion: instance
+  # Disk space on the three storage workers is tight. "instance" alone leaves
+  # stale replica directories from rebuilds on disk forever - they only surface
+  # as Orphan CRs. Include replica-data so Longhorn reclaims them itself.
+  orphanResourceAutoDeletion: 'replica-data;instance'
   orphanResourceAutoDeletionGracePeriod: 300
   replicaSoftAntiAffinity: false
   concurrentAutomaticEngineUpgradePerNodeLimit: 3

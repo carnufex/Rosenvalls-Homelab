@@ -480,7 +480,7 @@ $appRows | Sort-Object Name | Format-Table -AutoSize
 
 Write-Section "ArgoCD Dex"
 try {
-    kubectl -n argocd exec deploy/argocd-dex-server -- sh -c "nc -z -w 5 127.0.0.1 5556"
+    kubectl -n argocd exec deploy/argocd-dex-server -c dex-server -- sh -c "nc -z -w 5 127.0.0.1 5556"
     if ($LASTEXITCODE -ne 0) {
         Add-Failure "ArgoCD Dex pod is reachable by Kubernetes but is not listening on 5556."
     } else {
@@ -671,14 +671,14 @@ try {
         }
     }
 
-    kubectl -n media exec deploy/plex -- sh -c 'curl -fsS --max-time 10 http://127.0.0.1:32400/identity | grep -q MediaContainer'
+    kubectl -n media exec deploy/plex -c plex -- sh -c 'curl -fsS --max-time 10 http://127.0.0.1:32400/identity | grep -q MediaContainer'
     if ($LASTEXITCODE -ne 0) {
         Add-Failure "Plex /identity check failed from inside the pod."
     } else {
         Write-Ok "Plex /identity responds from inside the pod."
     }
 
-    kubectl -n media exec deploy/plex -- sh -c 'dir="/config/Library/Application Support/Plex Media Server/Codecs"; [ ! -d "$dir" ] || ! find "$dir" -type f -name EasyAudioEncoder ! -perm -111 | grep -q .'
+    kubectl -n media exec deploy/plex -c plex -- sh -c 'dir="/config/Library/Application Support/Plex Media Server/Codecs"; [ ! -d "$dir" ] || ! find "$dir" -type f -name EasyAudioEncoder ! -perm -111 | grep -q .'
     if ($LASTEXITCODE -ne 0) {
         Add-Failure "Plex EasyAudioEncoder cache contains non-executable binaries; restart Plex after initContainer rollout or clear the codec cache."
     } else {
