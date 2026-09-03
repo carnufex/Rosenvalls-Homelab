@@ -30,7 +30,7 @@ spec:
                       - host1
       containers:
         - name: jackett
-          image: lscr.io/linuxserver/jackett:v0.24.2381-ls489@sha256:e6a86a28207e6da37fb72e02d6cd157c9f69f70338128b02c5cf99dc36676594
+          image: lscr.io/linuxserver/jackett:v0.24.2520-ls17@sha256:d9536db7cc9f0e31bf7c1bb4bdfc477842a124bae4091046dd040b02fe5ce378
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:

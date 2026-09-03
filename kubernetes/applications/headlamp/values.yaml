@@ -4,7 +4,7 @@ image:
   registry: ghcr.io
   repository: headlamp-k8s/headlamp
   pullPolicy: IfNotPresent
-  tag: "v0.42.0"
+  tag: "v0.45.0"
 
 config:
   inCluster: true

@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: valkey
-          image: docker.io/valkey/valkey:9@sha256:8e8d64b405ce18f41b8e5ee20aa4687a8ed0022d1298f2ce31cdcf3a76e09411
+          image: docker.io/valkey/valkey:9@sha256:a91d34ab33975b1054e26f1bd9995b268f7e0c507b5ded7f3d181a1a25521630
           imagePullPolicy: IfNotPresent
           args:
             - valkey-server

@@ -7,7 +7,7 @@ resources:
 helmCharts:
   - name: loki-stack
     repo: https://grafana.github.io/helm-charts
-    version: 2.10.2
+    version: 2.10.3
     releaseName: loki-stack
     namespace: monitoring
     valuesFile: values.yaml
