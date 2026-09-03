@@ -59,11 +59,23 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
+                # alpine/k8s runs as root by default; kubectl needs a writable
+                # HOME for its discovery cache when we force a non-root UID.
+                - name: HOME
+                  value: /tmp
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
               securityContext:
                 allowPrivilegeEscalation: false
                 runAsNonRoot: true
+                runAsUser: 65534
+                runAsGroup: 65534
                 capabilities:
                   drop:
                     - ALL
                 seccompProfile:
                   type: RuntimeDefault
+          volumes:
+            - name: tmp
+              emptyDir: {}
