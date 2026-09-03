@@ -1,8 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# Cilium 1.20 requires Gateway API v1.6.1 or newer.
+#
+# As of v1.6 the standard channel also ships TCPRoute, TLSRoute and UDPRoute,
+# so the three separate experimental CRD URLs this used to pull are gone.
+#
+# standard-install.yaml also installs the ValidatingAdmissionPolicy
+# safe-upgrades.gateway.networking.k8s.io, which refuses any Gateway API CRD
+# older than v1.5.0. Rolling back to v1.3.0 means deleting that policy first.
 resources:
-- https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
-- https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.3.0/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
-- https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.3.0/config/crd/experimental/gateway.networking.k8s.io_udproutes.yaml
-- https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.3.0/config/crd/experimental/gateway.networking.k8s.io_tcproutes.yaml
+- https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/standard-install.yaml
