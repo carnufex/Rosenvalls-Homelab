@@ -7,9 +7,6 @@
 networkPolicies:
   restrictInternalTraffic: false
 
-crdConversion:
-  enabled: false
-
 metrics:
   serviceMonitor:
     enabled: true
