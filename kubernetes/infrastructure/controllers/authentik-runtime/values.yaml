@@ -85,7 +85,10 @@ worker:
       cpu: 500m
       memory: 6Gi
     limits:
-      cpu: 500m
+      # Kept the request at 500m so scheduling is unchanged, but the worker
+      # runs bursty task batches and sat pinned against a 500m ceiling from
+      # the 2026.8 upgrade onwards (CPUThrottlingHigh, continuously firing).
+      cpu: 2000m
       memory: 7Gi
   affinity:
     nodeAffinity:
