@@ -179,6 +179,49 @@ preserve or restore the NFS data first and deliberately change that protection
 in a reviewed recovery operation. Never use destruction as troubleshooting for
 this VM or the WD Red disk.
 
+## Talos Node Upgrades
+
+`scripts/upgrade-talos-node.ps1` walks one node through a list of Talos
+versions, one minor at a time, and waits for both the node and the whole
+cluster to settle between steps. Talos only supports upgrading from the
+previous minor, so 1.12 -> 1.14 must pass through 1.13.
+
+```powershell
+.\scripts\upgrade-talos-node.ps1 -NodeName worker-07 -NodeIp 192.168.1.219 `
+  -Versions "v1.13.9,v1.14.0" `
+  -TalosctlPath "$env:TEMP\talosctl-v1.14.0\talosctl.exe"
+```
+
+Compute-only workers (worker-05 .. worker-09) upgrade unattended in about ten
+minutes each. **The three Longhorn storage workers (worker-01, worker-02,
+worker-03) do not**, for two reasons:
+
+1. From 1.14 Talos drains the node first, and two pods refuse eviction. A
+   single-instance CNPG cluster - `authentik-postgresql` - has a primary PDB
+   with `allowedDisruptions=0`; two-instance clusters have the same PDB on
+   whichever pod is currently primary. Longhorn then keeps a PDB on
+   `instance-manager-*` for as long as a volume is attached on the node, which
+   the stuck CNPG pod guarantees. The two block each other, Talos retries
+   evictions until the client rate limiter hits its deadline, and the upgrade
+   fails with the node left cordoned.
+2. A cordoned node is not a valid Longhorn replica target, so a node left
+   cordoned by a failed drain never rebuilds its replicas. Uncordon it as soon
+   as an upgrade fails, or its volumes sit degraded on a single replica.
+
+Run `scripts/prepare-node-for-drain.ps1 -NodeName <node>` first. It cordons the
+node, deletes (not evicts - deletion bypasses the PDB) any CNPG instance on it
+so CNPG rebuilds elsewhere, and refuses to continue while any attached volume
+is still degraded. Uncordon afterwards.
+
+Expect each storage-node reboot to cost a full round of replica rebuilds:
+`concurrent-replica-rebuild-per-node-limit` is 1 on purpose, so ~25 replicas
+rebuild one after another. Do not raise it to go faster - worker-01 already
+reports NodeDiskIOSaturation under normal load.
+
+After the fleet is on the new Talos version, bump `talos_version` in
+`tofu/variables.tf` and `tofu/terraform.tfvars` so a future rebuild does not
+reinstall the old release.
+
 ## High-Value Checks
 
 ```powershell
