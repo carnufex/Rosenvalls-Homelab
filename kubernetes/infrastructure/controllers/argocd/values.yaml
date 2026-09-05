@@ -1,3 +1,16 @@
+repoServer:
+  # The repo-server shipped with no requests at all, which made it BestEffort
+  # and therefore first in line to be evicted whenever worker-01 came under
+  # memory or disk pressure - 15 restarts in two days. While it is down ArgoCD
+  # cannot render manifests and every app reports a ComparisonError. It idles
+  # around 115Mi but spikes rendering the helm charts for all 30 apps.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
 server:
   extraArgs:
     - --insecure
