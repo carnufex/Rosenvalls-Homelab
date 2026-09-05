@@ -29,9 +29,13 @@ cgroup:
     enabled: false
   hostRoot: /sys/fs/cgroup
 
-# Peka på kontrollnodens IP tills vi har en VIP
-k8sServiceHost: 192.168.1.201
-k8sServicePort: 6443
+# Talos KubePrism: varje nod kör en lokal lastbalanserare mot samtliga
+# control-plane-endpoints på 127.0.0.1:7445. Pekade tidigare rakt på
+# control-01, vilket gjorde varje omstart av den noden till en enskild
+# felpunkt för hela dataplanet. VIP:en 192.168.1.200 finns (kubeconfig
+# använder den), men KubePrism är det Talos rekommenderar för Cilium.
+k8sServiceHost: localhost
+k8sServicePort: 7445
 
 l2announcements:
   enabled: true
