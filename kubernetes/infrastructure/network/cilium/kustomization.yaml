@@ -12,7 +12,7 @@ helmCharts:
     releaseName: cilium
     namespace: kube-system
     valuesFile: values.yaml
-    kubeVersion: v1.35.7
+    kubeVersion: v1.37.0
 
 patches:
   - path: deployment-hardening-patch.yaml

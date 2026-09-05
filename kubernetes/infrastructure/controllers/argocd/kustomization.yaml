@@ -14,4 +14,4 @@ helmCharts:
     releaseName: argocd
     namespace: argocd
     valuesFile: values.yaml
-    kubeVersion: v1.35.7
+    kubeVersion: v1.37.0

@@ -25,7 +25,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: health-check
-              image: alpine/k8s:1.35.8@sha256:aaeed1de1399aa816535d376c7d5c9bea905892301649ffaee0905397c7d4956
+              image: alpine/k8s:1.37.0@sha256:b421c2e9419edb98db39b6ab641669f4db7bb2acf354f22450c6b7e7176d1ff4
               imagePullPolicy: IfNotPresent
               command:
                 - /bin/sh
