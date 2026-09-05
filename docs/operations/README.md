@@ -215,6 +215,14 @@ node, deletes (not evicts - deletion bypasses the PDB) any CNPG instance on it
 so CNPG rebuilds elsewhere, and refuses to continue while any attached volume
 is still degraded. Uncordon afterwards.
 
+The drain itself comes from the client: talosctl 1.14 added `--drain`, defaulting
+to true, which is why the same nodes upgraded fine under the 1.12 client. Once
+prepare-node-for-drain.ps1 has emptied the node, only Longhorn's instance-manager
+is left and its PDB never allows eviction - so pass `-SkipDrain` to
+upgrade-talos-node.ps1, which forwards `--drain=false`. Prefer that over
+`--force`, which also skips the etcd health checks that matter on control planes.
+Uncordon and wait for replicas to rebuild before starting the next storage node.
+
 Expect each storage-node reboot to cost a full round of replica rebuilds:
 `concurrent-replica-rebuild-per-node-limit` is 1 on purpose, so ~25 replicas
 rebuild one after another. Do not raise it to go faster - worker-01 already

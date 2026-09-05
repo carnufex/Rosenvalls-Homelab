@@ -9,7 +9,14 @@ param(
     [string]$TalosctlPath = "",
     [string]$Schematic = "53513e54bb39202f35694412577a6bc53d484744d35a126e5d42ef34785c0d83",
     [string[]]$Versions = @("v1.9.6", "v1.10.9", "v1.11.6", "v1.12.11"),
-    [int]$StabilizeAttempts = 90
+    [int]$StabilizeAttempts = 90,
+
+    # talosctl 1.14+ cordons and evicts before rebooting. On the Longhorn
+    # storage workers that drain deadlocks on PodDisruptionBudgets (see
+    # docs/operations/README.md). Run scripts/prepare-node-for-drain.ps1 to
+    # empty the node first, then pass -SkipDrain so talosctl does not try to
+    # evict what is left. Requires a 1.14+ talosctl.
+    [switch]$SkipDrain
 )
 
 $ErrorActionPreference = "Continue"
@@ -95,7 +102,10 @@ foreach ($version in $Versions) {
     $image = "factory.talos.dev/nocloud-installer/$Schematic`:$version"
     Write-Host "upgrade $NodeName to $version"
 
-    $upgradeOutput = & $TalosctlPath --nodes $NodeIp --endpoints $Endpoint upgrade --image $image --reboot-mode=powercycle --timeout=30m --wait 2>&1
+    $upgradeArgs = @("--nodes", $NodeIp, "--endpoints", $Endpoint, "upgrade", "--image", $image, "--reboot-mode=powercycle", "--timeout=30m", "--wait")
+    if ($SkipDrain) { $upgradeArgs += "--drain=false" }
+
+    $upgradeOutput = & $TalosctlPath @upgradeArgs 2>&1
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
         $upgradeOutput | Select-Object -Last 80 | Out-Host
