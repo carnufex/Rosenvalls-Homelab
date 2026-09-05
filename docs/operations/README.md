@@ -68,6 +68,8 @@ Use these after:
 .\scripts\verify-media-nfs.ps1
 .\scripts\verify-nfs-export.ps1
 .\scripts\verify-deluge-vpn.ps1
+.\scripts\upgrade-talos-node.ps1
+.\scripts\prepare-node-for-drain.ps1
 ```
 
 `pvc-seed-utils.ps1` is an internal helper used by seeding scripts. Do not run it directly.
