@@ -181,6 +181,31 @@ preserve or restore the NFS data first and deliberately change that protection
 in a reviewed recovery operation. Never use destruction as troubleshooting for
 this VM or the WD Red disk.
 
+## OpenTofu State Is Drifted - Do Not Apply
+
+`tofu -chdir=tofu plan` currently reports **15 to add, 11 to change, 14 to
+destroy** with no local edits at all. The state still describes the Talos image
+as `talos-v1.8.3-std-nocloud-amd64.img` while the fleet runs v1.14.0, so the
+image resources force replacement and drag seven
+`talos_machine_configuration_apply` resources with them.
+
+Nothing in this repository can be applied unscoped until that is reconciled.
+The targeted saved-plan gate documented under the nfs-01 sections above is not
+ceremony - it is the only safe way to touch OpenTofu here.
+
+`talos_version` deserves particular care. Raising it to match reality also pulls
+`module.talos.talos_machine_secrets.this` into the plan and renders its
+certificate and key attributes as `(known after apply)`. It was bumped to
+v1.14.0 after the September 2026 upgrade and reverted for exactly that reason -
+the variable stays at v1.12.11 until the drift work happens, and the version
+should be corrected **as part of** that reconciliation, deliberately, not before
+it. See `terraform.tfstate.before-talos-version-state-reconcile-*.backup` for a
+previous encounter with the same trap.
+
+Consequence for capacity work: node topology changes that look like two lines in
+`nodes_config` - adding a Longhorn disk to a compute-only worker, for instance -
+cannot currently be delivered through OpenTofu.
+
 ## Talos Node Upgrades
 
 `scripts/upgrade-talos-node.ps1` walks one node through a list of Talos
@@ -228,9 +253,10 @@ Expect each storage-node reboot to cost a full round of replica rebuilds:
 rebuild one after another. Do not raise it to go faster - worker-01 already
 reports NodeDiskIOSaturation under normal load.
 
-After the fleet is on the new Talos version, bump `talos_version` in
-`tofu/variables.tf` and `tofu/terraform.tfvars` so a future rebuild does not
-reinstall the old release.
+Do **not** bump `talos_version` in `tofu/variables.tf` afterwards - see
+"OpenTofu State Is Drifted" above. It changes the plan for
+`talos_machine_secrets`, and OpenTofu cannot rebuild a node in this repo today
+anyway, so the variable is corrected during the state reconciliation instead.
 
 ## High-Value Checks
 
