@@ -21,5 +21,4 @@ spec:
         - type: RequestRedirect
           requestRedirect:
             hostname: headlamp.rosenvall.se
-            scheme: https
             statusCode: 302

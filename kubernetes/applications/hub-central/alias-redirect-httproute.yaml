@@ -25,5 +25,4 @@ spec:
         - type: RequestRedirect
           requestRedirect:
             hostname: rosenvall.local
-            scheme: https
             statusCode: 301
