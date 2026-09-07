@@ -5,7 +5,14 @@ metadata:
   namespace: rosenvall-devops
   annotations:
     argocd.argoproj.io/sync-wave: "4"
-    argocd.argoproj.io/sync-options: Replace=true,Force=true
+    # A Job spec.template is immutable, so the app-wide ServerSideDiff dry-run
+    # fails on this resource the moment the manifest changes, and ArgoCD then
+    # cannot diff the whole application. Force=true also collides with the
+    # app-wide ServerSideApply ("--force cannot be used with --server-side").
+    # Both are opted out here; Replace+Force is deliberate - the job is
+    # idempotent and is meant to re-run.
+    argocd.argoproj.io/sync-options: Replace=true,Force=true,ServerSideApply=false
+    argocd.argoproj.io/compare-options: ServerSideDiff=false
 spec:
   backoffLimit: 3
   manualSelector: true
