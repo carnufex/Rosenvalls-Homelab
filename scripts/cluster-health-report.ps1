@@ -761,6 +761,46 @@ try {
     }
 }
 
+Write-Section "Internal Route Reachability"
+# The .local hosts were effectively unchecked until a Cilium 1.20 upgrade left
+# two redirect-only routes answering 404 and nobody noticed. Enumerate the
+# hostnames from the HTTPRoutes themselves so new routes are covered without
+# editing this script.
+$internalRouteJson = Invoke-KubectlJson @("get", "httproute", "-A")
+$internalHosts = [System.Collections.Generic.List[string]]::new()
+foreach ($route in @($internalRouteJson.items)) {
+    $attachedToInternal = @($route.spec.parentRefs | Where-Object { $_.name -eq "internal" }).Count -gt 0
+    if (-not $attachedToInternal) { continue }
+    foreach ($hostName in @($route.spec.hostnames)) {
+        if ($hostName -and -not $internalHosts.Contains($hostName)) { $internalHosts.Add($hostName) }
+    }
+}
+
+if ($internalHosts.Count -eq 0) {
+    Add-Warning "Found no hostnames on HTTPRoutes attached to the internal gateway."
+} else {
+    # 404 is the signal that matters: the request reached Envoy and matched no
+    # route. Anything an app legitimately answers with is fine - including 405,
+    # since Invoke-HttpStatus sends HEAD and some backends refuse the method.
+    $acceptable = @(200, 301, 302, 303, 307, 308, 401, 403, 405)
+    $internalResults = @()
+    foreach ($hostName in ($internalHosts | Sort-Object)) {
+        $status = Invoke-HttpStatus -HostName $hostName -Path "/"
+        $internalResults += [pscustomobject]@{ Host = $hostName; Status = $status }
+        if ($null -eq $status) {
+            Add-Warning "$hostName did not answer on the internal gateway (DNS or connection failure)."
+        } elseif ($status -eq 404) {
+            Add-Failure "$hostName returned 404 from the internal gateway - Envoy matched no route for that host."
+        } elseif ($acceptable -notcontains $status) {
+            Add-Warning "$hostName returned unexpected status $status from the internal gateway."
+        }
+    }
+    $internalResults | Format-Table -AutoSize
+    if (-not ($internalResults | Where-Object { $_.Status -eq 404 -or $null -eq $_.Status })) {
+        Write-Ok "All $($internalHosts.Count) internal hostnames resolve to a matching route."
+    }
+}
+
 Write-Section "DevOps Preview Namespaces"
 $namespaces = Invoke-KubectlJson @("get", "namespaces", "-l", "app.kubernetes.io/part-of=rosenvall-devops-preview")
 $cutoff = (Get-Date).ToUniversalTime().AddHours(-1 * $PreviewTtlHours)
