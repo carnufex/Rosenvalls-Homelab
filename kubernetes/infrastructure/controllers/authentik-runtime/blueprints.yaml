@@ -289,6 +289,42 @@ data:
           group: Media
           provider: !KeyOf seerr_provider
           policy_engine_mode: any
+  apps-oncall-tools.yaml: |
+    version: 1
+    metadata:
+      name: Apps - On-call Copilot
+    entries:
+      - id: oncall_tools_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: rosenvall.se/oncall-tools
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          client_type: confidential
+          redirect_uris:
+            - url: https://oncall.rosenvall.se/oauth2/callback
+              matching_mode: strict
+          client_id: !Env ONCALL_TOOLS_CLIENT_ID
+          client_secret: !Env ONCALL_TOOLS_CLIENT_SECRET
+          access_code_validity: minutes=1
+          access_token_validity: hours=1
+          refresh_token_validity: days=30
+          sub_mode: hashed_user_id
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+      - id: oncall_tools_application
+        model: authentik_core.application
+        identifiers:
+          slug: oncall-tools
+        attrs:
+          name: On-call Copilot
+          group: Applications
+          provider: !KeyOf oncall_tools_provider
+          policy_engine_mode: any
   apps-plex.yaml: |
     version: 1
     metadata:
