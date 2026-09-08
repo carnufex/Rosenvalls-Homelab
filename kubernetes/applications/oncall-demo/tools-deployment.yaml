@@ -42,6 +42,9 @@ spec:
             - { name: GITHUB_BRANCH, value: master }
             - { name: GITOPS_FILE, value: kubernetes/applications/oncall-demo/demo-api-deployment.yaml }
             - { name: ONCALL_ENGINEER_NAME, value: Christopher }
+            # Slack user used as created_by on call cards when no /oncall drill user is known.
+            - { name: SLACK_CALL_CREATED_BY, value: U0BCQRH011P }
+            - { name: LOCAL_TIMEZONE, value: Europe/Stockholm }
             - { name: LOG_LEVEL, value: info }
           envFrom:
             - secretRef: { name: oncall-tools-secrets }
