@@ -32,7 +32,7 @@ spec:
         - name: oncall-demo-registry
       containers:
         - name: oncall-tools
-          image: registry.rosenvall.se/carnufex/oncall-tools:sha-31c9bd5
+          image: registry.rosenvall.se/carnufex/oncall-tools:sha-ea6f6d8
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 8080 }
