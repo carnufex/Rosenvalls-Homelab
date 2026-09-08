@@ -12,6 +12,6 @@ resources:
   - demo-api-deployment.yaml     # the victim; image tag is changed only via Git
   - demo-api-service.yaml
   - tools-service.yaml
-  # --- step 2 (after registry.rosenvall.se/carnufex/oncall-tools is pushed) ---
-  # - tools-deployment.yaml
-  # - tools-httproute.yaml        # oncall.rosenvall.se via gateway/external
+  # --- step 2: tool backend + public route ---
+  - tools-deployment.yaml
+  - tools-httproute.yaml        # oncall.rosenvall.se via gateway/external
