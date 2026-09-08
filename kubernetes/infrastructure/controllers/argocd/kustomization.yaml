@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - httproute.yaml
   - external-secret.yaml
+  - oncall-demo-refresh-rbac.yaml   # scoped refresh right for the on-call copilot demo
 
 helmCharts:
   - name: argo-cd
