@@ -25,7 +25,7 @@ spec:
       containers:
         - name: demo-api
           image: registry.rosenvall.se/carnufex/oncall-demo-api:1.0.0
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always      # LAN registry; the demo tags are rebuilt in place
           ports:
             - { name: http, containerPort: 8080 }
           readinessProbe:
