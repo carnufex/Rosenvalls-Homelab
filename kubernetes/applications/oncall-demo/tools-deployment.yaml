@@ -27,7 +27,7 @@ spec:
         - name: oncall-demo-registry
       containers:
         - name: oncall-tools
-          image: registry.rosenvall.se/carnufex/oncall-tools:sha-4fc5a97
+          image: registry.rosenvall.se/carnufex/oncall-tools:sha-ae45109
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 8080 }
@@ -45,6 +45,8 @@ spec:
             # Slack user used as created_by on call cards when no /oncall drill user is known.
             - { name: SLACK_CALL_CREATED_BY, value: U0BCQRH011P }
             - { name: LOCAL_TIMEZONE, value: Europe/Stockholm }
+            - { name: DETECTOR_INTERVAL_MS, value: "2000" }
+            - { name: INCIDENT_STORE_PATH, value: /data/incidents.json }
             - { name: LOG_LEVEL, value: info }
           envFrom:
             - secretRef: { name: oncall-tools-secrets }
@@ -62,3 +64,9 @@ spec:
           resources:
             requests: { cpu: 50m, memory: 128Mi }
             limits: { cpu: 500m, memory: 512Mi }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: oncall-tools-data
