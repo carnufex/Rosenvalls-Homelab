@@ -23,6 +23,11 @@ spec:
         app.kubernetes.io/name: oncall-tools
     spec:
       serviceAccountName: oncall-tools
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
       imagePullSecrets:
         - name: oncall-demo-registry
       containers:
