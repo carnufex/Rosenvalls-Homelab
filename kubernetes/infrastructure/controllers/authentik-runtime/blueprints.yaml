@@ -308,6 +308,11 @@ data:
               matching_mode: strict
           client_id: !Env ONCALL_TOOLS_CLIENT_ID
           client_secret: !Env ONCALL_TOOLS_CLIENT_SECRET
+          # Required explicitly on current Authentik; an empty list makes every authorize
+          # request fail with invalid_request ("otherwise malformed").
+          grant_types:
+            - authorization_code
+            - refresh_token
           access_code_validity: minutes=1
           access_token_validity: hours=1
           refresh_token_validity: days=30
