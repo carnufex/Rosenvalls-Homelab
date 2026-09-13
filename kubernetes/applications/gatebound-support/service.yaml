@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatebound-support
+  namespace: gatebound-support
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: gatebound-support
+  ports:
+    - { name: http, port: 8080, targetPort: http, protocol: TCP }

@@ -1,0 +1,15 @@
+# Player-facing support stack for Gatebound: MCP tools for the ElevenLabs agent,
+# ticket link pages (Discord OAuth -> forum post) and the post-call webhook.
+# Source: github.com/carnufex/gatebound-support. Talks to the game only through
+# gatebound-web's /api/support/* (shared secret) - never to MariaDB.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gatebound-support
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn-version: latest

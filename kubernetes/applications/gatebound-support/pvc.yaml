@@ -1,0 +1,15 @@
+# SQLite store for ticket drafts, tickets and conversation transcripts. Longhorn
+# RWO, mounted by the single replica (strategy Recreate).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gatebound-support-data
+  namespace: gatebound-support
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 256Mi
