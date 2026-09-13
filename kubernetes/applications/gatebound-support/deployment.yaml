@@ -28,7 +28,7 @@ spec:
         - name: gatebound-support-registry
       containers:
         - name: gatebound-support
-          image: registry.rosenvall.se/carnufex/gatebound-support:sha-7ee1d80
+          image: registry.rosenvall.se/carnufex/gatebound-support:sha-d4556cb
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 8080 }
