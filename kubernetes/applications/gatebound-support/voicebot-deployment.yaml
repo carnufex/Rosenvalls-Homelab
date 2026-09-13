@@ -29,7 +29,7 @@ spec:
         - name: gatebound-support-registry
       containers:
         - name: voicebot
-          image: registry.rosenvall.se/carnufex/gatebound-support:sha-866d5d1
+          image: registry.rosenvall.se/carnufex/gatebound-support:sha-9078d9d
           imagePullPolicy: IfNotPresent
           command: ["gatebound-support", "voicebot"]
           env:
