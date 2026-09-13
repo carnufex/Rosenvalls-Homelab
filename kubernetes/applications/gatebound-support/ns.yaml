@@ -1,5 +1,5 @@
 # Player-facing support stack for Gatebound: MCP tools for the ElevenLabs agent,
-# ticket link pages (Discord OAuth -> forum post) and the post-call webhook.
+# ticket link pages (Discord OAuth -> private thread) and the post-call webhook.
 # Source: github.com/carnufex/gatebound-support. Talks to the game only through
 # gatebound-web's /api/support/* (shared secret) - never to MariaDB.
 apiVersion: v1
