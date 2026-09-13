@@ -6,8 +6,6 @@ kind: Deployment
 metadata:
   name: gatebound-support
   namespace: gatebound-support
-  annotations:
-    argocd.argoproj.io/sync-wave: "10"
 spec:
   replicas: 1                 # SQLite on a RWO volume -> single replica
   revisionHistoryLimit: 3
