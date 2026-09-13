@@ -1,0 +1,41 @@
+# gatebound-support-voicebot: the Discord voice bridge (`gatebound-support voicebot`),
+# same image as gatebound-support but a separate long-lived process — it holds a Discord
+# gateway/voice connection and talks to gatebound-support's /internal API over HTTP instead
+# of touching SQLite directly. No HTTP service of its own, no PVC (stateless).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatebound-support-voicebot
+  namespace: gatebound-support
+spec:
+  replicas: 1                 # one Discord gateway session; a second replica would fight over it
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gatebound-support-voicebot
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gatebound-support-voicebot
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
+      imagePullSecrets:
+        - name: gatebound-support-registry
+      containers:
+        - name: voicebot
+          image: registry.rosenvall.se/carnufex/gatebound-support:sha-2a9e571
+          imagePullPolicy: IfNotPresent
+          command: ["gatebound-support", "voicebot"]
+          env:
+            - { name: LOG_LEVEL, value: info }
+          envFrom:
+            - secretRef: { name: gatebound-support-secrets }
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }

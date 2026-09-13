@@ -10,4 +10,5 @@ resources:
   - pvc.yaml
   - service.yaml
   - deployment.yaml
+  - voicebot-deployment.yaml   # Discord voice bridge, same image, no service/route/PVC
   - httproute.yaml        # gatebound-support.rosenvall.se
