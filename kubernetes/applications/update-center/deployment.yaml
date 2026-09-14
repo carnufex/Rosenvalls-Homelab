@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: update-center
+  namespace: update-center
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate # one job runner; never two instances mutating the cluster
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: update-center
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: update-center
+    spec:
+      serviceAccountName: update-center
+      imagePullSecrets:
+        - name: update-center-registry
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # Prefer compute-only workers: a Longhorn storage node or a control plane
+      # is exactly what the tool drains, and it cannot drain itself.
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: [worker-05, worker-06, worker-07, worker-08, worker-09]
+      containers:
+        - name: update-center
+          image: registry.rosenvall.se/carnufex/update-center:sha-a90287c # bumped by scripts/deploy.ps1 in the update-center repo
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: update-center-env
+          env:
+            - { name: PORT, value: "8080" }
+            - { name: GITHUB_REPO, value: carnufex/Rosenvalls-Homelab }
+            - { name: GITHUB_BRANCH, value: master }
+            - { name: PROXMOX_API_URL, value: https://192.168.1.111:8006 }
+            - { name: TALOSCONFIG, value: /secrets/talos/talosconfig }
+            - { name: PROXMOX_SSH_KEY, value: /secrets/ssh/id_ed25519 }
+            - { name: TALOS_ENDPOINT, value: "192.168.1.201" }
+            - { name: LONGHORN_NODES, value: "worker-01,worker-02,worker-03" }
+            - { name: REFRESH_MINUTES, value: "30" }
+            - { name: DATA_DIR, value: /tmp/update-center }
+            - { name: TALOSCTL_CACHE, value: /tmp/update-center/talosctl }
+            - name: NODE_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: POD_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+          volumeMounts:
+            - name: talos
+              mountPath: /secrets/talos
+              readOnly: true
+            - name: ssh
+              mountPath: /secrets/ssh
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            httpGet: { path: /api/health, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health, port: http }
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 50m, memory: 192Mi }
+            limits: { cpu: "1", memory: 768Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+      volumes:
+        - name: talos
+          secret:
+            secretName: update-center-talos
+            optional: true
+            defaultMode: 0400
+        - name: ssh
+          secret:
+            secretName: update-center-ssh
+            optional: true # until scripts/install-proxmox-ssh-key.ps1 has been run
+            defaultMode: 0400
+        - name: tmp
+          emptyDir:
+            sizeLimit: 2Gi # etcd snapshots (~350 MiB each) + talosctl downloads + repo tarballs

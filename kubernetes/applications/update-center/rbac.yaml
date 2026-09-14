@@ -1,0 +1,58 @@
+# Identity for update-center. Reads broadly (inventory), writes only what the
+# upgrade flows need: cordon/uncordon (nodes patch), evictions, deleting pods
+# (stale DaemonSet pods after a Talos reboot, CNPG instances that block a
+# drain, its own pod when relocating), and the ArgoCD refresh annotation.
+# No secrets, no exec, no workload writes — every app change goes through Git.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: update-center
+  namespace: update-center
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: update-center
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch", "patch"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/eviction"]
+    verbs: ["create"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list"]
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["postgresql.cnpg.io"]
+    resources: ["clusters"]
+    verbs: ["get", "list"]
+  # Hard refresh after a commit (annotation patch) + sync/health for the UI.
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications"]
+    verbs: ["get", "list", "watch", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: update-center
+subjects:
+  - kind: ServiceAccount
+    name: update-center
+    namespace: update-center
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: update-center

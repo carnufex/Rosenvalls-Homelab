@@ -1,0 +1,25 @@
+# LAN-only: updates.rosenvall.local on the internal gateway (no public route —
+# the tool drains nodes and reboots hosts; it stays inside the LAN behind SSO).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: update-center
+  namespace: update-center
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-options: Replace=true
+spec:
+  parentRefs:
+    - name: internal
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - updates.rosenvall.local
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: update-center-oauth2-proxy
+          port: 4180

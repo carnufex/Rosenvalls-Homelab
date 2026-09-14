@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# update-center: shows available updates for GitOps apps, Talos/Kubernetes and
+# the Proxmox hosts, with buttons that apply them. Source + image build:
+# https://github.com/carnufex/update-center (image on registry.rosenvall.se).
+resources:
+  - ns.yaml
+  - rbac.yaml
+  - externalsecrets.yaml
+  - deployment.yaml
+  - service.yaml
+  - oauth2-proxy-deployment.yaml
+  - oauth2-proxy-service.yaml
+  - httproute.yaml # updates.rosenvall.local -> oauth2-proxy -> update-center
