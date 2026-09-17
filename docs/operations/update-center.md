@@ -26,6 +26,12 @@ Scans every 30 min (or on "Uppdatera listan"):
    and the Cilium version in `tofu/talos/inline-manifests/cilium-install.yaml` vs the GitOps chart. These are what a
    cold rebuild starts from; upgrades happen in place, so they drift unless synced.
 
+5. **Resurser** - requests/limits vs measured usage. Prometheus keeps 3 days, so the tool samples daily maxima/p95
+   per workload container and node and keeps 30 days in ConfigMap `update-center/update-center-usage-history`
+   (delete it to start over). Until 7 days exist the tab is marked *preliminärt* and *Tillämpa* is disabled.
+   Categories: över-/underallokerad, saknar request, databas/cache (never auto-recommended). Also per-node
+   requested vs really used vs VM RAM in Proxmox, and PVC used vs capacity.
+
 ## Buttons and what they actually run
 
 | Button | Flow | Rollback |
@@ -34,6 +40,7 @@ Scans every 30 min (or on "Uppdatera listan"):
 | Talos → **Uppgradera** | cordon → CNPG-aware drain (deletes CNPG instances so they rebuild elsewhere, evicts the rest, leaves Longhorn instance-manager) → for CPs `talosctl etcd status` + `etcd snapshot` (to the pod's `/tmp`) → `talosctl upgrade --image factory.talos.dev/nocloud-installer/<schematic>:<ver> --reboot-mode=powercycle --drain=false --wait` → stale DaemonSet pod cleanup + wait stable → uncordon. Steps through minors (latest patch each). | Talos keeps the previous install in the B partition: `talosctl rollback -n <ip>` |
 | Talos → **Uppgradera Kubernetes** | etcd snapshot → `upgrade-k8s --dry-run` → `upgrade-k8s --to <ver>` | `upgrade-k8s --to <old>` |
 | Talos → **Synka tofu** | one commit bumping the `talos_version` default in `tofu/variables.tf` to the live version. Never touches state or nodes; `terraform.tfvars` is gitignored, bump it locally. Cilium bootstrap drift is display-only: run `scripts/render-cilium-bootstrap.ps1` and commit | `git revert` |
+| Resurser → **Tillämpa** | one commit replacing only that container's `resources:` block in its plain manifest (requests = measured max + 25 % / cpu p95; an existing memory limit is kept, a missing one is added; never a cpu limit). The edit is verified by re-parsing: anything else changing aborts. ArgoCD rolls the pod. Helm-managed workloads: change `values.yaml` by hand | `git revert` |
 | Proxmox → **Sök uppdateringar** | `POST /nodes/<n>/apt/update` (task) | — |
 | Proxmox → **Installera uppdateringar** | SSH: `apt-get update && apt-get -y full-upgrade` (confdef/confold), `autoremove`, re-disables `pve-enterprise.sources` if the upgrade re-enabled it | apt logs on the host |
 | Proxmox → **Starta om (säkert)** | drain every k8s node on the host (control planes last; refuses if <2 other CPs Ready) → `POST /nodes/<n>/status command=reboot` → wait offline → wait online → start guests that were running → wait Ready → stable → uncordon | if it stalls: nodes stay cordoned; `kubectl uncordon` after the host is back |

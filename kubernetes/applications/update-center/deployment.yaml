@@ -41,7 +41,7 @@ spec:
                     values: [worker-05, worker-06, worker-07, worker-08, worker-09]
       containers:
         - name: update-center
-          image: registry.rosenvall.se/carnufex/update-center:sha-7577d82 # bumped by scripts/deploy.ps1 in the update-center repo
+          image: registry.rosenvall.se/carnufex/update-center:sha-348b95c # bumped by scripts/deploy.ps1 in the update-center repo
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -85,8 +85,8 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 30
           resources:
-            requests: { cpu: 50m, memory: 192Mi }
-            limits: { cpu: "1", memory: 768Mi }
+            requests: { cpu: 50m, memory: 512Mi } # measured max ~385Mi during a scan
+            limits: { cpu: "1", memory: 1Gi }
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

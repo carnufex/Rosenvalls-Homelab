@@ -36,6 +36,10 @@ rules:
   - apiGroups: ["policy"]
     resources: ["poddisruptionbudgets"]
     verbs: ["get", "list"]
+  # Resources report: PVC capacity vs used.
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list"]
   - apiGroups: ["postgresql.cnpg.io"]
     resources: ["clusters"]
     verbs: ["get", "list"]
@@ -56,3 +60,33 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: update-center
+---
+# Usage history for the resources report (Prometheus keeps 3 days, the tool keeps 30):
+# one gzip'd ConfigMap in its own namespace. `create` cannot be limited by name.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: update-center-history
+  namespace: update-center
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["update-center-usage-history"]
+    verbs: ["get", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: update-center-history
+  namespace: update-center
+subjects:
+  - kind: ServiceAccount
+    name: update-center
+    namespace: update-center
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: update-center-history
