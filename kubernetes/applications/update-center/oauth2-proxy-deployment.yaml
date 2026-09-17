@@ -20,6 +20,17 @@ spec:
       labels:
         app.kubernetes.io/name: update-center-oauth2-proxy
     spec:
+      # Keep the login proxy off the storage/control-plane nodes: when those are drained for a
+      # host reboot the UI (and the live job log) should stay reachable.
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: [worker-05, worker-06, worker-07, worker-08, worker-09]
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
