@@ -23,7 +23,7 @@ variable "cluster_endpoint" {
 variable "talos_version" {
   description = "Talos version to use"
   type        = string
-  default     = "v1.12.11"
+  default     = "v1.14.0"
 }
 
 variable "gateway" {
