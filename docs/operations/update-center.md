@@ -22,6 +22,10 @@ Scans every 30 min (or on "Uppdatera listan"):
 3. **Proxmox** — `/cluster/status`, `/nodes/*/status`, `/apt/versions`, `/apt/update`
    (pending packages), `/qemu` guests; over SSH: `/var/run/reboot-required`.
 
+4. **Tofu pins** (Talos tab) - `talos_version` default in `tofu/variables.tf` vs the Talos version the nodes run,
+   and the Cilium version in `tofu/talos/inline-manifests/cilium-install.yaml` vs the GitOps chart. These are what a
+   cold rebuild starts from; upgrades happen in place, so they drift unless synced.
+
 ## Buttons and what they actually run
 
 | Button | Flow | Rollback |
@@ -29,6 +33,7 @@ Scans every 30 min (or on "Uppdatera listan"):
 | Appar → **Uppdatera** | one Git commit (Git Data API) replacing every line that pins that value in the app, `argocd.argoproj.io/refresh=hard` on the app, wait ≤10 min for Synced/Healthy + rollout | `git revert` the commit (or click the older tag once the tool can see it — it can't; revert in Git) |
 | Talos → **Uppgradera** | cordon → CNPG-aware drain (deletes CNPG instances so they rebuild elsewhere, evicts the rest, leaves Longhorn instance-manager) → for CPs `talosctl etcd status` + `etcd snapshot` (to the pod's `/tmp`) → `talosctl upgrade --image factory.talos.dev/nocloud-installer/<schematic>:<ver> --reboot-mode=powercycle --drain=false --wait` → stale DaemonSet pod cleanup + wait stable → uncordon. Steps through minors (latest patch each). | Talos keeps the previous install in the B partition: `talosctl rollback -n <ip>` |
 | Talos → **Uppgradera Kubernetes** | etcd snapshot → `upgrade-k8s --dry-run` → `upgrade-k8s --to <ver>` | `upgrade-k8s --to <old>` |
+| Talos → **Synka tofu** | one commit bumping the `talos_version` default in `tofu/variables.tf` to the live version. Never touches state or nodes; `terraform.tfvars` is gitignored, bump it locally. Cilium bootstrap drift is display-only: run `scripts/render-cilium-bootstrap.ps1` and commit | `git revert` |
 | Proxmox → **Sök uppdateringar** | `POST /nodes/<n>/apt/update` (task) | — |
 | Proxmox → **Installera uppdateringar** | SSH: `apt-get update && apt-get -y full-upgrade` (confdef/confold), `autoremove`, re-disables `pve-enterprise.sources` if the upgrade re-enabled it | apt logs on the host |
 | Proxmox → **Starta om (säkert)** | drain every k8s node on the host (control planes last; refuses if <2 other CPs Ready) → `POST /nodes/<n>/status command=reboot` → wait offline → wait online → start guests that were running → wait Ready → stable → uncordon | if it stalls: nodes stay cordoned; `kubectl uncordon` after the host is back |
