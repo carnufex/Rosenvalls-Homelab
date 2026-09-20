@@ -85,6 +85,13 @@ running when the pod died shows as failed.
 
 ## Troubleshooting
 
+- **A fleet run waits on "noder N (… cordonad)" or fails with "är cordonade men ingår inte i
+  körningen"**: a node was cordoned by *Flytta update-center* and its host was never rebooted
+  (happened 2026-09-20: worker-05/08 on clevoP150SM, the run waited 3 h). Either reboot that
+  host (*Starta om (säkert)* uncordons at the end) or `kubectl uncordon <node>`. Since
+  sha-d639ca9 the run handles cordoned nodes on hosts still in the plan itself and fails
+  fast on any other cordon; the Översikt tab lists cordoned nodes under *Åtgärda först*.
+
 - `GITHUB_TOKEN saknas` / 401 on commit → check ExternalSecret `update-center-env` and the
   `ONCALL_GITHUB_TOKEN` entry (fine-grained PAT expiry).
 - Proxmox 403 → token `root@pam!update-center` lost its ACL: `pveum acl modify / --tokens
