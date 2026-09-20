@@ -32,6 +32,17 @@ Scans every 30 min (or on "Uppdatera listan"):
    Categories: över-/underallokerad, saknar request, databas/cache (never auto-recommended). Also per-node
    requested vs really used vs VM RAM in Proxmox, and PVC used vs capacity.
 
+## The Översikt order (top = next move)
+
+The landing tab lists what to do in this fixed order, so the top group is always the
+right next step: **Åtgärda först** (a NotReady node, an offline host, a Degraded Argo app:
+nothing else should run, and the fleet health gates would stop there anyway) → safe patches
+(one commit, no reboot) → minor updates → Proxmox hosts (hypervisor before OS; automated
+with health gate) → Talos nodes then Kubernetes (OS before orchestrator) → major updates
+(manual: release notes, DB snapshot, one at a time) → resources (optimisation) → lookup
+failures (registry/GitHub timeouts, informational). Rule: automated and low-risk first,
+manual and risky last.
+
 ## Buttons and what they actually run
 
 | Button | Flow | Rollback |
