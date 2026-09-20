@@ -85,6 +85,12 @@ running when the pod died shows as failed.
 
 ## Troubleshooting
 
+- **A node upgrade/reboot ends with "timeout: <node> blev inte stabil" although the node is
+  Ready and its pods run**: the stability check used to count every non-Running pod in the
+  cluster, including old `Evicted` (Failed) pods (2026-09-20: six 3-day-old portfolio pods
+  failed an otherwise perfect worker-04 upgrade). Failed pods are ignored since the fix;
+  `kubectl delete pods -A --field-selector=status.phase=Failed` cleans them up anyway.
+
 - **A fleet run waits on "noder N (… cordonad)" or fails with "är cordonade men ingår inte i
   körningen"**: a node was cordoned by *Flytta update-center* and its host was never rebooted
   (happened 2026-09-20: worker-05/08 on clevoP150SM, the run waited 3 h). Either reboot that
