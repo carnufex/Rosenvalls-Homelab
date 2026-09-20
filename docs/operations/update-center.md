@@ -36,6 +36,7 @@ Scans every 30 min (or on "Uppdatera listan"):
 
 | Button | Flow | Rollback |
 |---|---|---|
+| Översikt / Appar → **Uppdatera alla patchar** / **Uppdatera valda** | every selected image/chart bump as ONE commit (Git Data API; refuses before writing if any line drifted or two selections hit the same line), then `refresh=hard` + wait for each touched ArgoCD app in turn | `git revert` the single commit |
 | Appar → **Uppdatera** | one Git commit (Git Data API) replacing every line that pins that value in the app, `argocd.argoproj.io/refresh=hard` on the app, wait ≤10 min for Synced/Healthy + rollout | `git revert` the commit (or click the older tag once the tool can see it — it can't; revert in Git) |
 | Talos → **Uppgradera** | cordon → CNPG-aware drain (deletes CNPG instances so they rebuild elsewhere, evicts the rest, leaves Longhorn instance-manager) → for CPs `talosctl etcd status` + `etcd snapshot` (to the pod's `/tmp`) → `talosctl upgrade --image factory.talos.dev/nocloud-installer/<schematic>:<ver> --reboot-mode=powercycle --drain=false --wait` → stale DaemonSet pod cleanup + wait stable → uncordon. Steps through minors (latest patch each). | Talos keeps the previous install in the B partition: `talosctl rollback -n <ip>` |
 | Talos → **Uppgradera Kubernetes** | etcd snapshot → `upgrade-k8s --dry-run` → `upgrade-k8s --to <ver>` | `upgrade-k8s --to <old>` |
@@ -48,7 +49,11 @@ Scans every 30 min (or on "Uppdatera listan"):
 | Proxmox → **Flytta update-center** | shown only when the tool's own pod runs on that host: cordons the host's nodes and deletes its own pod so it reschedules elsewhere; then reload and click reboot (which uncordons at the end) | **Uncordon noder** button |
 
 Only one job runs at a time; every button confirms first; the actor (SSO e-mail)
-is logged with the job. Job logs stream live in the UI (kept in memory, last 50 jobs).
+is logged with the job. Every job shows its phases as a step checklist (with the live
+log underneath) and an estimate from earlier runs; a running job is shown as a banner on
+every tab. The last 40 jobs (log tail included) and per-action durations are persisted
+in the ConfigMap `update-center-jobs`, so history survives pod restarts; a job that was
+running when the pod died shows as failed.
 
 ## Known limits
 
