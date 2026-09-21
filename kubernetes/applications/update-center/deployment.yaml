@@ -41,7 +41,7 @@ spec:
                     values: [worker-05, worker-06, worker-07, worker-08, worker-09]
       containers:
         - name: update-center
-          image: registry.rosenvall.se/carnufex/update-center:sha-1a4b26e # bumped by scripts/deploy.ps1 in the update-center repo
+          image: registry.rosenvall.se/carnufex/update-center:sha-569a1bd # bumped by scripts/deploy.ps1 in the update-center repo
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
