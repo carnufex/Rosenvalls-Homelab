@@ -28,6 +28,7 @@ patches can accumulate millions of rows and OOM-loop the worker during
 | Rosenvall DevOps | Active | `https://devops.rosenvall.se/auth/callback` |
 | Grafana | Active after sync | `https://grafana.rosenvall.local/login/generic_oauth` |
 | Headlamp | Active | `https://headlamp.rosenvall.se/oidc-callback` |
+| CMDB | Active | `https://cmdb.rosenvall.se/auth/callback` (+ localhost 8480/4200 for dev), public client `cmdb-web` |
 
 Use native OIDC for apps in this table. Proxy-based protection is limited to
 the explicit exceptions below.
@@ -49,6 +50,7 @@ Required keys:
 - `SEERR_CLIENT_SECRET`
 - `PLEX_CLIENT_ID`
 - `PLEX_CLIENT_SECRET`
+- `CMDB_DEMO_PASSWORD` (the three synthetic cmdb demo users, `cmdb-demo-*`)
 
 ## Authentik Proxy Apps
 

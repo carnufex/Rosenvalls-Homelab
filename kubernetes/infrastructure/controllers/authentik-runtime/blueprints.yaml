@@ -121,6 +121,109 @@ data:
           group: Applications
           provider: !KeyOf rosenvall_devops_provider
           policy_engine_mode: any
+  apps-cmdb.yaml: |
+    version: 1
+    metadata:
+      name: Apps - CMDB
+    entries:
+      # Groups map to access scopes in the app (full, one region polygon, one project).
+      - id: cmdb-full-group
+        model: authentik_core.group
+        identifiers:
+          name: cmdb-full
+        attrs:
+          name: cmdb-full
+      - id: cmdb-region-group
+        model: authentik_core.group
+        identifiers:
+          name: cmdb-region-nord
+        attrs:
+          name: cmdb-region-nord
+      - id: cmdb-project-group
+        model: authentik_core.group
+        identifiers:
+          name: cmdb-projekt-a
+        attrs:
+          name: cmdb-projekt-a
+      - id: cmdb-user-demo-full
+        model: authentik_core.user
+        identifiers:
+          username: cmdb-demo-full
+        attrs:
+          username: cmdb-demo-full
+          name: Demo Full
+          email: cmdb-demo-full@rosenvall.local
+          path: users/cmdb-demo
+          type: internal
+          is_active: true
+          password: !Env CMDB_DEMO_PASSWORD
+          groups:
+            - !KeyOf cmdb-full-group
+      - id: cmdb-user-demo-region
+        model: authentik_core.user
+        identifiers:
+          username: cmdb-demo-region
+        attrs:
+          username: cmdb-demo-region
+          name: Demo Region
+          email: cmdb-demo-region@rosenvall.local
+          path: users/cmdb-demo
+          type: internal
+          is_active: true
+          password: !Env CMDB_DEMO_PASSWORD
+          groups:
+            - !KeyOf cmdb-region-group
+      - id: cmdb-user-demo-projekt
+        model: authentik_core.user
+        identifiers:
+          username: cmdb-demo-projekt
+        attrs:
+          username: cmdb-demo-projekt
+          name: Demo Projekt
+          email: cmdb-demo-projekt@rosenvall.local
+          path: users/cmdb-demo
+          type: internal
+          is_active: true
+          password: !Env CMDB_DEMO_PASSWORD
+          groups:
+            - !KeyOf cmdb-project-group
+      - id: cmdb_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: rosenvall.se/cmdb
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          client_type: public
+          client_id: cmdb-web
+          grant_types: [authorization_code, refresh_token]
+          redirect_uris:
+            - url: https://cmdb.rosenvall.se/auth/callback
+              matching_mode: strict
+            - url: http://localhost:8480/auth/callback
+              matching_mode: strict
+            - url: http://localhost:4200/auth/callback
+              matching_mode: strict
+          access_code_validity: minutes=1
+          access_token_validity: hours=1
+          refresh_token_validity: hours=8
+          sub_mode: hashed_user_id
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'offline_access'"]]
+      - id: cmdb_application
+        model: authentik_core.application
+        identifiers:
+          slug: cmdb
+        attrs:
+          name: CMDB
+          group: Applications
+          meta_description: POC med syntetisk data
+          provider: !KeyOf cmdb_provider
+          policy_engine_mode: any
   apps-grafana.yaml: |
     version: 1
     metadata:
