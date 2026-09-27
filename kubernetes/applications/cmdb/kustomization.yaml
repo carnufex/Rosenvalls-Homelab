@@ -7,3 +7,4 @@ resources:
   - secrets.yaml
   - database.yaml
   - app.yaml
+  - httproute.yaml
