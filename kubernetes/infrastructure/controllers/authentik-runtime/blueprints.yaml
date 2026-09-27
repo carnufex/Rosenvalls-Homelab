@@ -224,6 +224,24 @@ data:
           meta_description: POC med syntetisk data
           provider: !KeyOf cmdb_provider
           policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf cmdb_application
+          group: !KeyOf cmdb-full-group
+        attrs:
+          order: 1
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf cmdb_application
+          group: !KeyOf cmdb-region-group
+        attrs:
+          order: 2
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf cmdb_application
+          group: !KeyOf cmdb-project-group
+        attrs:
+          order: 3
   apps-grafana.yaml: |
     version: 1
     metadata:
