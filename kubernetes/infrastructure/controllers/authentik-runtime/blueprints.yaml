@@ -187,6 +187,14 @@ data:
           password: !Env CMDB_DEMO_PASSWORD
           groups:
             - !KeyOf cmdb-project-group
+      # Members of cmdb-full, declared on the group (not the user) so the users' other groups are untouched.
+      - model: authentik_core.group
+        identifiers:
+          name: cmdb-full
+        attrs:
+          users:
+            - !Find [authentik_core.user, [username, "christopher.rosenvall@gmail.com"]]
+            - !KeyOf cmdb-user-demo-full
       - id: cmdb_provider
         model: authentik_providers_oauth2.oauth2provider
         identifiers:
