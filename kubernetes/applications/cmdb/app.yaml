@@ -70,6 +70,10 @@ spec:
       serviceAccountName: cmdb-runtime
       securityContext:
         runAsNonRoot: true
+      volumes:
+        - name: graph-cache
+          emptyDir:
+            sizeLimit: 1Gi
       initContainers:
         # Migrations and the type catalog sync run as a separate step (ADR-0009).
         - name: migrate
@@ -105,10 +109,18 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
+          env:
+            # The in-memory graph (cmdb#8) starts from this snapshot after a container restart.
+            - name: Graph__SnapshotPath
+              value: /var/cache/cmdb/graph.bin
+          volumeMounts:
+            - name: graph-cache
+              mountPath: /var/cache/cmdb
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              # The graph holds ~320 MiB at rest; loading from the database peaks around 700 MiB.
+              memory: 512Mi
             limits:
               memory: 2Gi
           startupProbe:
