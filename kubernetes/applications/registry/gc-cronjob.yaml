@@ -33,7 +33,7 @@ spec:
                   topologyKey: kubernetes.io/hostname
           containers:
             - name: gc
-              image: registry:3.1.1
+              image: registry:3.1.2
               imagePullPolicy: IfNotPresent
               command:
                 - /bin/registry
