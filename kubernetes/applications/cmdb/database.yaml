@@ -21,6 +21,18 @@ spec:
         - CREATE EXTENSION IF NOT EXISTS postgis
         - CREATE EXTENSION IF NOT EXISTS pg_trgm
 
+  # Roles that read the database directly, outside the API (carnufex/cmdb ADR-0012).
+  # Row-level security limits each to the access scopes naming it in
+  # access_scope.db_roles; the API grants SELECT on start.
+  managed:
+    roles:
+      - name: cmdb_rapport_nord
+        ensure: present
+        login: true
+        connectionLimit: 5
+        passwordSecret:
+          name: cmdb-rapport-nord
+
   storage:
     size: 10Gi
     storageClass: longhorn
