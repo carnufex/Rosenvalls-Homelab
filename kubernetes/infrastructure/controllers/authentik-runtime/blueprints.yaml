@@ -252,6 +252,130 @@ data:
           group: !KeyOf cmdb-project-group
         attrs:
           order: 3
+      # Interactive agents (Claude Code, Codex) over MCP (ADR-0011): public PKCE client with a fixed loopback
+      # callback, since Authentik has no dynamic client registration. Same people, same groups as the web app.
+      - id: cmdb_mcp_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: rosenvall.se/cmdb-mcp
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          issuer_mode: per_provider
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          client_type: public
+          client_id: cmdb-mcp
+          grant_types: [authorization_code, refresh_token]
+          redirect_uris:
+            - url: http://localhost:33418/callback
+              matching_mode: strict
+            - url: http://127.0.0.1:33418/callback
+              matching_mode: strict
+          access_code_validity: minutes=1
+          access_token_validity: hours=1
+          refresh_token_validity: days=7
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'offline_access'"]]
+      - id: cmdb_mcp_application
+        model: authentik_core.application
+        identifiers:
+          slug: cmdb-mcp
+        attrs:
+          name: CMDB för agenter (MCP)
+          group: Applications
+          meta_description: MCP-klient för Claude Code och Codex, syntetisk data
+          meta_launch_url: blank://blank
+          provider: !KeyOf cmdb_mcp_provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf cmdb_mcp_application
+          group: !KeyOf cmdb-full-group
+        attrs:
+          order: 1
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf cmdb_mcp_application
+          group: !KeyOf cmdb-region-group
+        attrs:
+          order: 2
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf cmdb_mcp_application
+          group: !KeyOf cmdb-project-group
+        attrs:
+          order: 3
+      # Unattended agents: service accounts that get tokens with client_credentials (username + app password).
+      - id: cmdb-agents-group
+        model: authentik_core.group
+        identifiers:
+          name: cmdb-agents
+        attrs:
+          name: cmdb-agents
+      - id: cmdb-agent-demo-user
+        model: authentik_core.user
+        identifiers:
+          username: cmdb-agent-demo
+        attrs:
+          username: cmdb-agent-demo
+          name: CMDB demoagent
+          path: users/cmdb-demo
+          type: service_account
+          is_active: true
+          groups:
+            - !KeyOf cmdb-agents-group
+      - model: authentik_core.token
+        identifiers:
+          identifier: cmdb-agent-demo
+        attrs:
+          user: !KeyOf cmdb-agent-demo-user
+          intent: app_password
+          key: !Env CMDB_AGENT_TOKEN
+          expiring: false
+          description: client_credentials against cmdb-agents
+      - id: cmdb_agents_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: rosenvall.se/cmdb-agents
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          issuer_mode: per_provider
+          sub_mode: hashed_user_id
+          include_claims_in_id_token: true
+          client_type: public
+          client_id: cmdb-agents
+          grant_types: [client_credentials]
+          redirect_uris: []
+          access_token_validity: hours=1
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'offline_access'"]]
+      - id: cmdb_agents_application
+        model: authentik_core.application
+        identifiers:
+          slug: cmdb-agents
+        attrs:
+          name: CMDB för obevakade agenter
+          group: Applications
+          meta_description: Tjänstekonton via client_credentials, syntetisk data
+          meta_launch_url: blank://blank
+          provider: !KeyOf cmdb_agents_provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf cmdb_agents_application
+          group: !KeyOf cmdb-agents-group
+        attrs:
+          order: 1
   apps-grafana.yaml: |
     version: 1
     metadata:

@@ -29,6 +29,8 @@ patches can accumulate millions of rows and OOM-loop the worker during
 | Grafana | Active after sync | `https://grafana.rosenvall.local/login/generic_oauth` |
 | Headlamp | Active | `https://headlamp.rosenvall.se/oidc-callback` |
 | CMDB | Active | `https://cmdb.rosenvall.se/auth/callback` (+ localhost 8480/4200 for dev), public client `cmdb-web` |
+| CMDB MCP | Active | public client `cmdb-mcp`, loopback `http://localhost:33418/callback` for Claude Code/Codex |
+| CMDB agents | Active | `client_credentials` on `cmdb-agents` for service accounts in group `cmdb-agents` |
 
 Use native OIDC for apps in this table. Proxy-based protection is limited to
 the explicit exceptions below.
@@ -51,6 +53,7 @@ Required keys:
 - `PLEX_CLIENT_ID`
 - `PLEX_CLIENT_SECRET`
 - `CMDB_DEMO_PASSWORD` (the three synthetic cmdb demo users, `cmdb-demo-*`)
+- `CMDB_AGENT_TOKEN` (app password of the service account `cmdb-agent-demo`)
 
 ## Authentik Proxy Apps
 
