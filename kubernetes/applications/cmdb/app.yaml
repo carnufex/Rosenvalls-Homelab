@@ -119,8 +119,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              # The graph holds ~320 MiB at rest; loading from the database peaks around 700 MiB.
-              memory: 512Mi
+              # Full scale: ~660 MiB at rest in the pod. Changes apply as a delta in milliseconds; a structural change
+              # (new equipment or cable) rebuilds the graph and peaks around 1.6 GB (cmdb docs/plan.md, "Tillväxt", #81).
+              # At 2x data the limit needs ~4Gi and at 4x ~7Gi, unless carnufex/cmdb#119 lowers the rebuild peak.
+              memory: 768Mi
             limits:
               memory: 2Gi
           startupProbe:
