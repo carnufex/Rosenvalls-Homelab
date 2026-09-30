@@ -180,6 +180,9 @@ spec:
               value: cmdb-web
             - name: MAP_BASEMAP
               value: esri
+            # The operations agent in ElevenLabs (carnufex/cmdb ADR-0015): call buttons in the web app.
+            - name: VOICE_AGENT_ID
+              value: agent_5601m3sj3df0f6jvg4w1bj13m92g
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
