@@ -180,8 +180,11 @@ spec:
               value: cmdb-web
             - name: MAP_BASEMAP
               value: esri
-            # The operations agent in ElevenLabs (carnufex/cmdb ADR-0015): call buttons in the web app.
+            # Voice agents in ElevenLabs (carnufex/cmdb ADR-0015, ADR-0016): the service desk switchboard answers the
+            # web app's calls; proactive risk calls go straight to the NOC agent.
             - name: VOICE_AGENT_ID
+              value: agent_4901m3szgyjwexwsqjxav28bnrnt
+            - name: VOICE_NOC_AGENT_ID
               value: agent_5601m3sj3df0f6jvg4w1bj13m92g
           securityContext:
             allowPrivilegeEscalation: false
