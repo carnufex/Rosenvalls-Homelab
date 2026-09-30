@@ -119,9 +119,9 @@ spec:
           resources:
             requests:
               cpu: 100m
-              # Full scale: ~660 MiB at rest in the pod. Changes apply as a delta in milliseconds; a structural change
-              # (new equipment or cable) rebuilds the graph and peaks around 1.6 GB (cmdb docs/plan.md, "Tillväxt", #81).
-              # At 2x data the limit needs ~4Gi and at 4x ~7Gi, unless carnufex/cmdb#119 lowers the rebuild peak.
+              # Full scale: ~700 MiB at rest in the pod. Changes apply as a delta in milliseconds and fold in at ~1.1x
+              # the graph; only removed or moved objects (rare, carnufex/cmdb#123) and the load at startup peak higher,
+              # ~1.6 GB (cmdb docs/plan.md, "Tillväxt"). At 2x data the limit needs ~4Gi and at 4x ~7Gi.
               memory: 768Mi
             limits:
               memory: 2Gi
