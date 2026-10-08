@@ -1,0 +1,148 @@
+# Network policy for the cmdb namespace (carnufex/cmdb#182). Default deny in both directions with DNS open, then
+# one allow policy per workload; Cilium policies are additive, so anything not listed here is dropped.
+# CiliumNetworkPolicy rather than NetworkPolicy: traffic from the Cilium Gateway carries the reserved "ingress"
+# identity, which a Kubernetes NetworkPolicy cannot select, and Authentik is reached by its public name (toFQDNs).
+# Kubelet probes from the node are allowed by Cilium regardless of policy.
+# Debug drops: hubble observe -n cmdb --verdict DROPPED
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+  namespace: cmdb
+spec:
+  endpointSelector: {}
+  # An empty rule selects every pod and allows nothing, which turns on default deny.
+  ingress:
+    - {}
+  egress:
+    # DNS via kube-dns. The L7 rule lets the DNS proxy see lookups, which toFQDNs below depends on.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cmdb-web
+  namespace: cmdb
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cmdb-web
+  ingress:
+    # Only the Cilium Gateway (HTTPRoute cmdb on gateway/external).
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: cmdb-api
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cmdb-api
+  namespace: cmdb
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cmdb-api
+  ingress:
+    # /api, /mcp and the voice channels all come through nginx in cmdb-web.
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: cmdb-web
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    # The database (also used by the migrate init container).
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: cmdb-postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # OIDC metadata and signing keys (Auth__Authority). The API makes no other outbound calls:
+    # ElevenLabs calls in through the gateway, SMS is stubbed and the basemap is fetched by the browser.
+    - toFQDNs:
+        - matchName: authentik.rosenvall.se
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cmdb-postgresql
+  namespace: cmdb
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: cmdb-postgresql
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: cmdb-api
+        # The demo data Job from cmdb scripts/load-demo-data.sh, which sets this label.
+        - matchLabels:
+            app.kubernetes.io/name: cmdb-datagen
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # The CNPG operator: instance status endpoint (8000) and management connections (5432).
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            app.kubernetes.io/name: cloudnative-pg
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+            - port: "5432"
+              protocol: TCP
+  egress:
+    # The instance manager watches the Cluster resource and reports status through the API server.
+    - toEntities:
+        - kube-apiserver
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cmdb-datagen
+  namespace: cmdb
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cmdb-datagen
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: cmdb-postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP

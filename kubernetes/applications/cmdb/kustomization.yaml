@@ -8,3 +8,4 @@ resources:
   - database.yaml
   - app.yaml
   - httproute.yaml
+  - networkpolicy.yaml
