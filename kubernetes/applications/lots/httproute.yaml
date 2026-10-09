@@ -1,0 +1,24 @@
+# Public entry point. The SPA shell is public; every API call needs an Authentik token (application "lots",
+# blueprint apps-lots.yaml) and only members of the lots-* groups can sign in.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: lots
+  namespace: lots
+spec:
+  hostnames:
+    - lots.rosenvall.se
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external
+      namespace: gateway
+      sectionName: https
+  rules:
+    - matches:
+        - path: { type: PathPrefix, value: / }
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: lots
+          port: 8080

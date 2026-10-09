@@ -20,6 +20,8 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: cmdb
     server: https://kubernetes.default.svc
+  - namespace: lots
+    server: https://kubernetes.default.svc
   - namespace: media
     server: https://kubernetes.default.svc
   - namespace: ollama

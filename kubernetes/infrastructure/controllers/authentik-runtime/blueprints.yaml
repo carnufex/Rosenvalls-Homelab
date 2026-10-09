@@ -121,6 +121,102 @@ data:
           group: Applications
           provider: !KeyOf rosenvall_devops_provider
           policy_engine_mode: any
+  apps-lots.yaml: |
+    version: 1
+    metadata:
+      name: Apps - Lots
+    entries:
+      # Group names are the roles in Lots (prefix "lots-" is stripped): admin, planner, operator, auditor.
+      - id: lots-admin-group
+        model: authentik_core.group
+        identifiers:
+          name: lots-admin
+        attrs:
+          name: lots-admin
+      - id: lots-planner-group
+        model: authentik_core.group
+        identifiers:
+          name: lots-planner
+        attrs:
+          name: lots-planner
+      - id: lots-operator-group
+        model: authentik_core.group
+        identifiers:
+          name: lots-operator
+        attrs:
+          name: lots-operator
+      - id: lots-auditor-group
+        model: authentik_core.group
+        identifiers:
+          name: lots-auditor
+        attrs:
+          name: lots-auditor
+      # Members declared on the group so the user's other groups are untouched.
+      - model: authentik_core.group
+        identifiers:
+          name: lots-admin
+        attrs:
+          users:
+            - !Find [authentik_core.user, [username, "christopher.rosenvall@gmail.com"]]
+      - id: lots_provider
+        model: authentik_providers_oauth2.oauth2provider
+        identifiers:
+          name: rosenvall.se/lots
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, "default-provider-authorization-implicit-consent"]]
+          signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, "default-provider-invalidation-flow"]]
+          client_type: public
+          client_id: lots
+          grant_types: [authorization_code, refresh_token]
+          redirect_uris:
+            - url: https://lots.rosenvall.se/
+              matching_mode: strict
+            - url: http://localhost:8088/
+              matching_mode: strict
+          access_code_validity: minutes=1
+          access_token_validity: hours=1
+          refresh_token_validity: hours=8
+          sub_mode: hashed_user_id
+          property_mappings:
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+      - id: lots_application
+        model: authentik_core.application
+        identifiers:
+          slug: lots
+        attrs:
+          name: Lots
+          group: Applications
+          meta_description: Agentskal med identitet, policy och audit
+          meta_launch_url: https://lots.rosenvall.se/
+          provider: !KeyOf lots_provider
+          policy_engine_mode: any
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf lots_application
+          group: !KeyOf lots-admin-group
+        attrs:
+          order: 1
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf lots_application
+          group: !KeyOf lots-planner-group
+        attrs:
+          order: 2
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf lots_application
+          group: !KeyOf lots-operator-group
+        attrs:
+          order: 3
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf lots_application
+          group: !KeyOf lots-auditor-group
+        attrs:
+          order: 4
   apps-cmdb.yaml: |
     version: 1
     metadata:

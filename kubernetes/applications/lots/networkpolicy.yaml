@@ -1,0 +1,103 @@
+# Network policy for the lots namespace. Default deny in both directions with DNS open, then one allow policy per
+# workload (Cilium policies are additive). CiliumNetworkPolicy because traffic from the Cilium Gateway carries the
+# reserved "ingress" identity and public services are reached by name (toFQDNs). Same shape as the cmdb namespace.
+# Debug drops: hubble observe -n lots --verdict DROPPED
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+  namespace: lots
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lots
+  namespace: lots
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lots
+  ingress:
+    # Only the Cilium Gateway (HTTPRoute lots on gateway/external).
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: lots-postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # OIDC metadata and signing keys, and the service account token for the cmdb profile (client_credentials),
+    # and the CMDB's own MCP endpoint, all by public name.
+    - toFQDNs:
+        - matchName: authentik.rosenvall.se
+        - matchName: cmdb.rosenvall.se
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # The model: Service ollama/ollama has no selector, its endpoint is the Ollama host on the LAN.
+    - toCIDR:
+        - 192.168.1.215/32
+      toPorts:
+        - ports:
+            - port: "11434"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lots-postgresql
+  namespace: lots
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: lots-postgresql
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: lots
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # The CNPG operator: instance status endpoint (8000) and management connections (5432).
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cnpg-system
+            app.kubernetes.io/name: cloudnative-pg
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+            - port: "5432"
+              protocol: TCP
+  egress:
+    # The instance manager watches the Cluster resource and reports status through the API server.
+    - toEntities:
+        - kube-apiserver

@@ -28,6 +28,7 @@ patches can accumulate millions of rows and OOM-loop the worker during
 | Rosenvall DevOps | Active | `https://devops.rosenvall.se/auth/callback` |
 | Grafana | Active after sync | `https://grafana.rosenvall.local/login/generic_oauth` |
 | Headlamp | Active | `https://headlamp.rosenvall.se/oidc-callback` |
+| Lots | Active | `https://lots.rosenvall.se/` (+ localhost 8088 for dev), public client `lots`; groups `lots-admin/planner/operator/auditor` are the roles |
 | CMDB | Active | `https://cmdb.rosenvall.se/auth/callback` (+ localhost 8480/4200 for dev), public client `cmdb-web` |
 | CMDB MCP | Active | public client `cmdb-mcp`, loopback `http://localhost:33418/callback` for Claude Code/Codex |
 | CMDB agents | Active | `client_credentials` on `cmdb-agents` for service accounts in group `cmdb-agents` |

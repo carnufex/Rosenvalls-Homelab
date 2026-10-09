@@ -1,0 +1,41 @@
+# PostgreSQL for Lots (runs, trace, approvals, audit log) on CloudNativePG. Single instance: the
+# volumes are replicated by Longhorn and the audit log is included in the GFS backup group.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: lots-postgresql
+  namespace: lots
+  labels:
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/gfs: enabled
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+
+  bootstrap:
+    initdb:
+      database: lots
+      owner: lots
+      secret:
+        name: lots-postgresql-bootstrap
+
+  storage:
+    size: 2Gi
+    storageClass: longhorn
+
+  walStorage:
+    size: 1Gi
+    storageClass: longhorn
+
+  resources:
+    requests:
+      memory: 192Mi
+      cpu: 50m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  postgresql:
+    parameters:
+      max_connections: "50"
+      shared_buffers: "64MB"
