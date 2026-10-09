@@ -158,6 +158,13 @@ data:
         attrs:
           users:
             - !Find [authentik_core.user, [username, "christopher.rosenvall@gmail.com"]]
+      # The shared demo user (blueprint apps-rosenvall-devops.yaml) gets read-only access: no approvals, no audit.
+      - model: authentik_core.group
+        identifiers:
+          name: lots-operator
+        attrs:
+          users:
+            - !Find [authentik_core.user, [username, "demo"]]
       - id: lots_provider
         model: authentik_providers_oauth2.oauth2provider
         identifiers:
