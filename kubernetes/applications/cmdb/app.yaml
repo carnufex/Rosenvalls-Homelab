@@ -22,6 +22,10 @@ data:
   # The migrate step logs every SQL statement at Information otherwise.
   Logging__LogLevel__Microsoft.EntityFrameworkCore: Warning
   Auth__Authority: https://authentik.rosenvall.se/application/o/cmdb/
+  # Each voice endpoint accepts only its own ElevenLabs agent (carnufex/cmdb#181); ids from agent/agent.json, not secret.
+  Voice__Agents__Noc: agent_5601m3sj3df0f6jvg4w1bj13m92g
+  Voice__Agents__ServiceDesk: agent_4901m3szgyjwexwsqjxav28bnrnt
+  Voice__Agents__It: agent_8701m3szgwn9emh8237ccyhygr83
 ---
 apiVersion: v1
 kind: Service
