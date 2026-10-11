@@ -7,6 +7,7 @@ resources:
   - secrets.yaml
   - database.yaml
   - db-dump.yaml
+  - data-protection.yaml
   - app.yaml
   - toolpack.yaml
   - networkpolicy.yaml

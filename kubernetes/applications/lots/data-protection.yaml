@@ -1,0 +1,16 @@
+# The Data Protection key ring (Lots ADR 0032, #194): it wraps the data key of every secret in Lots' own store and encrypts delegated
+# login tokens and connected accounts. Without a persistent ring those are lost on every restart. Longhorn RWO, mounted by the single
+# replica (the Deployment uses strategy Recreate). Back it up apart from the database: together they open every stored secret.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lots-keys
+  namespace: lots
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 64Mi

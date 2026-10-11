@@ -61,6 +61,8 @@ data:
   Models__Prices__zai-org_GLM-5.3-Flash__InputPerMillion: "0.25"
   Models__Prices__zai-org_GLM-5.3-Flash__OutputPerMillion: "0.5"
   Database__MigrateOnStartup: "true"
+  # The key ring on its own volume (data-protection.yaml): stored secrets (#194) and login tokens survive restarts.
+  DataProtection__KeysPath: /data/keys
   Profiles__Path: /profiles
   Agent__DefaultProfile: cmdb
 ---
@@ -158,6 +160,8 @@ metadata:
 spec:
   replicas: 1
   revisionHistoryLimit: 3
+  strategy:
+    type: Recreate   # the key ring volume is ReadWriteOnce
   selector:
     matchLabels:
       app.kubernetes.io/name: lots
@@ -169,6 +173,7 @@ spec:
       serviceAccountName: lots-runtime
       securityContext:
         runAsNonRoot: true
+        fsGroup: 10001   # the image's user: the key ring volume is writable for it
         seccompProfile:
           type: RuntimeDefault
       volumes:
@@ -177,9 +182,12 @@ spec:
         - name: profiles
           configMap:
             name: lots-profiles
+        - name: keys
+          persistentVolumeClaim:
+            claimName: lots-keys
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-5485503@sha256:5224d1130c4d7fe014741df2eb43b79830303da7358291f588afad1ac918c2b3
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-81873fa@sha256:6cc50de3ddd16a19dba7221790b6275984b00c1876342266a5b102f7dd6deead
           ports:
             - containerPort: 8080
               name: http
@@ -199,6 +207,8 @@ spec:
             - name: profiles
               mountPath: /profiles
               readOnly: true
+            - name: keys
+              mountPath: /data/keys
           resources:
             requests:
               cpu: 50m

@@ -54,11 +54,14 @@ spec:
               protocol: TCP
     # OIDC metadata and signing keys, and the service account token for the cmdb profile (client_credentials),
     # and the CMDB's own MCP endpoint, all by public name. Berget AI: the hosted model of the berget plugin (Lots #172),
-    # used only by contexts or runs that pick its alias; cleared for internal data at most.
+    # used only by contexts or runs that pick its alias; cleared for internal data at most. Bitwarden Secrets Manager (EU): the
+    # bitwarden-secrets plugin's store (Lots #194), read with a Lots-only machine account.
     - toFQDNs:
         - matchName: authentik.rosenvall.se
         - matchName: cmdb.rosenvall.se
         - matchName: api.berget.ai
+        - matchName: identity.bitwarden.eu
+        - matchName: api.bitwarden.eu
       toPorts:
         - ports:
             - port: "443"
