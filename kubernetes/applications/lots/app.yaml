@@ -161,8 +161,12 @@ spec:
   replicas: 1
   revisionHistoryLimit: 3
   strategy:
-    type: Recreate   # the key ring volume is ReadWriteOnce
-    rollingUpdate: null   # clears the RollingUpdate defaults of the live object, which Recreate forbids
+    # The key ring volume is ReadWriteOnce: the old pod goes before the new one starts (as Recreate, which server-side apply cannot
+    # switch to from the live object's RollingUpdate defaults).
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: lots
