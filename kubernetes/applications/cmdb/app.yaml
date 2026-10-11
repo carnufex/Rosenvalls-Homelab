@@ -81,7 +81,7 @@ spec:
       initContainers:
         # Migrations and the type catalog sync run as a separate step (ADR-0009).
         - name: migrate
-          image: registry.rosenvall.se/carnufex/cmdb-api:sha-5826b08@sha256:c57450ea7a5a0cda1e3067ea7aa0b269e5457a14e38d4cccd34a505aefa17def
+          image: registry.rosenvall.se/carnufex/cmdb-api:sha-6e08e7a@sha256:c997ec83343b71ca8cf464b16e73a443967e510960f43c0efb9c3ce01b3be91f
           args: ["--migrate"]
           envFrom:
             - configMapRef:
@@ -100,7 +100,7 @@ spec:
               memory: 512Mi
       containers:
         - name: api
-          image: registry.rosenvall.se/carnufex/cmdb-api:sha-5826b08@sha256:c57450ea7a5a0cda1e3067ea7aa0b269e5457a14e38d4cccd34a505aefa17def
+          image: registry.rosenvall.se/carnufex/cmdb-api:sha-6e08e7a@sha256:c997ec83343b71ca8cf464b16e73a443967e510960f43c0efb9c3ce01b3be91f
           ports:
             - containerPort: 8080
               name: http
@@ -171,7 +171,7 @@ spec:
         runAsNonRoot: true
       containers:
         - name: web
-          image: registry.rosenvall.se/carnufex/cmdb-web:sha-5826b08@sha256:38e3cc800ce28ca90cae73f11178c16a6c4e79a6b6196ba0a532578eae2811b4
+          image: registry.rosenvall.se/carnufex/cmdb-web:sha-6e08e7a@sha256:3b5a606b4b23d34964559cc127a9e93fd1c31914a026690da59d0a56293d02c4
           ports:
             - containerPort: 8080
               name: http
