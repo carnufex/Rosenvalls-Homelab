@@ -39,3 +39,23 @@ spec:
     parameters:
       max_connections: "50"
       shared_buffers: "64MB"
+---
+# The lots database itself, declared so the operator installs pgvector: it is not a trusted extension, so the lots owner cannot
+# create it, and without it knowledge search scans every vector instead of using HNSW indexes. The database already exists (initdb
+# above); retain means deleting this resource never drops it.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: lots
+  namespace: lots
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  cluster:
+    name: lots-postgresql
+  name: lots
+  owner: lots
+  databaseReclaimPolicy: retain
+  extensions:
+    - name: vector
+      ensure: present

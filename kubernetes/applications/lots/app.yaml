@@ -39,6 +39,19 @@ data:
   Speech__Voices__sv: cb-default
   Speech__Voices__en: cb-default
   Speech__DefaultLanguage: sv
+  # Knowledge (ADR 0016): embeddings on the same Ollama, multilingual Arctic Embed 2 (#165). Users add their own sources on the
+  # Knowledge page; none are defined as code here.
+  Models__Aliases__embed__Targets__0__Endpoint: default
+  Models__Aliases__embed__Targets__0__Model: snowflake-arctic-embed2
+  # The document service on the same GPU PC (#167, ADR 0028): Docling layout, tables and OCR with page provenance, and the reranker
+  # (#169, bge-reranker-v2-m3 on the GPU). By address for the same reason as voice. While the PC is off, new documents are listed
+  # as failed and converted on the next index run, indexed ones stay searchable and search keeps the fused order.
+  Documents__BaseUrl: http://192.168.1.215:8710
+  Documents__ApiKeyEnv: LOTS_DOCUMENTS_KEY
+  Models__Endpoints__documents__BaseUrl: http://192.168.1.215:8710/v1
+  Models__Endpoints__documents__ApiKeyEnv: LOTS_DOCUMENTS_KEY
+  Models__Aliases__rerank__Targets__0__Endpoint: documents
+  Models__Aliases__rerank__Targets__0__Model: BAAI/bge-reranker-v2-m3
   Database__MigrateOnStartup: "true"
   Profiles__Path: /profiles
   Agent__DefaultProfile: cmdb
@@ -158,7 +171,7 @@ spec:
             name: lots-profiles
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-b332fb4@sha256:3ed96a8cc99613603834e7badce9708c64991808a296c6b1a6540fafc67f2360
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-5d2b8d4@sha256:f7f6892ae4f1f170667ca86b8ad4291ed50b47350c62ecf0a843fd42b2fcc757
           ports:
             - containerPort: 8080
               name: http
@@ -181,9 +194,9 @@ spec:
           resources:
             requests:
               cpu: 50m
-              memory: 192Mi
+              memory: 256Mi
             limits:
-              memory: 512Mi
+              memory: 1Gi   # knowledge indexing holds a converted document (chunks, page images) in memory
           startupProbe:
             httpGet:
               path: /health

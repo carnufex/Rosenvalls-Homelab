@@ -16,6 +16,11 @@ through per-call policy, approvals and an append-only audit log. Public at `http
   endpoint from Git (ollama/ollama only has one from an older sync and would lose it if recreated).
   The cluster has no GPU. While the PC is off the UI says voice is unavailable; typing still works. Conversation audio and
   meeting recordings are not stored here (no volume), so the Meetings page answers that meetings are not configured.
+- Knowledge: embeddings with `snowflake-arctic-embed2` on the same Ollama (alias `embed`); users add their own sources on the
+  Knowledge page. Changing the model re-embeds in the background and switches when the new index is complete (#165).
+- Documents: the Lots document service (Docling: layout, tables, OCR, page provenance) and its reranker (bge-reranker-v2-m3) on
+  the GPU PC at `192.168.1.215:8710` (`docker compose up -d` in `services/documents` of carnufex/Lots, key in its `.env`).
+  While the PC is off, new documents wait for the next index run; indexed ones stay searchable, without reranking.
 
 ## Identity
 
@@ -31,6 +36,7 @@ Add a user to a group in Authentik to give access.
 | `LOTS_DB_PASSWORD` | CNPG bootstrap secret and the connection string |
 | `CMDB_AGENT_TOKEN` | app password of the `cmdb-agent-demo` service account (profile `passwordEnv`) |
 | `LOTS_VOICE_KEY` | API key of the voice service on the GPU PC (its `VOICE_API_KEY`; shell `Speech__ApiKeyEnv`) |
+| `LOTS_DOCUMENTS_KEY` | API key of the document service on the GPU PC (its `DOCUMENTS_API_KEY`; shell `Documents__ApiKeyEnv` and the rerank endpoint) |
 | `GHCR_PAT`, registry password | image pull secret (same entries as the other apps) |
 
 ## Deploy a new version
@@ -45,7 +51,7 @@ Put the new `tag@sha256:<digest>` into `app.yaml` and push; ArgoCD syncs it.
 ## Network
 
 Default deny (`networkpolicy.yaml`). Ingress only from the Cilium Gateway. Egress: PostgreSQL, Authentik and the CMDB by
-name (443), and the GPU PC `192.168.1.215`: Ollama `11434` and the voice service `8700`.
+name (443), and the GPU PC `192.168.1.215`: Ollama `11434`, the voice service `8700` and the document service `8710`.
 
 ## Troubleshooting
 
@@ -53,4 +59,5 @@ name (443), and the GPU PC `192.168.1.215`: Ollama `11434` and the voice service
 - Sign-in fails with 403/empty roles: the user is not in a `lots-*` group (token claim `groups`).
 - Runs fail with a connection error: the Ollama host is off.
 - Voice unavailable: the PC is off or the voice container is down (`curl http://192.168.1.215:8700/health` from the LAN).
+- Documents listed as failed / no reranking: the document service is down (`curl http://192.168.1.215:8710/health`).
 - Dropped traffic: `hubble observe -n lots --verdict DROPPED`.
