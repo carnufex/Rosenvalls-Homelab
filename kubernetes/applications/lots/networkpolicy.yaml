@@ -61,6 +61,14 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+    # The tool pack (toolpack.yaml): MCP over HTTP inside the namespace.
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: lots-toolpack
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     # The GPU PC on the LAN: Ollama (Service ollama/ollama, no selector), the voice and the document service (by address).
     - toCIDR:
         - 192.168.1.215/32
@@ -105,3 +113,42 @@ spec:
     # The instance manager watches the Cluster resource and reports status through the API server.
     - toEntities:
         - kube-apiserver
+---
+# The tool pack: only the shell may call it, and it may only reach the public APIs of its internet packs (Lots #174) and the news
+# feeds configured in toolpack.yaml. Keep this list in step with Internet:Feeds.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lots-toolpack
+  namespace: lots
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lots-toolpack
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: lots
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toFQDNs:
+        - matchPattern: "*.wikipedia.org"
+        - matchName: api.open-meteo.com
+        - matchName: geocoding-api.open-meteo.com
+        - matchName: api.frankfurter.dev
+        - matchName: nominatim.openstreetmap.org
+        - matchName: date.nager.at
+        - matchName: export.arxiv.org
+        - matchName: api.krisinformation.se
+        - matchName: polisen.se
+        - matchName: www.polisen.se
+        - matchName: opendata-download-warnings.smhi.se
+        - matchName: www.svt.se
+        - matchName: feeds.bbci.co.uk
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

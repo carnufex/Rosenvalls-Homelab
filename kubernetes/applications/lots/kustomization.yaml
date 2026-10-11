@@ -7,5 +7,6 @@ resources:
   - secrets.yaml
   - database.yaml
   - app.yaml
+  - toolpack.yaml
   - networkpolicy.yaml
   - httproute.yaml

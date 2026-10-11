@@ -16,6 +16,11 @@ through per-call policy, approvals and an append-only audit log. Public at `http
   endpoint from Git (ollama/ollama only has one from an older sync and would lose it if recreated).
   The cluster has no GPU. While the PC is off the UI says voice is unavailable; typing still works. Conversation audio and
   meeting recordings are not stored here (no volume), so the Meetings page answers that meetings are not configured.
+- Tool pack (`toolpack.yaml`): the Lots MCP tool pack with the internet packs (weather, Wikipedia, exchange rates, maps, holidays,
+  news feeds, arXiv, SMHI, Polisen, Krisinformation; no keys). Install the "Internet tools" plugin in Lots (Administration > Plugins)
+  with `toolpackUrl` `http://lots-toolpack:8080/mcp`; users then switch the tools on under Account > Tools. Its egress is limited to
+  those public hosts (`networkpolicy.yaml`, policy `lots-toolpack`); a new news feed needs its host added there.
+- Plugins: the shell image ships its plugin catalog (internet, web-research, docker-ops); installed plugins live in the database.
 - Knowledge: embeddings with `snowflake-arctic-embed2` on the same Ollama (alias `embed`); users add their own sources on the
   Knowledge page. Changing the model re-embeds in the background and switches when the new index is complete (#165).
 - Documents: the Lots document service (Docling: layout, tables, OCR, page provenance) and its reranker (bge-reranker-v2-m3) on

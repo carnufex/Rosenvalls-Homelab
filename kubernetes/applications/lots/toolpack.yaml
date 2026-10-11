@@ -1,0 +1,83 @@
+# The Lots tool pack (carnufex/Lots src/Lots.Mcp.Toolpack): one MCP server with the internet packs (Lots #174), all keyless public
+# sources (weather, Wikipedia, exchange rates, maps, holidays, news feeds, arXiv, SMHI, Polisen, Krisinformation). The shell reaches it
+# at http://lots-toolpack:8080/mcp: install the "Internet tools" plugin (Administration > Plugins) with that toolpackUrl. Egress only to
+# the public hosts these packs call (networkpolicy.yaml). Image refs are bumped by hand like the shell's.
+apiVersion: v1
+kind: Service
+metadata:
+  name: lots-toolpack
+  namespace: lots
+spec:
+  selector:
+    app.kubernetes.io/name: lots-toolpack
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lots-toolpack
+  namespace: lots
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lots-toolpack
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lots-toolpack
+    spec:
+      serviceAccountName: lots-runtime
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: toolpack
+          image: registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-a66030c@sha256:e128e81a5471c0c66d8267c40ec401fd68281d5e2beb8f31fca1b4056d4f4e02
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - { name: Internet__Packs__0, value: "*" }
+            # news_headlines reads only these feeds (an allow-list; their hosts are in the network policy).
+            - { name: Internet__Feeds__0__Name, value: svt }
+            - { name: Internet__Feeds__0__Url, value: "https://www.svt.se/nyheter/rss.xml" }
+            - { name: Internet__Feeds__1__Name, value: bbc }
+            - { name: Internet__Feeds__1__Url, value: "https://feeds.bbci.co.uk/news/world/rss.xml" }
+            - { name: HOME, value: /tmp }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 20m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
