@@ -162,6 +162,7 @@ spec:
   revisionHistoryLimit: 3
   strategy:
     type: Recreate   # the key ring volume is ReadWriteOnce
+    rollingUpdate: null   # clears the RollingUpdate defaults of the live object, which Recreate forbids
   selector:
     matchLabels:
       app.kubernetes.io/name: lots
