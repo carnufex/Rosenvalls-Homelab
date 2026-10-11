@@ -62,11 +62,10 @@ data:
   Models__Prices__zai-org_GLM-5.3-Flash__OutputPerMillion: "0.5"
   Database__MigrateOnStartup: "true"
   # The Data Protection key ring (Lots ADR 0035, #200): in PostgreSQL, encrypted with the certificate from Bitwarden (secrets.yaml,
-  # lots-data-protection). The old plaintext ring on the lots-keys volume is imported once, encrypted, then the volume goes.
+  # lots-data-protection), shared by every replica. (The earlier plaintext ring on a volume was imported on 2026-10-11, then wiped.)
   DataProtection__Store: database
   DataProtection__Certificates__0__Path: /run/secrets/data-protection/tls.crt
   DataProtection__Certificates__0__KeyPath: /run/secrets/data-protection/tls.key
-  DataProtection__ImportKeysFrom: /data/keys
   Profiles__Path: /profiles
   Agent__DefaultProfile: cmdb
 ---
@@ -165,12 +164,11 @@ spec:
   replicas: 1
   revisionHistoryLimit: 3
   strategy:
-    # The key ring volume is ReadWriteOnce: the old pod goes before the new one starts (as Recreate, which server-side apply cannot
-    # switch to from the live object's RollingUpdate defaults).
+    # No volume ties the shell to one pod any more (#200): the new pod is ready before the old one goes.
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: lots
@@ -182,7 +180,6 @@ spec:
       serviceAccountName: lots-runtime
       securityContext:
         runAsNonRoot: true
-        fsGroup: 10001   # the image's user: the key ring volume is writable for it
         seccompProfile:
           type: RuntimeDefault
       volumes:
@@ -191,10 +188,6 @@ spec:
         - name: profiles
           configMap:
             name: lots-profiles
-        - name: keys
-          persistentVolumeClaim:
-            claimName: lots-keys
-            readOnly: true
         - name: data-protection
           secret:
             secretName: lots-data-protection
@@ -219,9 +212,6 @@ spec:
               mountPath: /tmp
             - name: profiles
               mountPath: /profiles
-              readOnly: true
-            - name: keys
-              mountPath: /data/keys
               readOnly: true
             - name: data-protection
               mountPath: /run/secrets/data-protection
