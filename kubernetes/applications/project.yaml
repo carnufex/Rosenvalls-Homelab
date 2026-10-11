@@ -26,8 +26,6 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: ollama
     server: https://kubernetes.default.svc
-  - namespace: voice
-    server: https://kubernetes.default.svc
   - namespace: slack-ops-bot
     server: https://kubernetes.default.svc
   - namespace: gatebound

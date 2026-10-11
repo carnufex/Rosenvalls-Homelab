@@ -10,8 +10,10 @@ through per-call policy, approvals and an append-only audit log. Public at `http
 - Profile `cmdb` (ConfigMap `lots-profiles`): tools of the CMDB's MCP server, used as the `cmdb-agents` service account.
   The homelab (Docker) profile is not deployed: it needs Docker access, which does not exist in the cluster.
 - Model: `qwen3.5:latest` on the Ollama host via Service `ollama/ollama` (so a run fails while that host is off).
-- Voice: the Lots voice service (Whisper, Chatterbox, meeting diarization) on the same GPU PC via Service `voice/voice`
-  (`kubernetes/applications/voice`, port 8700; started there with `docker compose up -d` in `services/voice` of carnufex/Lots).
+- Voice: the Lots voice service (Whisper, Chatterbox, meeting diarization) on the same GPU PC at `192.168.1.215:8700`
+  (`Speech__BaseUrl`; started there with `docker compose up -d` in `services/voice` of carnufex/Lots). By address, not a
+  selector-less Service like Ollama's: ArgoCD's default resource exclusions skip `Endpoints`, so such a Service gets no
+  endpoint from Git (ollama/ollama only has one from an older sync and would lose it if recreated).
   The cluster has no GPU. While the PC is off the UI says voice is unavailable; typing still works. Conversation audio and
   meeting recordings are not stored here (no volume), so the Meetings page answers that meetings are not configured.
 

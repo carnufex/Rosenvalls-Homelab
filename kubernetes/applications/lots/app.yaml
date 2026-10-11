@@ -31,9 +31,10 @@ data:
   # Self-hosted model on the Ollama host (Service ollama/ollama -> LAN endpoint).
   Model__BaseUrl: http://ollama.ollama.svc.cluster.local:11434/v1
   Model__Model: qwen3.5:latest
-  # Voice (#38): the voice service on the same GPU PC (Service voice/voice -> LAN endpoint). Chatterbox for both languages;
-  # while the PC is off the UI says voice is unavailable and typing still works. No audio is stored (no volume here).
-  Speech__BaseUrl: http://voice.voice.svc.cluster.local:8700/v1
+  # Voice (#38): the voice service on the same GPU PC, by address: ArgoCD excludes Endpoints, so a selector-less Service
+  # like ollama/ollama cannot be created from Git any more. Chatterbox for both languages; while the PC is off the UI says
+  # voice is unavailable and typing still works. No audio is stored (no volume here).
+  Speech__BaseUrl: http://192.168.1.215:8700/v1
   Speech__ApiKeyEnv: LOTS_VOICE_KEY
   Speech__Voices__sv: cb-default
   Speech__Voices__en: cb-default

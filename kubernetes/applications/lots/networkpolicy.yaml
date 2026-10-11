@@ -61,8 +61,7 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # The model and the voice service: Services ollama/ollama and voice/voice have no selector, their endpoint is the GPU PC
-    # on the LAN.
+    # The GPU PC on the LAN: Ollama (Service ollama/ollama, no selector) and the voice service (by address).
     - toCIDR:
         - 192.168.1.215/32
       toPorts:
