@@ -192,7 +192,7 @@ spec:
             claimName: lots-keys
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-81873fa@sha256:6cc50de3ddd16a19dba7221790b6275984b00c1876342266a5b102f7dd6deead
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-98a97ff@sha256:a7fc1be55d0e9d055e4a75f3d4c1e22b146c376efa2ca3d908beba67a022dbba
           ports:
             - containerPort: 8080
               name: http
