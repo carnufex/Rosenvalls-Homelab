@@ -16,8 +16,6 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: headlamp
     server: https://kubernetes.default.svc
-  - namespace: matplan
-    server: https://kubernetes.default.svc
   - namespace: cmdb
     server: https://kubernetes.default.svc
   - namespace: lots

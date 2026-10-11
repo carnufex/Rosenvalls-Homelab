@@ -59,7 +59,7 @@ secrets will never materialize:
   CLAUDE.md "Build & deploy"). Tag immutably (`sha-<gitshort>`), never deploy
   `:latest` for pinned apps.
 - **Private images** need an image pull secret: copy `ghcr-image-pull-secret.yaml`
-  + its ExternalSecret from `gatebound/` or `matplan/` — it is dual-auth for
+  + its ExternalSecret from `gatebound/` — it is dual-auth for
   `ghcr.io` (read-only legacy) and `registry.rosenvall.se`.
 - **Secrets:** use `ExternalSecret` resources, not inline `Secret` data. Bootstrap-
   only / break-glass secrets stay out of Git.

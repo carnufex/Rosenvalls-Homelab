@@ -294,8 +294,6 @@ $query = [uri]::EscapeDataString('1 - node_memory_MemAvailable_bytes / node_memo
 kubectl -n monitoring exec $pod -c prometheus -- wget -qO- "http://127.0.0.1:9090/api/v1/query?query=$query"
 ```
 
-During Docker cutover, `ragflow` and `matplan-whisper` may be intentionally paused to keep worker memory below eviction pressure. Re-enable them only after media and Home Assistant have run in Kubernetes without new evictions for at least one day.
-
 Control-plane memory above 85% should be treated as an early warning, not an
 automatic VM resize. First check whether workloads can move off `desktop` or
 whether the physical host needs more RAM; `control-01` should only be increased

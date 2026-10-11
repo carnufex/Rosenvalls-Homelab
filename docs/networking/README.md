@@ -171,7 +171,6 @@ Invoke-WebRequest -Uri https://argo.rosenvall.se -Method Head
 - `https://headlamp.rosenvall.se` uses native Authentik OIDC.
 - `https://seerr.rosenvall.se` uses Authentik through `oauth2-proxy`.
 - `https://plex.rosenvall.se` routes directly to Plex for browser, native client, and cast access.
-- MatPlan and BikePal are not publicly routed until they have native Authentik/OIDC or an approved proxy exception.
 
 ## Implementation Notes
 
