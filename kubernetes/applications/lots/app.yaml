@@ -179,7 +179,7 @@ spec:
             name: lots-profiles
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-436644b@sha256:09c4c205824a98f856c14cdc6f7fa179a778ac91479a901f507c5e74ea2273ea
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-5485503@sha256:5224d1130c4d7fe014741df2eb43b79830303da7358291f588afad1ac918c2b3
           ports:
             - containerPort: 8080
               name: http
