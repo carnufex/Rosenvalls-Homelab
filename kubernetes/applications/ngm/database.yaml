@@ -6,13 +6,17 @@ kind: Cluster
 metadata:
   name: ngm-postgresql
   namespace: ngm
-  labels:
-    recurring-job.longhorn.io/source: enabled
-    recurring-job-group.longhorn.io/gfs: enabled
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
   instances: 2
+  inheritedMetadata:
+    labels:
+      # Longhorn reads recurring-job labels from the PVC: the "cnpg" group only
+      # trims. These databases are backed up with logical dumps instead.
+      recurring-job.longhorn.io/source: enabled
+      recurring-job-group.longhorn.io/cnpg: enabled
+
   imageName: ghcr.io/cloudnative-pg/postgresql:17
 
   bootstrap:
@@ -20,13 +24,15 @@ spec:
       database: ngm
       owner: ngm
 
+  # Two CNPG instances already keep two copies of the data; one Longhorn replica
+  # per instance is enough.
   storage:
     size: 5Gi
-    storageClass: longhorn-critical
+    storageClass: longhorn-single
 
   walStorage:
     size: 2Gi
-    storageClass: longhorn-critical
+    storageClass: longhorn-single
 
   resources:
     requests:

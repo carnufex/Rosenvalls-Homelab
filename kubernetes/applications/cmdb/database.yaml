@@ -9,6 +9,13 @@ metadata:
   namespace: cmdb
 spec:
   instances: 1
+  inheritedMetadata:
+    labels:
+      # Longhorn reads recurring-job labels from the PVC: the "cnpg" group only
+      # trims. These databases are backed up with logical dumps instead.
+      recurring-job.longhorn.io/source: enabled
+      recurring-job-group.longhorn.io/cnpg: enabled
+
   imageName: ghcr.io/cloudnative-pg/postgis:17-3.5
 
   bootstrap:

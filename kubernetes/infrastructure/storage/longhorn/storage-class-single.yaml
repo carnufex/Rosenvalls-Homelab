@@ -1,0 +1,16 @@
+# One Longhorn replica, for workloads that replicate their own data (CNPG
+# clusters with instances >= 2): a second Longhorn copy per instance only
+# doubles disk use and rebuild traffic on the storage workers.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-single
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+parameters:
+  fsType: ext4
+  numberOfReplicas: "1"
+  staleReplicaTimeout: "30"
+  dataLocality: "best-effort"

@@ -109,6 +109,8 @@ spec:
         # The demo data Job from cmdb scripts/load-demo-data.sh, which sets this label.
         - matchLabels:
             app.kubernetes.io/name: cmdb-datagen
+        - matchLabels:
+            app.kubernetes.io/name: db-dump
       toPorts:
         - ports:
             - port: "5432"
@@ -138,6 +140,24 @@ spec:
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: cmdb-datagen
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: cmdb-postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: db-dump
+  namespace: cmdb
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: db-dump
   egress:
     - toEndpoints:
         - matchLabels:

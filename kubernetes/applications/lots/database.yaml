@@ -1,15 +1,19 @@
 # PostgreSQL for Lots (runs, trace, approvals, audit log) on CloudNativePG. Single instance: the
-# volumes are replicated by Longhorn and the audit log is included in the GFS backup group.
+# volumes are replicated by Longhorn and the audit log is in the nightly dump (db-dump.yaml).
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: lots-postgresql
   namespace: lots
-  labels:
-    recurring-job.longhorn.io/source: enabled
-    recurring-job-group.longhorn.io/gfs: enabled
 spec:
   instances: 1
+  inheritedMetadata:
+    labels:
+      # Longhorn reads recurring-job labels from the PVC: the "cnpg" group only
+      # trims. These databases are backed up with logical dumps instead.
+      recurring-job.longhorn.io/source: enabled
+      recurring-job-group.longhorn.io/cnpg: enabled
+
   imageName: ghcr.io/cloudnative-pg/postgresql:17
 
   bootstrap:

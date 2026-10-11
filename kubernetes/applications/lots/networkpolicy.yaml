@@ -96,6 +96,8 @@ spec:
     - fromEndpoints:
         - matchLabels:
             app.kubernetes.io/name: lots
+        - matchLabels:
+            app.kubernetes.io/name: db-dump
       toPorts:
         - ports:
             - port: "5432"
@@ -153,4 +155,22 @@ spec:
       toPorts:
         - ports:
             - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: db-dump
+  namespace: lots
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: db-dump
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: lots-postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
               protocol: TCP

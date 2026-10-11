@@ -6,6 +6,7 @@ resources:
   - image-pull-secret.yaml
   - secrets.yaml
   - database.yaml
+  - db-dump.yaml
   - app.yaml
   - toolpack.yaml
   - networkpolicy.yaml

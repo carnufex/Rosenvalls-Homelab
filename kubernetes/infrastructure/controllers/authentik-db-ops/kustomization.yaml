@@ -4,3 +4,4 @@ namespace: authentik
 
 resources:
   - r2-backups-disabled-configmap.yaml
+  - db-dump.yaml

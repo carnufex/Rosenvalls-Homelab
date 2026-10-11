@@ -1,9 +1,13 @@
+# Longhorn backupstore on host1's 8 TB "lagring" disk, exported by the Proxmox
+# host itself (scripts/configure-host1-backup-nfs.ps1). It is outside every
+# Longhorn data disk and outside the "desktop" host that carries all three
+# storage workers. Not R2: Class A operations exceed the free tier.
 apiVersion: longhorn.io/v1beta2
 kind: BackupTarget
 metadata:
   name: default
   namespace: longhorn-system
 spec:
-  backupTargetURL: ""
+  backupTargetURL: "nfs://192.168.1.230:/srv/nfs/backup/longhorn"
   credentialSecret: ""
   pollInterval: 24h
