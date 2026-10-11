@@ -61,8 +61,12 @@ data:
   Models__Prices__zai-org_GLM-5.3-Flash__InputPerMillion: "0.25"
   Models__Prices__zai-org_GLM-5.3-Flash__OutputPerMillion: "0.5"
   Database__MigrateOnStartup: "true"
-  # The key ring on its own volume (data-protection.yaml): stored secrets (#194) and login tokens survive restarts.
-  DataProtection__KeysPath: /data/keys
+  # The Data Protection key ring (Lots ADR 0035, #200): in PostgreSQL, encrypted with the certificate from Bitwarden (secrets.yaml,
+  # lots-data-protection). The old plaintext ring on the lots-keys volume is imported once, encrypted, then the volume goes.
+  DataProtection__Store: database
+  DataProtection__Certificates__0__Path: /run/secrets/data-protection/tls.crt
+  DataProtection__Certificates__0__KeyPath: /run/secrets/data-protection/tls.key
+  DataProtection__ImportKeysFrom: /data/keys
   Profiles__Path: /profiles
   Agent__DefaultProfile: cmdb
 ---
@@ -190,9 +194,13 @@ spec:
         - name: keys
           persistentVolumeClaim:
             claimName: lots-keys
+            readOnly: true
+        - name: data-protection
+          secret:
+            secretName: lots-data-protection
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-98a97ff@sha256:a7fc1be55d0e9d055e4a75f3d4c1e22b146c376efa2ca3d908beba67a022dbba
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-b14d6fe@sha256:6779eb5e4a92ac0ada310b7503da1f96e814005d6c8360603b67cb6305b59e53
           ports:
             - containerPort: 8080
               name: http
@@ -214,6 +222,10 @@ spec:
               readOnly: true
             - name: keys
               mountPath: /data/keys
+              readOnly: true
+            - name: data-protection
+              mountPath: /run/secrets/data-protection
+              readOnly: true
           resources:
             requests:
               cpu: 50m
