@@ -24,7 +24,6 @@ Partially verified:
 
 Missing or residual risk:
 
-- MatPlan and BikePal runtime manifests exist, but database restore is not yet proven end to end.
 - Talos API CA rotation is not complete until a dry-run and live rotation succeed all the way through.
 - Secure off-machine storage for current kubeconfig, talosconfig, local `terraform.tfvars`, and exported local CA must be maintained outside Git.
 
@@ -102,8 +101,8 @@ Full-cluster power-cycle drill evidence on 2026-05-25: all Talos nodes were rebo
 | Public routing | Partial | In-cluster connector is in Git, published routes are dashboard-managed |
 | Authentik database | Partial | Monthly encrypted logical R2 dump exists; restore drill still required |
 | Slim app configs | Partial | Monthly encrypted R2 archive excludes metadata/cache/media |
-| Longhorn volumes | Partial | Local snapshots exist; active offsite backup is disabled to avoid R2 Class A costs |
-| MatPlan data | Weak | Runtime is defined, restore path is not documented |
+| Longhorn volumes | Partial | Daily backups to host1 NFS (off the storage host, same site); no offsite copy |
+| CNPG databases | Partial | Nightly pg_dump (authentik, cmdb, lots to host1; ngm to OneDrive); authentik restore verified 2026-10-11 |
 | Talos/Kubernetes access artifacts | Weak | Generated locally, no repo-defined off-machine backup policy |
 | Headlamp cluster UI | Internal read-only | Helps inspect recovery state, but is not part of bootstrap |
 | DevOps preview namespaces | Automated TTL cleanup | Non-critical previews older than 24h are deleted by label-based cleanup |
@@ -180,7 +179,7 @@ For state restore drills, use non-production restore targets first:
 - restore one small Longhorn-backed config PVC from backup into a temporary namespace
 - restore Authentik from the critical logical dump into a temporary database in a controlled window
 - restore slim app configs into a temporary directory and verify excluded metadata/cache/media stay excluded
-- verify MatPlan and BikePal CNPG backup/restore before treating those databases as recoverable
+- restore one cmdb or lots dump from `/srv/nfs/backup/db-dumps` into a temporary database
 - verify media files through NFS and a separate file-level backup, not through Longhorn
 
 ## Talos API CA Status
@@ -191,7 +190,7 @@ Kubernetes access artifacts can be regenerated and rotated, but Talos API CA rot
 
 - `P0`: write a fully validated new-server and stolen-server runbook from bare metal to green core gate
 - `P1`: verify restore stories for each stateful system and document where restore is only theoretical
-- `P2`: codify Longhorn backup policy, add a MatPlan restore story, reduce dashboard-only dependencies, and evaluate a more HA control plane
+- `P2`: reduce dashboard-only dependencies and evaluate a more HA control plane
 
 ## Related Docs
 

@@ -117,8 +117,7 @@ State-preserving recovery is only partially documented:
 - `bitwarden-access-token` is still manual
 - Cloudflare published routes still live in the Cloudflare dashboard
 - `tofu/output/kubeconfig` and `tofu/output/talosconfig` are local artifacts without a documented off-machine backup policy
-- Longhorn has a backup target, but this repo does not yet define a recurring offsite backup policy
-- MatPlan does not yet have a documented restore story
+- Longhorn and database backups go to host1 NFS on the same site; there is no recurring offsite copy beyond the monthly critical R2 dumps
 
 See [Disaster recovery](docs/disaster-recovery/README.md) for the honest current-state runbook and recovery backlog.
 

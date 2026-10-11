@@ -16,6 +16,7 @@ This directory contains the configuration for Longhorn, a distributed block stor
 - `longhorn-critical`: critical stateful data, retained volumes, replica count 2
 - `longhorn-observability`: monitoring data, replica count 2
 - `longhorn-observability-single`: disposable/high-churn monitoring data, replica count 1; Prometheus TSDB must not consume critical rebuild capacity
+- `longhorn-single`: replica count 1 for workloads that replicate their own data (CNPG clusters with `instances >= 2`, e.g. ngm)
 
 ## Scheduling Contract
 
@@ -29,12 +30,36 @@ This directory contains the configuration for Longhorn, a distributed block stor
 
 ## Backup
 
-- `RecurringJob/default-hourly-snapshot` keeps 7 daily local snapshots for volumes in the `default` group. The resource keeps its legacy name to avoid creating a second recurring job.
-- `RecurringJob/prometheus-daily-snapshot` keeps only 1 daily snapshot for the disposable, high-churn Prometheus TSDB. Its PVC template is the recurring-job label source, which overrides the default group and prevents snapshot amplification from exhausting a 100 GiB Longhorn disk.
-- `BackupTarget/default` is intentionally disabled so Longhorn does not poll or write to Cloudflare R2.
-- Cloudflare R2 is not an active Longhorn backup backend because Class A operations can exceed the free tier.
-- The next active backup target should be local S3-compatible storage, such as MinIO on storage outside Longhorn's own data disks.
-- R2 should only be used for small, manual or low-frequency offsite DR copies with an explicit budget guard.
+Recurring-job groups (`recurring-jobs.yaml`). A volume joins a group through the label
+`recurring-job-group.longhorn.io/<group>: enabled` on its PVC (with
+`recurring-job.longhorn.io/source: enabled`, Longhorn copies PVC labels to the volume) or
+directly on the Longhorn volume; volumes without any recurring-job label are `default`.
+
+| Group | Members | Jobs |
+| --- | --- | --- |
+| `default` | app config and data | snapshot 02:30 keep 2, backup 03:00 keep 7, trim Sun 04:00 |
+| `cnpg` | CloudNativePG data + WAL PVCs (`spec.inheritedMetadata` on each Cluster) | trim only |
+| `disposable` | Prometheus TSDB, Loki | trim only |
+
+- `BackupTarget/default` is `nfs://192.168.1.230:/srv/nfs/backup/longhorn`: host1's 8 TB
+  `lagring` disk, exported by the Proxmox host (`scripts/configure-host1-backup-nfs.ps1`).
+  It is outside every Longhorn data disk and outside `desktop`, the host of all three storage
+  workers. Not R2: Class A operations exceed the free tier.
+- Only two local snapshots: seven daily snapshots of churny volumes pinned overwritten blocks
+  until a 10 GiB volume used 22 GiB and a 5 GiB Prometheus TSDB 48 GiB of node disk, which
+  filled worker disks and failed replicas (2026-10-11). History lives in the backups now.
+- CNPG volumes are not snapshotted: a crash-consistent data snapshot without a matching WAL
+  snapshot is not restorable. authentik, cmdb and lots run nightly `pg_dump` CronJobs
+  (`db-dump.yaml`) to `/srv/nfs/backup/db-dumps/<namespace>` (14 days); ngm dumps to OneDrive.
+  CNPG only applies `inheritedMetadata` to new PVCs; existing PVCs were labelled by hand.
+- Moving a volume to another group leaves the old group's snapshots behind (no retention
+  applies any more); delete them by hand.
+- Disposable volumes and multi-instance CNPG volumes run with `numberOfReplicas: 1`. Volumes
+  created before that class existed were patched on the Longhorn volume directly.
+
+Restore a Longhorn backup: Longhorn UI -> Backup -> volume -> Restore (new volume), then bind
+a PV/PVC to it. Restore a database dump:
+`pg_restore --clean --if-exists --no-owner -d <db> <namespace>-<timestamp>.dump`.
 
 ## Recovery Expectations
 

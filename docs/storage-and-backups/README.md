@@ -17,6 +17,8 @@ This page documents the current storage model and the backup posture it enables 
 | `longhorn` | General workloads | Default class |
 | `longhorn-critical` | Critical stateful data | Retained volumes, replica count 2 |
 | `longhorn-observability` | Monitoring data | Replica count 2 |
+| `longhorn-observability-single` | Prometheus TSDB | Replica count 1, disposable |
+| `longhorn-single` | Self-replicating workloads (multi-instance CNPG) | Replica count 1 |
 
 Longhorn keeps:
 
@@ -108,13 +110,41 @@ Longhorn should back up these PVCs:
 - `media/plex-config`
 - `media/deluge-config`
 
-Longhorn is configured with:
+Longhorn is configured with (details: `kubernetes/infrastructure/storage/longhorn/README.md`):
 
-- hourly local snapshots for the `default` recurring-job group, retained for 24 snapshots
+- two daily local snapshots and seven daily backups for the `default` recurring-job group
+- backups to `nfs://192.168.1.230:/srv/nfs/backup/longhorn` (host1, see below)
+- no snapshots for CloudNativePG volumes (`cnpg` group) or Prometheus/Loki (`disposable`)
 
 Active Longhorn and CNPG R2 backups are disabled. Cloudflare R2 exceeded the free Class A operation allowance when it was used as an active Longhorn and CNPG backup target. Do not point Longhorn, CNPG, or any high-frequency backup process at R2 unless there is an explicit budget decision.
 
-Config PVCs should carry `recurring-job.longhorn.io/source=enabled` plus `recurring-job-group.longhorn.io/default=enabled` for local snapshots only. The next primary backup target should be local S3-compatible storage, such as MinIO on a disk outside Longhorn's own data disks.
+Config PVCs need no recurring-job labels: unlabelled volumes are in the `default` group.
+
+### host1 Backup Export
+
+`scripts/configure-host1-backup-nfs.ps1` exports `/srv/nfs/backup` from the Proxmox host
+`host1` (same NFS server and alias IP `192.168.1.230` as the media library, own `fsid`),
+bind-mounted from `/media/lagring/k8s-backup` on the 8 TB USB disk:
+
+| Path | Content |
+| --- | --- |
+| `longhorn/` | Longhorn backupstore |
+| `db-dumps/<namespace>/` | nightly `pg_dump` of authentik, cmdb and lots (14 days) |
+| `archive/` | final copies of decommissioned apps (e.g. `matplan-2026-10-11`) |
+
+This is one disk on one host: it protects against Longhorn and worker-disk loss, not against
+losing host1. Critical items keep their monthly encrypted R2 copy below.
+
+### Databases
+
+- CloudNativePG volumes are not snapshotted; a data snapshot without a matching WAL snapshot
+  is not a restorable backup. Restore from the logical dumps:
+  `pg_restore --clean --if-exists --no-owner -d <db> <namespace>-<timestamp>.dump`.
+- authentik, cmdb, lots: `db-dump.yaml` CronJobs to the host1 export. A restore of the
+  authentik dump into a scratch Postgres was verified on 2026-10-11.
+- ngm and Immich: daily dumps to OneDrive (rclone).
+- `gatebound-mariadb` and `immich-postgresql` are plain Longhorn volumes in the `default` group
+  (crash-consistent snapshots and backups only).
 
 R2 is reserved for low-frequency critical DR only. The live R2 policy is:
 
