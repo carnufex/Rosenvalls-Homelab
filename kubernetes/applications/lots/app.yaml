@@ -33,6 +33,8 @@ data:
   Model__Model: qwen3.5:latest
   # Ollama's num_ctx for qwen3.5: requests are fitted to it, tool schemas and the answer's room included (#173).
   Model__ContextTokens: "8192"
+  # Lots #186: admins choose the chat model on the Models page (a ModelAlias over this one; Reset comes back here).
+  Models__AdminEditable__0: default
   # Voice (#38): the voice service on the same GPU PC, by address: ArgoCD excludes Endpoints, so a selector-less Service
   # like ollama/ollama cannot be created from Git any more. Chatterbox for both languages; while the PC is off the UI says
   # voice is unavailable and typing still works. No audio is stored (no volume here).
@@ -177,7 +179,7 @@ spec:
             name: lots-profiles
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-2975da7@sha256:96bb4408ec14ebce6621363092a2cf7085fdb82ef2d4c799c109827bacf55e18
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-436644b@sha256:09c4c205824a98f856c14cdc6f7fa179a778ac91479a901f507c5e74ea2273ea
           ports:
             - containerPort: 8080
               name: http
