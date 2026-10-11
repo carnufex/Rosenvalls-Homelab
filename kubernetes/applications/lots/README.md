@@ -10,6 +10,10 @@ through per-call policy, approvals and an append-only audit log. Public at `http
 - Profile `cmdb` (ConfigMap `lots-profiles`): tools of the CMDB's MCP server, used as the `cmdb-agents` service account.
   The homelab (Docker) profile is not deployed: it needs Docker access, which does not exist in the cluster.
 - Model: `qwen3.5:latest` on the Ollama host via Service `ollama/ollama` (so a run fails while that host is off).
+- Voice: the Lots voice service (Whisper, Chatterbox, meeting diarization) on the same GPU PC via Service `voice/voice`
+  (`kubernetes/applications/voice`, port 8700; started there with `docker compose up -d` in `services/voice` of carnufex/Lots).
+  The cluster has no GPU. While the PC is off the UI says voice is unavailable; typing still works. Conversation audio and
+  meeting recordings are not stored here (no volume), so the Meetings page answers that meetings are not configured.
 
 ## Identity
 
@@ -24,6 +28,7 @@ Add a user to a group in Authentik to give access.
 |---|---|
 | `LOTS_DB_PASSWORD` | CNPG bootstrap secret and the connection string |
 | `CMDB_AGENT_TOKEN` | app password of the `cmdb-agent-demo` service account (profile `passwordEnv`) |
+| `LOTS_VOICE_KEY` | API key of the voice service on the GPU PC (its `VOICE_API_KEY`; shell `Speech__ApiKeyEnv`) |
 | `GHCR_PAT`, registry password | image pull secret (same entries as the other apps) |
 
 ## Deploy a new version
@@ -38,11 +43,12 @@ Put the new `tag@sha256:<digest>` into `app.yaml` and push; ArgoCD syncs it.
 ## Network
 
 Default deny (`networkpolicy.yaml`). Ingress only from the Cilium Gateway. Egress: PostgreSQL, Authentik and the CMDB by
-name (443), and the Ollama host `192.168.1.215:11434`.
+name (443), and the GPU PC `192.168.1.215`: Ollama `11434` and the voice service `8700`.
 
 ## Troubleshooting
 
 - `kubectl -n lots get pods,cluster,externalsecret`
 - Sign-in fails with 403/empty roles: the user is not in a `lots-*` group (token claim `groups`).
 - Runs fail with a connection error: the Ollama host is off.
+- Voice unavailable: the PC is off or the voice container is down (`curl http://192.168.1.215:8700/health` from the LAN).
 - Dropped traffic: `hubble observe -n lots --verdict DROPPED`.

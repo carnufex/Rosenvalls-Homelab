@@ -61,12 +61,15 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # The model: Service ollama/ollama has no selector, its endpoint is the Ollama host on the LAN.
+    # The model and the voice service: Services ollama/ollama and voice/voice have no selector, their endpoint is the GPU PC
+    # on the LAN.
     - toCIDR:
         - 192.168.1.215/32
       toPorts:
         - ports:
             - port: "11434"
+              protocol: TCP
+            - port: "8700"
               protocol: TCP
 ---
 apiVersion: cilium.io/v2

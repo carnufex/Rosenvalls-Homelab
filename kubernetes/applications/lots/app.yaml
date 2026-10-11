@@ -31,6 +31,13 @@ data:
   # Self-hosted model on the Ollama host (Service ollama/ollama -> LAN endpoint).
   Model__BaseUrl: http://ollama.ollama.svc.cluster.local:11434/v1
   Model__Model: qwen3.5:latest
+  # Voice (#38): the voice service on the same GPU PC (Service voice/voice -> LAN endpoint). Chatterbox for both languages;
+  # while the PC is off the UI says voice is unavailable and typing still works. No audio is stored (no volume here).
+  Speech__BaseUrl: http://voice.voice.svc.cluster.local:8700/v1
+  Speech__ApiKeyEnv: LOTS_VOICE_KEY
+  Speech__Voices__sv: cb-default
+  Speech__Voices__en: cb-default
+  Speech__DefaultLanguage: sv
   Database__MigrateOnStartup: "true"
   Profiles__Path: /profiles
   Agent__DefaultProfile: cmdb
@@ -150,7 +157,7 @@ spec:
             name: lots-profiles
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-ba860b4@sha256:dba8f6be0658e4356b6eaff70c5cf7864d8552997e54493099ecb5376f0c35f6
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-b332fb4@sha256:3ed96a8cc99613603834e7badce9708c64991808a296c6b1a6540fafc67f2360
           ports:
             - containerPort: 8080
               name: http
