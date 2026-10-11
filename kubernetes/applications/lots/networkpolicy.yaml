@@ -53,10 +53,12 @@ spec:
             - port: "5432"
               protocol: TCP
     # OIDC metadata and signing keys, and the service account token for the cmdb profile (client_credentials),
-    # and the CMDB's own MCP endpoint, all by public name.
+    # and the CMDB's own MCP endpoint, all by public name. Berget AI: the hosted model of the berget plugin (Lots #172),
+    # used only by contexts or runs that pick its alias; cleared for internal data at most.
     - toFQDNs:
         - matchName: authentik.rosenvall.se
         - matchName: cmdb.rosenvall.se
+        - matchName: api.berget.ai
       toPorts:
         - ports:
             - port: "443"

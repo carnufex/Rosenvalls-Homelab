@@ -54,6 +54,10 @@ data:
   Models__Endpoints__documents__ApiKeyEnv: LOTS_DOCUMENTS_KEY
   Models__Aliases__rerank__Targets__0__Endpoint: documents
   Models__Aliases__rerank__Targets__0__Model: BAAI/bge-reranker-v2-m3
+  # Prices for the cost columns (#77): Berget AI's GLM-5.3-Flash in EUR; local models cost nothing.
+  Models__Currency: EUR
+  Models__Prices__zai-org_GLM-5.3-Flash__InputPerMillion: "0.25"
+  Models__Prices__zai-org_GLM-5.3-Flash__OutputPerMillion: "0.5"
   Database__MigrateOnStartup: "true"
   Profiles__Path: /profiles
   Agent__DefaultProfile: cmdb
