@@ -42,13 +42,13 @@ Add a user to a group in Authentik to give access.
 | `CMDB_AGENT_TOKEN` | app password of the `cmdb-agent-demo` service account (profile `passwordEnv`) |
 | `LOTS_VOICE_KEY` | API key of the voice service on the GPU PC (its `VOICE_API_KEY`; shell `Speech__ApiKeyEnv`) |
 | `LOTS_DOCUMENTS_KEY` | API key of the document service on the GPU PC (its `DOCUMENTS_API_KEY`; shell `Documents__ApiKeyEnv` and the rerank endpoint) |
-| `BERGET_API_KEY` | Berget AI, the berget plugin's provider |
 | Slack incoming webhook (the Alertmanager entry) | Lots' admin notices: dependency down/up, price changes, approval requests (`Notifications__Webhooks__0__Url`) |
 | `LOTS_BWS_ACCESS_TOKEN` | access token of the machine account `lots-prod` in Lots' own Bitwarden Secrets Manager organisation (EU), read access to its project `Lots` only (`BWS_ACCESS_TOKEN`, used by the bitwarden-secrets plugin) |
+| `GHCR_PAT`, registry password | image pull secret (same entries as the other apps) |
 
 Lots' own Bitwarden organisation (separate from the homelab one) holds what Lots itself reads as `bitwarden:<name>`: project `Lots`
-(`d9ca876d-4722-4c61-9798-b4e1007de5b8`) with `BERGET_API_KEY` (a key of its own, not the homelab one).
-| `GHCR_PAT`, registry password | image pull secret (same entries as the other apps) |
+(`d9ca876d-4722-4c61-9798-b4e1007de5b8`) with `BERGET_API_KEY` (a key of its own, not the homelab one; the berget plugin's `apiKey`
+setting is `bitwarden:BERGET_API_KEY`). The homelab entry `BERGET_API_KEY` is no longer read by Lots.
 
 ## Deploy a new version
 
