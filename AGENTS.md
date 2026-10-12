@@ -8,8 +8,8 @@
 - `bootstrap.ps1` performs the imperative bridge from fresh cluster to GitOps.
 - Operator documentation lives in `docs/` (start at `docs/README.md`); reusable runbook
   scripts live in `scripts/` — prefer them over hand-rolled checks.
-- Two agents work in this repo in parallel (Claude and Codex) and the owner commits between
-  sessions: always `git fetch` and reconcile before pushing, stage explicit paths only.
+- Several Claude sessions may work in this repo (even the same checkout) in parallel and the owner
+  commits between sessions: always `git fetch` and reconcile before pushing, stage explicit paths only.
 
 ## Architecture
 
@@ -73,20 +73,24 @@ Always restore that secret before chasing downstream symptoms.
   needs a LAN LoadBalancer IP — the Cilium selectors in
   `infrastructure/network/cilium/{ip-pool,announce}.yaml`.
 
-## Container Images (GitHub Actions is billing-blocked — do not rely on it)
+## Container Images
 
-- GitHub Actions has been billing-blocked account-wide since July 2026: workflow jobs never
-  start (not even self-hosted runners). Never push-and-wait-for-CI; never add workflows.
+- GitHub Actions works again (the July 2026 billing block is over, verified 2026-10-12), but
+  GitHub-hosted runners cannot reach the LAN-only registry. CI publishes through the ARC runner
+  scale set in `infrastructure/controllers/arc-controller` + `arc-runners` (label `lots-cluster`,
+  Lots first, carnufex/Lots#233): hosted runners build and test, the cluster runner pushes, signs
+  and bumps the pin here. Repos without a pipeline still publish by hand (below).
 - All homelab images are published to the self-hosted registry **`registry.rosenvall.se`**
   (CNCF Distribution in-cluster, Cilium LB `192.168.1.225`, LAN-only grey-cloud DNS,
   Let's Encrypt cert, htpasswd user `homelab`, password in Bitwarden `registry-password`).
   Full runbook: `kubernetes/applications/registry/README.md`.
-- Publish flow: local `docker build` → `docker push registry.rosenvall.se/carnufex/<app>` →
-  bump tag/digest here (pinned apps) or `kubectl rollout restart` (`:latest` apps).
+- Manual publish flow: local `docker build` → `docker push registry.rosenvall.se/carnufex/<app>:<tag>`
+  (the new tag only) → bump tag/digest here (pinned apps) or `kubectl rollout restart` (`:latest` apps).
 - Mirroring images: `crane copy` only (digest-preserving); every digest-pinned artifact must
   carry a `pinned-<first8>` tag or the weekly GC (`--delete-untagged`) will collect it.
 - `ghcr.io/carnufex/*` is read-only legacy: old images remain there as rollback and every
-  app's pull secret is dual-auth (ghcr.io + registry.rosenvall.se). Publish nothing new to GHCR.
+  app's pull secret is dual-auth (ghcr.io + registry.rosenvall.se). The self-hosted registry is the
+  publish target, also from CI.
 - Third-party images are pinned `tag@sha256` and bumped by Renovate (Mend-hosted, `renovate.json`).
 
 ## Repo-Local Skills
