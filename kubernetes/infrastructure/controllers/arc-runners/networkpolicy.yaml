@@ -1,7 +1,6 @@
-# Runner pods for carnufex/Lots (private; only its collaborators' code runs here) and their Docker Hub cache.
-# No ingress except runners -> cache. Runners: the internet on 80/443 (GitHub, NuGet, npm, PyPI, image registries: what the
-# CI gate downloads), the cache, and the LAN registry; nothing else on the LAN or in the cluster. The cache: Docker Hub only.
-# Secrets never live in this namespace: the publish job gets them from GitHub for that job only.
+# Runner pods for carnufex/Lots. Lots is a public repository, so a job on these runners is treated as untrusted code:
+# no ingress at all, and egress only to GitHub (the runner protocol, actions, artifacts) and the LAN registry. Nothing
+# else on the LAN or in the cluster. Secrets never live here: they come from a GitHub environment that only main may use.
 # Debug drops: hubble observe -n arc-runners --verdict DROPPED
 ---
 apiVersion: cilium.io/v2
@@ -34,33 +33,19 @@ metadata:
   name: runners
   namespace: arc-runners
 spec:
-  endpointSelector:
-    matchExpressions:
-      - { key: app, operator: NotIn, values: [dockerhub-cache] }
+  endpointSelector: {}
   egress:
-    # The internet, not private ranges (the LAN, the cluster's pod and service networks, link-local metadata).
-    - toCIDRSet:
-        - cidr: 0.0.0.0/0
-          except:
-            - 10.0.0.0/8
-            - 172.16.0.0/12
-            - 192.168.0.0/16
-            - 100.64.0.0/10
-            - 169.254.0.0/16
-            - 127.0.0.0/8
+    # The runner protocol, action downloads, artifacts (Azure blob storage) and release binaries (crane, cosign).
+    - toFQDNs:
+        - matchName: github.com
+        - matchName: api.github.com
+        - matchName: codeload.github.com
+        - matchPattern: "*.actions.githubusercontent.com"
+        - matchPattern: "*.githubusercontent.com"
+        - matchPattern: "*.blob.core.windows.net"
       toPorts:
         - ports:
             - port: "443"
-              protocol: TCP
-            - port: "80"
-              protocol: TCP
-    - toEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: arc-runners
-            app: dockerhub-cache
-      toPorts:
-        - ports:
-            - port: "5000"
               protocol: TCP
     # The self-hosted registry (registry/service.yaml): its pods after the LoadBalancer translation, and its LAN IP.
     - toEndpoints:
@@ -73,41 +58,6 @@ spec:
               protocol: TCP
     - toCIDR:
         - 192.168.1.225/32
-      toPorts:
-        - ports:
-            - port: "443"
-              protocol: TCP
----
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: dockerhub-cache
-  namespace: arc-runners
-spec:
-  endpointSelector:
-    matchLabels:
-      app: dockerhub-cache
-  ingress:
-    - fromEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: arc-runners
-      toPorts:
-        - ports:
-            - port: "5000"
-              protocol: TCP
-    # The kubelet's probes on the debug port.
-    - fromEntities:
-        - host
-      toPorts:
-        - ports:
-            - port: "5001"
-              protocol: TCP
-  egress:
-    - toFQDNs:
-        - matchName: registry-1.docker.io
-        - matchName: auth.docker.io
-        - matchName: production.cloudflare.docker.com
-        - matchPattern: "*.docker.io"
       toPorts:
         - ports:
             - port: "443"

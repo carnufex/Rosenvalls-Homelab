@@ -1,12 +1,9 @@
-# Privileged: the runner pods carry a Docker-in-Docker sidecar (carnufex/Lots CI builds images and starts PostgreSQL, scanners
-# and doc builds in containers), which needs a privileged container. Only these pods live here; the runner container itself
-# stays non-root without capabilities, and the network policies keep the namespace off the LAN and the rest of the cluster.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: arc-runners
   labels:
-    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/enforce-version: latest
-    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/warn-version: latest
