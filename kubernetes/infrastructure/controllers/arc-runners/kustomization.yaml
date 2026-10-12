@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ns.yaml
+  - externalsecret.yaml
+  - networkpolicy.yaml
+
+helmCharts:
+  - name: gha-runner-scale-set
+    repo: oci://ghcr.io/actions/actions-runner-controller-charts
+    version: 0.14.2
+    releaseName: lots-cluster
+    namespace: arc-runners
+    valuesFile: values.yaml
+    kubeVersion: v1.37.0

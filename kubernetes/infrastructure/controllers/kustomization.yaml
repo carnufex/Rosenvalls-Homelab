@@ -10,3 +10,4 @@ resources:
   - cert-manager
   - external-secrets
   - arc-controller
+  - arc-runners

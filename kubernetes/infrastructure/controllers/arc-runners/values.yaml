@@ -1,0 +1,34 @@
+# Runner scale set "lots-cluster" for carnufex/Lots (ARC). Jobs reach it with `runs-on: lots-cluster`.
+# Only the release job of Lots' main branch uses it: it pushes the image built on a GitHub-hosted runner to the
+# LAN-only registry, signs it and bumps the pin in this repo. Tests and builds stay on GitHub-hosted runners.
+githubConfigUrl: https://github.com/carnufex/Lots
+githubConfigSecret: arc-github-app
+runnerScaleSetName: lots-cluster
+minRunners: 0
+maxRunners: 2
+controllerServiceAccount:
+  namespace: arc-systems
+  name: arc-gha-rs-controller
+template:
+  spec:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1001 # the image's "runner" user (non-numeric USER, so runAsNonRoot needs the uid)
+      runAsGroup: 1001
+      fsGroup: 1001
+      seccompProfile:
+        type: RuntimeDefault
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:2.337.0
+        command: ["/home/runner/run.sh"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 2Gi

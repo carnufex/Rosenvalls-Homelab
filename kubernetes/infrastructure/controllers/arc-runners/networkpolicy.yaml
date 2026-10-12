@@ -1,0 +1,64 @@
+# Runner pods for carnufex/Lots. Lots is a public repository, so a job on these runners is treated as untrusted code:
+# no ingress at all, and egress only to GitHub (the runner protocol, actions, artifacts) and the LAN registry. Nothing
+# else on the LAN or in the cluster. Secrets never live here: they come from a GitHub environment that only main may use.
+# Debug drops: hubble observe -n arc-runners --verdict DROPPED
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+  namespace: arc-runners
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: runners
+  namespace: arc-runners
+spec:
+  endpointSelector: {}
+  egress:
+    # The runner protocol, action downloads, artifacts (Azure blob storage) and release binaries (crane, cosign).
+    - toFQDNs:
+        - matchName: github.com
+        - matchName: api.github.com
+        - matchName: codeload.github.com
+        - matchPattern: "*.actions.githubusercontent.com"
+        - matchPattern: "*.githubusercontent.com"
+        - matchPattern: "*.blob.core.windows.net"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # The self-hosted registry (registry/service.yaml): its pods after the LoadBalancer translation, and its LAN IP.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: registry
+            app: registry
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
+    - toCIDR:
+        - 192.168.1.225/32
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
