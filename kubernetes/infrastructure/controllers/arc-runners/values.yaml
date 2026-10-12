@@ -1,6 +1,10 @@
 # Runner scale set "lots-cluster" for carnufex/Lots (ARC). Jobs reach it with `runs-on: lots-cluster`.
-# Only the release job of Lots' main branch uses it: it pushes the image built on a GitHub-hosted runner to the
-# LAN-only registry, signs it and bumps the pin in this repo. Tests and builds stay on GitHub-hosted runners.
+# carnufex/Lots is private since 2026-10-12 on GitHub Free: GitHub-hosted minutes are metered and main gets dozens of commits a
+# day, so every job runs here: the CI gate (scripts/ci.sh: .NET and web tests, PostgreSQL, chart, docs, images, scan), the
+# release image, and the publish job (push to the LAN registry, sign, bump the pin in this repo).
+# Docker-in-Docker: a privileged native sidecar runs dockerd for the job; the runner container stays non-root without
+# capabilities and reaches it through the shared socket. Docker Hub pulls go through the pull-through cache next to it
+# (dockerhub-cache.yaml), so pinned images are fetched from Docker Hub once, not on every run (anonymous rate limit).
 githubConfigUrl: https://github.com/carnufex/Lots
 githubConfigSecret: arc-github-app
 runnerScaleSetName: lots-cluster
@@ -11,24 +15,95 @@ controllerServiceAccount:
   name: arc-gha-rs-controller
 template:
   spec:
+    # Below everything else: a pending workload may preempt a CI job, never the other way round (priorityclass.yaml).
+    priorityClassName: ci-low
     securityContext:
-      runAsNonRoot: true
-      runAsUser: 1001 # the image's "runner" user (non-numeric USER, so runAsNonRoot needs the uid)
-      runAsGroup: 1001
       fsGroup: 1001
-      seccompProfile:
-        type: RuntimeDefault
+    initContainers:
+      - name: init-dind-externals
+        image: ghcr.io/actions/actions-runner:2.337.0
+        command: ["cp", "-r", "/home/runner/externals/.", "/home/runner/tmpDir/"]
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        volumeMounts:
+          - name: dind-externals
+            mountPath: /home/runner/tmpDir
+      - name: dind
+        image: docker:28-dind@sha256:2a232a42256f70d78e3cc5d2b5d6b3276710a0de0596c145f627ecfae90282ac
+        restartPolicy: Always # native sidecar: the pod ends when the runner does
+        args:
+          - dockerd
+          - --host=unix:///var/run/docker.sock
+          - --group=1001 # the runner's group owns the socket
+          - --mtu=1400 # below the VXLAN pod MTU, or TLS downloads from job containers stall
+          - --registry-mirror=http://dockerhub-cache.arc-runners.svc.cluster.local:5000
+          - --insecure-registry=dockerhub-cache.arc-runners.svc.cluster.local:5000
+        env:
+          - name: DOCKER_TLS_CERTDIR
+            value: ""
+        securityContext:
+          privileged: true
+        startupProbe:
+          exec:
+            command: ["docker", "info"]
+          periodSeconds: 5
+          failureThreshold: 24
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1536Mi
+          limits:
+            memory: 4Gi
+        volumeMounts:
+          - name: work
+            mountPath: /home/runner/_work
+          - name: dind-sock
+            mountPath: /var/run
+          - name: dind-externals
+            mountPath: /home/runner/externals
+          - name: dind-data
+            mountPath: /var/lib/docker
     containers:
       - name: runner
         image: ghcr.io/actions/actions-runner:2.337.0
         command: ["/home/runner/run.sh"]
+        env:
+          - name: DOCKER_HOST
+            value: unix:///var/run/docker.sock
+          - name: RUNNER_WAIT_FOR_DOCKER_IN_SECONDS
+            value: "120"
         securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001 # the image's "runner" user (non-numeric USER, so runAsNonRoot needs the uid)
+          runAsGroup: 1001
           allowPrivilegeEscalation: false
           capabilities:
             drop: [ALL]
+          seccompProfile:
+            type: RuntimeDefault
         resources:
           requests:
-            cpu: 100m
-            memory: 256Mi
+            cpu: "1"
+            memory: 1536Mi
           limits:
-            memory: 2Gi
+            memory: 4Gi
+        volumeMounts:
+          - name: work
+            mountPath: /home/runner/_work
+          - name: dind-sock
+            mountPath: /var/run
+    volumes:
+      - name: work
+        emptyDir: {}
+      - name: dind-sock
+        emptyDir: {}
+      - name: dind-externals
+        emptyDir: {}
+      - name: dind-data
+        emptyDir:
+          sizeLimit: 30Gi

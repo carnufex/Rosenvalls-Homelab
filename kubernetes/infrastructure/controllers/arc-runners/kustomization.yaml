@@ -5,6 +5,8 @@ resources:
   - ns.yaml
   - externalsecret.yaml
   - networkpolicy.yaml
+  - priorityclass.yaml
+  - dockerhub-cache.yaml
 
 helmCharts:
   - name: gha-runner-scale-set
