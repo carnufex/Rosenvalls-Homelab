@@ -9,3 +9,4 @@ resources:
   - r2-critical-dr
   - cert-manager
   - external-secrets
+  - arc-controller
