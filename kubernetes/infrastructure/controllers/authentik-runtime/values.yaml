@@ -61,13 +61,16 @@ blueprints:
 
 server:
   enabled: true
+  # 1Gi stopped being enough as applications and policies were added (lots, cmdb):
+  # the server sat at the limit and was OOM-killed or liveness-killed 7-12 times an
+  # hour on 2026-10-13. 500m also throttled startup past the liveness window.
   resources:
     requests:
       cpu: 100m
-      memory: 512Mi
-    limits:
-      cpu: 500m
       memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
   service:
     annotations: {}
     labels: {}
