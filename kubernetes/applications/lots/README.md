@@ -15,7 +15,8 @@ through per-call policy, approvals and an append-only audit log. Public at `http
   selector-less Service like Ollama's: ArgoCD's default resource exclusions skip `Endpoints`, so such a Service gets no
   endpoint from Git (ollama/ollama only has one from an older sync and would lose it if recreated).
   The cluster has no GPU. While the PC is off the UI says voice is unavailable; typing still works. Conversation audio and
-  meeting recordings are not stored here (no volume), so the Meetings page answers that meetings are not configured.
+  meeting recordings are stored encrypted on the 10 Gi Longhorn volume `lots-audio` (`audio.yaml`, mounted at /data/audio, kept
+  30 days). It is ReadWriteOnce, so the deployment's pod affinity keeps a new pod on the running one's node during a rollout.
 - Tool pack (`toolpack.yaml`): the Lots MCP tool pack with the internet packs (weather, Wikipedia, exchange rates, maps, holidays,
   news feeds, arXiv, SMHI, Polisen, Krisinformation; no keys). Install the "Internet tools" plugin in Lots (Administration > Plugins)
   with `toolpackUrl` `http://lots-toolpack:8080/mcp`; users then switch the tools on under Account > Tools. Its egress is limited to

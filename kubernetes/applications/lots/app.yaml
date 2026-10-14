@@ -37,8 +37,11 @@ data:
   Models__AdminEditable__0: default
   # Voice (#38): the voice service on the same GPU PC, by address: ArgoCD excludes Endpoints, so a selector-less Service
   # like ollama/ollama cannot be created from Git any more. Chatterbox for both languages; while the PC is off the UI says
-  # voice is unavailable and typing still works. No audio is stored (no volume here).
+  # voice is unavailable and typing still works.
   Speech__BaseUrl: http://192.168.1.215:8700/v1
+  # Conversation audio (ADR 0014) and meeting recordings (#41), encrypted with the key ring, on the volume lots-audio
+  # (audio.yaml); meetings go to its meetings/ folder. Kept 30 days (Speech:AudioRetentionDays, Meetings:AudioRetentionDays).
+  Speech__AudioPath: /data/audio
   Speech__ApiKeyEnv: LOTS_VOICE_KEY
   Speech__Voices__sv: cb-default
   Speech__Voices__en: cb-default
@@ -173,7 +176,8 @@ spec:
   replicas: 1
   revisionHistoryLimit: 3
   strategy:
-    # No volume ties the shell to one pod any more (#200): the new pod is ready before the old one goes.
+    # The new pod is ready before the old one goes. The audio volume is ReadWriteOnce (one node), so the pod affinity below
+    # keeps a new pod on the node of the running one: both can mount it during the rollout.
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
@@ -189,8 +193,19 @@ spec:
       serviceAccountName: lots-runtime
       securityContext:
         runAsNonRoot: true
+        fsGroup: 10001 # the shell's user: the audio volume is writable for it
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
+      affinity:
+        podAffinity:
+          # With the lots-audio volume (ReadWriteOnce): a new pod goes where the running one is. The first pod, with none
+          # running, may go anywhere.
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: lots
+              topologyKey: kubernetes.io/hostname
       volumes:
         - name: tmp
           emptyDir: {}
@@ -200,6 +215,9 @@ spec:
         - name: data-protection
           secret:
             secretName: lots-data-protection
+        - name: audio
+          persistentVolumeClaim:
+            claimName: lots-audio
       containers:
         - name: shell
           image: registry.rosenvall.se/carnufex/lots-shell:sha-b01219d@sha256:831f368dc980da2fff649ec49934a8fd99948c100fe8520d0c30619be38b2e61
@@ -225,6 +243,8 @@ spec:
             - name: data-protection
               mountPath: /run/secrets/data-protection
               readOnly: true
+            - name: audio
+              mountPath: /data/audio
           resources:
             requests:
               cpu: 50m

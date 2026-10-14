@@ -1,0 +1,17 @@
+# Conversation audio (Lots ADR 0014) and meeting recordings (Lots #41): both sides of spoken turns and uploaded meetings, stored
+# encrypted by the shell (Data Protection) and deleted after 30 days. ReadWriteOnce: the deployment's pod affinity keeps a new
+# pod on the node of the running one, so rolling updates still have no downtime. Retained when deleted (storage class policy).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lots-audio
+  namespace: lots
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 10Gi
