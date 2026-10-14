@@ -202,7 +202,7 @@ spec:
             secretName: lots-data-protection
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-868fdda@sha256:b1a8726b80ab45b51eab1828efe3c97a727f434b3b12d236f5278d25d9bcbc9e
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-9f9d4a7@sha256:09e49d80904a82b40368bcf9dd7b4f741ab3dc969f9b3601e8d51ddad3c44ce6
           ports:
             - containerPort: 8080
               name: http
