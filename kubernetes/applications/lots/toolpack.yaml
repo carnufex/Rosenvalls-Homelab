@@ -43,7 +43,7 @@ spec:
           emptyDir: {}
       containers:
         - name: toolpack
-          image: registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-c9a7fd7@sha256:1368a59cfcd88b00e0b8c4e952db1ce581ff2809fd5ad97412b0506af8087752
+          image: registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-8223e3d@sha256:91147ba618c90e2fd0ca09493043742439eea54b23cad1939656dfb4b791b95f
           ports:
             - containerPort: 8080
               name: http
@@ -55,6 +55,13 @@ spec:
             - { name: Internet__Feeds__1__Name, value: bbc }
             - { name: Internet__Feeds__1__Url, value: "https://feeds.bbci.co.uk/news/world/rss.xml" }
             - { name: HOME, value: /tmp }
+            # Only the shell may call the tool pack: it refuses a call without this token (Lots #342; the shell sends it, app.yaml).
+            - { name: Mcp__AuthTokenRef, value: "env:LOTS_MCP_TOKEN" }
+            - name: LOTS_MCP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lots-secrets
+                  key: LOTS_MCP_TOKEN
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

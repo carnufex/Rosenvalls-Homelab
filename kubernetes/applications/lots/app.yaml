@@ -71,6 +71,9 @@ data:
   DataProtection__Certificates__0__KeyPath: /run/secrets/data-protection/tls.key
   Profiles__Path: /profiles
   Agent__DefaultProfile: cmdb
+  # The tool pack requires a bearer token (Lots #342): the shell sends LOTS_MCP_TOKEN (lots-secrets) to this host and to no other.
+  Mcp__ToolServerAuth__TokenRef: env:LOTS_MCP_TOKEN
+  Mcp__ToolServerAuth__Hosts__0: lots-toolpack
   # Admin notices (Lots #201, #203): a dependency down for 5 min and back, a provider's changed price, and approval requests go to the
   # homelab's Slack channel, the same incoming webhook Alertmanager uses (its URL is Notifications__Webhooks__0__Url in lots-secrets).
   # Payloads never carry tool arguments or results.
