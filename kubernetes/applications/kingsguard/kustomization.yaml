@@ -10,4 +10,4 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-  # httproute.yaml is added once the pod is healthy (gitops-app-onboarding)
+  - httproute.yaml
