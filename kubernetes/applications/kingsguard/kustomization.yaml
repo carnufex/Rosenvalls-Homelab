@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Kingsguard co-op (client + WebSocket server, one port), from carnufex/kingsguard deploy/k8s.
+# Image: registry.rosenvall.se/carnufex/kingsguard, built by hand (deploy/README.md in the game repo)
+# and pinned by sha tag and digest. Update: push a new sha-* tag and bump deployment.yaml.
+resources:
+  - ns.yaml
+  - image-pull-secret.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  # httproute.yaml is added once the pod is healthy (gitops-app-onboarding)

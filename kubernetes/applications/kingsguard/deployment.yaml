@@ -1,0 +1,66 @@
+# One replica only: rooms live in memory and the SQLite file has one writer. Recreate, so the
+# old pod releases the RWO volume before the new one starts (open rooms close; campaigns are
+# saved after every action and round, so a party just reloads and rejoins).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kingsguard
+  namespace: kingsguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kingsguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kingsguard
+    spec:
+      imagePullSecrets:
+        - name: kingsguard-image-pull
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: kingsguard
+          image: registry.rosenvall.se/carnufex/kingsguard:sha-6403d12@sha256:5616f7a3cbbf75b661c814d44d364a8543c2cbf7a5ccca72eec4b80d5e16b8ce
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 8080 }
+          env:
+            - { name: PORT, value: "8080" }
+            - { name: KG_DB, value: /data/kingsguard.db }
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { memory: 384Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+            - { name: tmp, mountPath: /tmp }
+          startupProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: kingsguard-data
+        - name: tmp
+          emptyDir: {}

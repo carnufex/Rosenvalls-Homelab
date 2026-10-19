@@ -1,0 +1,12 @@
+# Campaign saves (SQLite, /data/kingsguard.db). Small; one writer.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kingsguard-data
+  namespace: kingsguard
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 1Gi
