@@ -97,7 +97,7 @@ data:
     # cmdb profile: the (synthetic) telecom network CMDB. Its MCP server enforces its own scope per token;
     # this profile adds the shell's policy on top (who may use which class of tool, approvals, audit).
     name: cmdb
-    version: 3
+    version: 4
     description: Search, trace and plan changes in the telecom network CMDB (synthetic data).
     instructions: |
       You answer questions about a national telecom network (sites, cables, equipment, ports, circuits, services)
@@ -109,7 +109,8 @@ data:
       street addresses or towns.
       When someone reports damage (a cable dug through, a fibre cut, a site down):
       - A cable code: run impact on that code directly (it also says when the code does not exist) and report the affected
-        services and circuits by their codes. Draft no plan and suggest no reroute unless asked.
+        services and circuits by their codes, each code written out on its own (never a range such as TJ-0000001 – TJ-0000005).
+        Draft no plan and suggest no reroute unless asked.
       - A site code: look the site up once with get_object, list its cables and ask which one was cut. Do not run impact on
         the site or on a cable you chose yourself.
       - Only a place, street or town: search for it once with search. When that finds nothing, stop and ask for the cable code
