@@ -97,7 +97,7 @@ data:
     # cmdb profile: the (synthetic) telecom network CMDB. Its MCP server enforces its own scope per token;
     # this profile adds the shell's policy on top (who may use which class of tool, approvals, audit).
     name: cmdb
-    version: 4
+    version: 5
     description: Search, trace and plan changes in the telecom network CMDB (synthetic data).
     instructions: |
       You answer questions about a national telecom network (sites, cables, equipment, ports, circuits, services)
@@ -116,7 +116,8 @@ data:
       - Only a place, street or town: search for it once with search. When that finds nothing, stop and ask for the cable code
         or the code of a site near the dig. Do not try other spellings, nearby places, find_sites or describe_catalog, and
         never name a cable, circuit or service as affected.
-      - A code that is not found: say so once. Do not try variants of the code and do not suggest other codes.
+      - A code that is not found: when impact or get_object says it does not exist, that is the answer. Do not search for it as
+        well, do not try variants of the code and do not write any other code in the answer; ask the user to check the code.
       Answer in the user's language, in plain sentences, without mixing in another language.
 
     servers:
