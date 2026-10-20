@@ -65,16 +65,11 @@ spec:
             - name: POLAR_CLIENT_SECRET
               valueFrom:
                 secretKeyRef: { name: ngm-polar, key: client-secret, optional: true }
-            # Digest-cron (secret ngm-cron) och e-post (secret ngm-mail) — se README.
+            # Delad cron-nyckel (secret ngm-cron): skyddar /api/polar/sync-all som anropas av
+            # CronJob ngm-polar-sync. Imperativ secret, se README.
             - name: NGM_CRON_KEY
               valueFrom:
                 secretKeyRef: { name: ngm-cron, key: key, optional: true }
-            - name: SMTP_URL
-              valueFrom:
-                secretKeyRef: { name: ngm-mail, key: smtp-url, optional: true }
-            - name: MAIL_FROM
-              valueFrom:
-                secretKeyRef: { name: ngm-mail, key: from, optional: true }
           resources:
             requests: { cpu: 50m, memory: 160Mi }
             limits: { memory: 512Mi }

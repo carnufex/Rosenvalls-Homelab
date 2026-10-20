@@ -36,8 +36,6 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: ngm
     server: https://kubernetes.default.svc
-  - namespace: ngm-marketing
-    server: https://kubernetes.default.svc
   - namespace: oncall-demo
     server: https://kubernetes.default.svc
   - namespace: gatebound-support
