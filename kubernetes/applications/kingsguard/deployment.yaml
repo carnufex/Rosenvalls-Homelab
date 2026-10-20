@@ -29,13 +29,18 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: kingsguard
-          image: registry.rosenvall.se/carnufex/kingsguard:sha-1152a84@sha256:23e7f8f00406f8567ba9317c3a8beab01529aab3e54fcebd2e92a71611065c4a
+          image: registry.rosenvall.se/carnufex/kingsguard:sha-973a85e@sha256:8b8059caf624a28088d8707649d2d6648449852b346fce8a26f0dcc009597cbd
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 8080 }
           env:
             - { name: PORT, value: "8080" }
             - { name: KG_DB, value: /data/kingsguard.db }
+            # one proxy (the gateway) in front: the client address for the /auth rate limit is the last X-Forwarded-For entry
+            - { name: KG_TRUST_PROXY, value: "1" }
+          # Sign in with Google (KG_GOOGLE_CLIENT_ID, KG_GOOGLE_CLIENT_SECRET, KG_PUBLIC_URL); without the Secret the server runs guest-only.
+          envFrom:
+            - secretRef: { name: kingsguard-google-oauth, optional: true }
           resources:
             requests: { cpu: 50m, memory: 96Mi }
             limits: { memory: 384Mi }
