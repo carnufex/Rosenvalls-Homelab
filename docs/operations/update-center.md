@@ -108,6 +108,12 @@ running when the pod died shows as failed.
 
 ## Troubleshooting
 
+- **A Proxmox reboot is refused with "bär alla friska repliker (2+)"**: the host carries every healthy replica of
+  an attached Longhorn volume (host `desktop` carries worker-01..03, i.e. all of them). Rebooting it under load
+  corrupted authentik on 2026-10-21 (`docs/operations/incidents/2026-10-21-authentik-db-host-reboot.md`). The fleet
+  run installs the packages and skips only that reboot. Reboot it in a planned window with the storage workloads
+  stopped.
+
 - **A node upgrade/reboot ends with "timeout: <node> blev inte stabil" although the node is
   Ready and its pods run**: the stability check used to count every non-Running pod in the
   cluster, including old `Evicted` (Failed) pods (2026-09-20: six 3-day-old portfolio pods
