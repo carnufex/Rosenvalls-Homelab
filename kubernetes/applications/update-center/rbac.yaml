@@ -42,7 +42,7 @@ rules:
     verbs: ["get", "list"]
   # Gate before touching storage nodes: are all Longhorn volumes healthy?
   - apiGroups: ["longhorn.io"]
-    resources: ["volumes"]
+    resources: ["volumes", "replicas"] # replicas: never reboot away the last healthy replica of a volume
     verbs: ["get", "list"]
   - apiGroups: ["postgresql.cnpg.io"]
     resources: ["clusters"]
