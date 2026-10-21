@@ -22,3 +22,11 @@ spec:
           labelSelector:
             matchLabels:
               app: longhorn-ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: longhorn-global-manager
+  namespace: longhorn-system
+spec:
+  revisionHistoryLimit: 3

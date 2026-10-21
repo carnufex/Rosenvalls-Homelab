@@ -148,5 +148,16 @@ longhornManager:
 longhornDriver:
   priorityClass: system-cluster-critical
 
+# New in 1.13: leader-elected cluster-wide manager (3 replicas, 1 active). Memory scales with the
+# cluster's pod count (pod informer cache).
+longhornGlobalManager:
+  priorityClass: system-cluster-critical
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
 preUpgradeChecker:
   jobEnabled: false
