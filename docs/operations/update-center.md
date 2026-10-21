@@ -32,6 +32,13 @@ Scans every 30 min (or on "Uppdatera listan"):
    Categories: över-/underallokerad, saknar request, databas/cache (never auto-recommended). Also per-node
    requested vs really used vs VM RAM in Proxmox, and PVC used vs capacity.
 
+6. **Automatic patches** - every night at 04:00 (Europe/Stockholm; env `AUTO_PATCH_HOUR`, `-1` = off) the tool
+   runs *Uppdatera alla patchar* by itself as one batch job (actor `auto-patch`, visible in the job history and
+   in the Översikt patch group). Minor/major, Talos and Proxmox are never automatic.
+
+Tag lookups read the whole OCI tag list (it is sorted by name, not date: before 2026-10-21 a 1500-tag cap made
+Sonarr/Radarr/Jackett look current for months). `oci://` Helm charts (ARC) are resolved from registry tags.
+
 ## The Översikt order (top = next move)
 
 The landing tab lists what to do in this fixed order, so the top group is always the
