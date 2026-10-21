@@ -4,15 +4,14 @@ metadata:
   name: rosenvall-devops-forgejo-bootstrap
   namespace: rosenvall-devops
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
-    # A Job spec.template is immutable, so the app-wide ServerSideDiff dry-run
-    # fails on this resource the moment the manifest changes, and ArgoCD then
-    # cannot diff the whole application. Force=true also collides with the
-    # app-wide ServerSideApply ("--force cannot be used with --server-side").
-    # Both are opted out here; Replace+Force is deliberate - the job is
-    # idempotent and is meant to re-run.
-    argocd.argoproj.io/sync-options: Replace=true,Force=true,ServerSideApply=false
-    argocd.argoproj.io/compare-options: ServerSideDiff=false
+    # A hook, not a tracked resource: a Job's spec.template is immutable, and as a plain
+    # resource every image bump made the server-side diff fail on it. ArgoCD then reported
+    # the app Synced without applying anything (argoproj/argo-cd#28722; the per-resource
+    # ServerSideDiff=false opt-out did not help). Hooks are not diffed: this one is recreated
+    # after every sync, once Forgejo is up (it needs the Forgejo pod, see podAffinity).
+    # The job is idempotent: create the service user or reset its password.
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   backoffLimit: 3
   manualSelector: true
