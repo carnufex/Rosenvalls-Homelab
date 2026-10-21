@@ -1,6 +1,6 @@
-# Runner pods for carnufex/Lots (public) and carnufex/kingsguard (private). A job on these runners is treated as untrusted
-# code: no ingress at all, and egress only to GitHub (the runner protocol, actions, artifacts) and the LAN registry. Nothing
-# else on the LAN or in the cluster. Secrets never live here: they come from GitHub, scoped to the main-branch jobs.
+# Runner pods for carnufex/Lots. Lots is a public repository, so a job on these runners is treated as untrusted code:
+# no ingress at all, and egress only to GitHub (the runner protocol, actions, artifacts) and the LAN registry. Nothing
+# else on the LAN or in the cluster. Secrets never live here: they come from a GitHub environment that only main may use.
 # Debug drops: hubble observe -n arc-runners --verdict DROPPED
 ---
 apiVersion: cilium.io/v2
