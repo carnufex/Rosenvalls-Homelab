@@ -4,7 +4,7 @@ global:
   namespaceOverride: ""
   additionalLabels: {}
   image:
-    tag: 2026.8.1 # update-center: ghcr.io/goauthentik/server (image-only patches may run ahead of the chart)
+    tag: 2026.8.5 # update-center: ghcr.io/goauthentik/server (image-only patches may run ahead of the chart)
   revisionHistoryLimit: 3
   env: []
   envFrom:
