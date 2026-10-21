@@ -36,8 +36,24 @@ Scans every 30 min (or on "Uppdatera listan"):
    runs *Uppdatera alla patchar* by itself as one batch job (actor `auto-patch`, visible in the job history and
    in the Översikt patch group). Minor/major, Talos and Proxmox are never automatic.
 
-Tag lookups read the whole OCI tag list (it is sorted by name, not date: before 2026-10-21 a 1500-tag cap made
-Sonarr/Radarr/Jackett look current for months). `oci://` Helm charts (ARC) are resolved from registry tags.
+What counts as a pin and how a target is chosen (changed 2026-10-21, when Sonarr, Radarr, Jackett, Immich,
+ARC, the authentik image and others had been silently missing):
+
+- **Tag lists are read in full.** Registries list tags by name or oldest-push first, never newest first, so the
+  old 1500-tag cap cut off exactly the new versions. Past 120 pages (immich-machine-learning has 215k PR tags)
+  the tail is read from `last=<pinned tag>`.
+- **`oci://` Helm charts** (ARC) are resolved from registry tags.
+- **Helm values pins**: an `image:` block with `repository:` (+ `registry:`) and `tag:` in a values file is a
+  pin; the bump rewrites only the tag. A `tag:` without `repository:` (chart default image) needs a hint:
+  `tag: 2026.8.1 # update-center: ghcr.io/goauthentik/server` (authentik-runtime has one).
+- **In-major step first**: when a major exists, the newest release inside the current major is the target
+  (batchable patch/minor) and the major is noted ("sedan major X"); the major gets its own button once the
+  current major is exhausted. Example: Forgejo 15.0.7 -> 15.0.10 while 17.0.0 (which upstream advised against)
+  waited.
+- **Verified rollout**: after ArgoCD reports Synced/Healthy, every bumped image that ran in a workload before
+  must appear in a workload pod template within 3 min, otherwise the job fails. ArgoCD can report Synced
+  while a server-side diff error left the change unapplied (argoproj/argo-cd#28722; it happened to the old
+  Forgejo bootstrap Job, now a PostSync hook). An ArgoCD timeout also fails the job (it used to only warn).
 
 ## The Översikt order (top = next move)
 
