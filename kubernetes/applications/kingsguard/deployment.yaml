@@ -29,7 +29,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: kingsguard
-          image: ghcr.io/carnufex/kingsguard:sha-2fcd1ee@sha256:00f0bf07a30e8bc95b6f548b536d406bf636f84566e76e0abdc199297b3a325a
+          image: ghcr.io/carnufex/kingsguard:sha-9ae596e@sha256:a9bea112727d7ef99d2f0034320f0ede77b35a7eda3c39344a9d544dde2a4051
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 8080 }
