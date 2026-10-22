@@ -7,10 +7,16 @@ checked against the live cluster and the images on that date.
 
 | Date | Cluster | Step | Result |
 |---|---|---|---|
-| 2026-10-22 | cmdb | phase 1 (`8ccf844`) | 17.5 bullseye → 17.11 trixie, postgis 3.5.2 → 3.6.4. Down ~3.5 min (mostly the image pull). Row counts of the 8 largest tables, 121 tables and `ST_Extent` of all 22 geometry columns identical before/after. cmdb-api Ready again the moment the DB was. Dump job on `17-standard-trixie` verified (119 MB). Pre-step dump `cmdb-2026-10-22T120028Z.dump` also off-cluster. |
+| 2026-10-22 | cmdb | phase 1 (`8ccf844`) | 17.5 bullseye → 17.11 trixie, postgis 3.5.2 → 3.6.4. Down ~3.5 min (smart shutdown, see below). Row counts of the 8 largest tables, 121 tables and `ST_Extent` of all 22 geometry columns identical before/after. cmdb-api Ready again the moment the DB was. Dump job on `17-standard-trixie` verified (119 MB). Pre-step dump `cmdb-2026-10-22T120028Z.dump` also off-cluster. |
+| 2026-10-22 | lots | phase 1 (`0feeac4`) | 17.10 bullseye → 17.11 trixie, pgvector 0.8.2 → 0.8.7. Down ~3 min (smart shutdown). Row counts of all 58 tables identical; a 5-nearest-neighbour query through the HNSW index (`knowledge_chunks_vec_1024`) returned the same ids and distances. lots Ready 5 s after the DB; `/health/ready` 200. Dump job on `17-standard-trixie` verified (70 MB). Pre-step dump `lots-2026-10-22T125503Z.dump` also off-cluster. |
 
-Lesson for the next clusters: most of the downtime is pulling the new image. Pre-pull it on the node that runs
-the primary first (e.g. a short-lived pod with the image and `nodeName` pinned) to cut the restart to seconds.
+Lesson (corrected after lots): the downtime is **not** the image pull. The image was already on the node, and
+the pod was rescheduled to another node anyway, so pre-pulling on the old node does not help. It is CNPG's
+smart shutdown: Postgres waits for client sessions to end until `smartShutdownTimeout` (default 180 s), and the
+apps' connection pools never close them (lots: `Killing` 12:56:20, down until ~12:59:06). For ngm and
+authentik, add `smartShutdownTimeout: 15` to the Cluster in the same commit as the image change. After 15 s
+the shutdown switches to fast mode, which is still a clean shutdown with a checkpoint, and the restart drops
+to well under a minute.
 
 ## Why
 
