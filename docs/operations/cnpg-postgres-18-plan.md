@@ -10,6 +10,9 @@ checked against the live cluster and the images on that date.
 | 2026-10-22 | cmdb | phase 1 (`8ccf844`) | 17.5 bullseye → 17.11 trixie, postgis 3.5.2 → 3.6.4. Down ~3.5 min (smart shutdown, see below). Row counts of the 8 largest tables, 121 tables and `ST_Extent` of all 22 geometry columns identical before/after. cmdb-api Ready again the moment the DB was. Dump job on `17-standard-trixie` verified (119 MB). Pre-step dump `cmdb-2026-10-22T120028Z.dump` also off-cluster. |
 | 2026-10-22 | lots | phase 1 (`0feeac4`) | 17.10 bullseye → 17.11 trixie, pgvector 0.8.2 → 0.8.7. Down ~3 min (smart shutdown). Row counts of all 58 tables identical; a 5-nearest-neighbour query through the HNSW index (`knowledge_chunks_vec_1024`) returned the same ids and distances. lots Ready 5 s after the DB; `/health/ready` 200. Dump job on `17-standard-trixie` verified (70 MB). Pre-step dump `lots-2026-10-22T125503Z.dump` also off-cluster. |
 | 2026-10-22 | ngm | phase 1 (`d91d01b`) | Both instances 17.11 bullseye → trixie, plus `smartShutdownTimeout: 15`. Replica first, then the primary was restarted in place (no switchover). **Primary down ~18 s** instead of ~3 min. Streaming replication back (lag 15 ms), all 14 tables' row counts identical, app logged no errors, `/login` 200. Dump job on `17-standard-trixie` uploaded to OneDrive. Pre-step dumps: OneDrive `ngm-2026-10-22T130544Z.dump` and a local copy. |
+| 2026-10-22 | authentik | phase 1 (`838fbf7`) | 17.11 bullseye → trixie, `smartShutdownTimeout: 15`, dump job and dr-restore overlay follow. DB down ~34 s; **SSO not ready ~51 s**, because authentik-server's liveness probe checks the DB and restarted the container once (13:10:35). Key row counts and 231 tables identical, login flow, OAuth authorize and flow API OK. Dump job on `17-standard-trixie` verified (30 MB). Pre-step dump `authentik-2026-10-22T130917Z.dump` also off-cluster. `authentik_empty_20261021` dropped. |
+
+**Phase 1 complete (2026-10-22):** all four clusters on trixie 17.11 (cmdb `postgis:17-3.6`).
 
 Lesson (corrected after lots): the downtime is **not** the image pull. The image was already on the node, and
 the pod was rescheduled to another node anyway, so pre-pulling on the old node does not help. It is CNPG's
@@ -101,6 +104,15 @@ Do it once per extension profile: cmdb (postgis), lots (vector), and authentik (
 
 ## Phase 2 — 17 → 18 in place
 
+Before phase 2, from what phase 1 showed:
+
+- Add `smartShutdownTimeout: 15` to cmdb and lots too (ngm and authentik have it). The restart is then
+  seconds instead of ~3 min.
+- authentik: the server's liveness probe (`/-/health/live/`, 3 × 10 s) fails while the DB is down and
+  restarts the container, which adds ~17 s on top of the DB outage. Phase 2 keeps the DB down longer
+  (pg_upgrade), so raise `server.livenessProbe.failureThreshold` (e.g. 12 = 2 min) in
+  `authentik-runtime/values.yaml` first, or accept one restart.
+
 What CNPG does: stops **all** pods, runs a job with `pg_upgrade --link` on the primary's volumes, swaps the
 directories, starts the primary, and **re-clones** replicas (ngm). The whole cluster is down for the
 duration (seconds to a few minutes at these sizes). If the job fails, revert `imageName` to 17 and the
@@ -128,8 +140,7 @@ After each cluster:
 
 ## Cleanup from the 2026-10-21 incident (any time)
 
-- `DROP DATABASE authentik_empty_20261021;` on authentik-postgresql. It is the empty database that was
-  swapped out during the restore.
+- ~~`DROP DATABASE authentik_empty_20261021;`~~ done 2026-10-22.
 - Retained PVs `pvc-acdd7378-…` and `pvc-889cb962-…` (label
   `homelab.rosenvall.se/incident=authentik-wal-corruption-20261021`): delete them once nobody needs them.
   They take Longhorn capacity, which phase R needs.
