@@ -97,8 +97,22 @@ data:
     # cmdb profile: the (synthetic) telecom network CMDB. Its MCP server enforces its own scope per token;
     # this profile adds the shell's policy on top (who may use which class of tool, approvals, audit).
     name: cmdb
-    version: 6
-    description: Search, trace and plan changes in the telecom network CMDB (synthetic data).
+    version: 7
+    description: >-
+      The telecom network CMDB (synthetic data) - sites, cables, fibre, equipment, ports, circuits and services: search, trace,
+      what a cut or dug-through cable affects, and plans for changes.
+    # The router compares a question with these; without them a network question scores too low next to another context.
+    routing:
+      examples:
+        - "En fiber är av i Malmö, vilka påverkas?"
+        - "Jag har grävt av en kabel, vad påverkas?"
+        - "Vilka tjänster och kretsar går i kabel K-001124?"
+        - "Vad händer om platsen går ner?"
+        - "Spåra kretsen från ände till ände."
+        - "Föreslå en ny väg runt den kapade kabeln."
+        - "Skapa en plan för att ansluta en ny plats."
+        - "Which customers are affected if this cable is cut?"
+        - "Trace this service through the network."
     instructions: |
       You answer questions about a national telecom network (sites, cables, equipment, ports, circuits, services)
       using the CMDB tools. Look things up instead of guessing. Use search or get_object to find an object, trace to
