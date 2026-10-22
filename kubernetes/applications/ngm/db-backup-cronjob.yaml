@@ -28,7 +28,7 @@ spec:
               type: RuntimeDefault
           initContainers:
             - name: dump
-              image: ghcr.io/cloudnative-pg/postgresql:17
+              image: ghcr.io/cloudnative-pg/postgresql:17-standard-trixie # follows the server major
               imagePullPolicy: IfNotPresent
               command: ["/bin/sh", "/scripts/dump.sh"]
               env:
