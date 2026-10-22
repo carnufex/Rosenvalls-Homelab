@@ -16,7 +16,8 @@ spec:
       recurring-job.longhorn.io/source: enabled
       recurring-job-group.longhorn.io/cnpg: enabled
 
-  imageName: ghcr.io/cloudnative-pg/postgis:17-3.5
+  # Debian 13 "standard" image; the bare 17-3.5 tag is bullseye and frozen. Plan: docs/operations/cnpg-postgres-18-plan.md
+  imageName: ghcr.io/cloudnative-pg/postgis:17-3.6-standard-trixie
 
   bootstrap:
     initdb:
