@@ -75,6 +75,13 @@ server:
     annotations: {}
     labels: {}
     type: ClusterIP
+  # /-/health/live/ fails while Postgres is down, so a database restart also restarted the server
+  # (2026-10-22: +17 s of SSO outage). 12 x 10 s rides out a CNPG restart or the PG18 pg_upgrade;
+  # a hung server is still killed after 2 min. (The probe overrides under worker: below are the
+  # worker's own; the server ran on chart defaults until now.)
+  livenessProbe:
+    failureThreshold: 12
+    timeoutSeconds: 5
 
 worker:
   enabled: true
