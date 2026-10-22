@@ -14,6 +14,26 @@ checked against the live cluster and the images on that date.
 
 **Phase 1 complete (2026-10-22):** all four clusters on trixie 17.11 (cmdb `postgis:17-3.6`).
 
+**Phase-2 prep done (2026-10-22):** `smartShutdownTimeout: 15` on cmdb and lots (`06abdd6`, applied without a
+restart). authentik-server liveness `failureThreshold: 12`, `timeoutSeconds: 5` (`ec2139f`). The old probe
+overrides sat under `worker:`, so the server had always run on chart defaults.
+
+**Step R done (2026-10-22), all three profiles pass.** Each one restored today's pre-step dump into a
+`longhorn-single` cluster on the phase-1 image in namespace `cnpg-rehearsal`, then switched `imageName` to 18:
+
+| Profile | Upgrade (patch → healthy, incl. 18 image pull) | Result |
+|---|---|---|
+| authentik (plain) | 96 s | 18.6, checksums off. 231 tables and key row counts identical to live. `ak migrate --noinput`: "No migrations to apply". `ak check --database default`: no issues. authentik 2026.8.5 is fine on 18. |
+| lots (pgvector) | 66 s | vector 0.8.7, all 58 tables identical, 5-NN through the HNSW index: same ids, distances and plan. |
+| cmdb (PostGIS) | 70 s | Row counts of the 8 largest tables and `ST_Extent` of all geometry columns identical. **PostGIS then reports `procs need upgrade for use with PostgreSQL "180"`.** `SELECT postgis_extensions_upgrade();` fixes it (`PGSQL="180"`), geometries unchanged, ST_Transform OK. Added to phase 2. |
+
+`vacuumdb --all --analyze-in-stages --missing-stats-only` took ~3 s on each. Restore noise, irrelevant to the
+in-place upgrade (no restore happens there): `COMMENT ON EXTENSION` needs the extension owner, and cmdb's
+99 grants to `cmdb_rapport_nord` fail where that role does not exist.
+
+Note: `longhorn-single` has reclaim policy `Retain`. Deleting a rehearsal cluster leaves Released PVs and
+Longhorn volumes; delete both by hand. All six were removed after this run.
+
 Lesson (corrected after lots): the downtime is **not** the image pull. The image was already on the node, and
 the pod was rescheduled to another node anyway, so pre-pulling on the old node does not help. It is CNPG's
 smart shutdown: Postgres waits for client sessions to end until `smartShutdownTimeout` (default 180 s), and the
@@ -121,7 +141,7 @@ fresh cluster.
 
 | Cluster | `imageName` → | Extra steps |
 |---|---|---|
-| cmdb | `ghcr.io/cloudnative-pg/postgis:18-3.6-standard-trixie` | — (postgis already 3.6.4 on both sides) |
+| cmdb | `ghcr.io/cloudnative-pg/postgis:18-3.6-standard-trixie` | **after the upgrade: `SELECT postgis_extensions_upgrade();`**, then check `postgis_full_version()` shows `PGSQL="180"` without "procs need upgrade" (found in step R) |
 | lots | `ghcr.io/cloudnative-pg/postgresql:18-standard-trixie` | — (vector 0.8.7 on both sides) |
 | ngm | same as lots | replica re-clone (9 MB, quick) |
 | authentik | same as lots | plus the DR overlay files |
