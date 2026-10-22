@@ -12,7 +12,12 @@ spec:
       recurring-job.longhorn.io/source: enabled
       recurring-job-group.longhorn.io/cnpg: enabled
 
-  imageName: ghcr.io/cloudnative-pg/postgresql:17
+  # Debian 13 "standard" image; the bare :17 tag is bullseye and frozen. Plan: docs/operations/cnpg-postgres-18-plan.md
+  imageName: ghcr.io/cloudnative-pg/postgresql:17-standard-trixie
+
+  # authentik's connection pool never closes its sessions, so the default smart shutdown waits the full
+  # 180 s on every restart (SSO down). After 15 s CNPG switches to a fast, still clean, shutdown.
+  smartShutdownTimeout: 15
 
   bootstrap:
     initdb:
