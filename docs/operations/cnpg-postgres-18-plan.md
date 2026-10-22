@@ -1,7 +1,16 @@
 # CNPG: bullseye images → trixie, then PostgreSQL 17 → 18
 
-Plan, 2026-10-22. Not started. One database at a time, a fresh dump before every step. Facts below were
+Plan, 2026-10-22. In progress (see *Progress*). One database at a time, a fresh dump before every step. Facts below were
 checked against the live cluster and the images on that date.
+
+## Progress
+
+| Date | Cluster | Step | Result |
+|---|---|---|---|
+| 2026-10-22 | cmdb | phase 1 (`8ccf844`) | 17.5 bullseye → 17.11 trixie, postgis 3.5.2 → 3.6.4. Down ~3.5 min (mostly the image pull). Row counts of the 8 largest tables, 121 tables and `ST_Extent` of all 22 geometry columns identical before/after. cmdb-api Ready again the moment the DB was. Dump job on `17-standard-trixie` verified (119 MB). Pre-step dump `cmdb-2026-10-22T120028Z.dump` also off-cluster. |
+
+Lesson for the next clusters: most of the downtime is pulling the new image. Pre-pull it on the node that runs
+the primary first (e.g. a short-lived pod with the image and `nodeName` pinned) to cut the restart to seconds.
 
 ## Why
 
