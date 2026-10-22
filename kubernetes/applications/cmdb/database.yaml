@@ -19,6 +19,10 @@ spec:
   # Debian 13 "standard" image; the bare 17-3.5 tag is bullseye and frozen. Plan: docs/operations/cnpg-postgres-18-plan.md
   imageName: ghcr.io/cloudnative-pg/postgis:17-3.6-standard-trixie
 
+  # The app's connection pool never closes its sessions: the default smart shutdown waited the full
+  # 180 s on every restart (phase 1: ~3 min down). After 15 s CNPG switches to a fast, still clean, shutdown.
+  smartShutdownTimeout: 15
+
   bootstrap:
     initdb:
       database: cmdb
