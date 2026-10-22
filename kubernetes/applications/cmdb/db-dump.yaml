@@ -73,7 +73,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: dump
-              image: ghcr.io/cloudnative-pg/postgresql:17-standard-trixie # follows the server major
+              image: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie # follows the server major
               imagePullPolicy: IfNotPresent
               command: ["/bin/sh", "-c"]
               args:
