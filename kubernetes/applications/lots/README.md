@@ -27,6 +27,9 @@ through per-call policy, approvals and an append-only audit log. Public at `http
 - Documents: the Lots document service (Docling: layout, tables, OCR, page provenance) and its reranker (bge-reranker-v2-m3) on
   the GPU PC at `192.168.1.215:8710` (`docker compose up -d` in `services/documents` of carnufex/Lots, key in its `.env`).
   While the PC is off, new documents wait for the next index run; indexed ones stay searchable, without reranking.
+- Decision models: Laya (`:8096`) and THX-01 (`:8097`) on the GPU PC (CPU containers; `docker compose up -d --build` in
+  `services/decisions` of carnufex/Lots, key in its `.env`). They answer "which context?" after the router, in the shadow only;
+  Administration > Routing compares them with the router. While the PC is off they answer nothing and questions go on as before.
 
 ## Identity
 
@@ -43,6 +46,7 @@ Add a user to a group in Authentik to give access.
 | `CMDB_AGENT_TOKEN` | app password of the `cmdb-agent-demo` service account (profile `passwordEnv`) |
 | `LOTS_VOICE_KEY` | API key of the voice service on the GPU PC (its `VOICE_API_KEY`; shell `Speech__ApiKeyEnv`) |
 | `LOTS_DOCUMENTS_KEY` | API key of the document service on the GPU PC (its `DOCUMENTS_API_KEY`; shell `Documents__ApiKeyEnv` and the rerank endpoint) |
+| `LOTS_DECIDE_KEY` | API key of the decision model services on the GPU PC (their `DECIDE_API_KEY`; shell endpoints `laya` and `thx01`) |
 | Slack incoming webhook (the Alertmanager entry) | Lots' admin notices: dependency down/up, price changes, approval requests (`Notifications__Webhooks__0__Url`) |
 | `LOTS_BWS_ACCESS_TOKEN` | access token of the machine account `lots-prod` in Lots' own Bitwarden Secrets Manager organisation (EU), read access to its project `Lots` only (`BWS_ACCESS_TOKEN`, used by the bitwarden-secrets plugin) |
 | `GHCR_PAT`, registry password | image pull secret (same entries as the other apps) |
@@ -63,7 +67,7 @@ Put the new `tag@sha256:<digest>` into `app.yaml` and push; ArgoCD syncs it.
 ## Network
 
 Default deny (`networkpolicy.yaml`). Ingress only from the Cilium Gateway. Egress: PostgreSQL, Authentik and the CMDB by
-name (443), and the GPU PC `192.168.1.215`: Ollama `11434`, the voice service `8700` and the document service `8710`.
+name (443), and the GPU PC `192.168.1.215`: Ollama `11434`, the voice service `8700`, the document service `8710` and the decision models `8096`/`8097`.
 
 ## Troubleshooting
 
@@ -72,4 +76,5 @@ name (443), and the GPU PC `192.168.1.215`: Ollama `11434`, the voice service `8
 - Runs fail with a connection error: the Ollama host is off.
 - Voice unavailable: the PC is off or the voice container is down (`curl http://192.168.1.215:8700/health` from the LAN).
 - Documents listed as failed / no reranking: the document service is down (`curl http://192.168.1.215:8710/health`).
+- Routing page shows no decision model answers: the decision services are down (`curl http://192.168.1.215:8097/health`).
 - Dropped traffic: `hubble observe -n lots --verdict DROPPED`.

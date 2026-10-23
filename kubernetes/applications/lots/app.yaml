@@ -59,6 +59,23 @@ data:
   Models__Endpoints__documents__ApiKeyEnv: LOTS_DOCUMENTS_KEY
   Models__Aliases__rerank__Targets__0__Endpoint: documents
   Models__Aliases__rerank__Targets__0__Model: BAAI/bge-reranker-v2-m3
+  # Decision models in the shadow of the router (Lots #403, ADR 0053): Laya and THX-01 on the same GPU PC (CPU containers,
+  # services/decisions of carnufex/Lots, key in its .env). Each is asked "which context?" after the router has answered and never
+  # decides anything; Administration > Routing compares them. While the PC is off the arms answer nothing and questions go on.
+  Models__Endpoints__laya__BaseUrl: http://192.168.1.215:8096/v1
+  Models__Endpoints__laya__ApiKeyEnv: LOTS_DECIDE_KEY
+  Models__Endpoints__laya__HealthPath: ../health
+  Models__Endpoints__laya__TimeoutSeconds: "10"
+  Models__Endpoints__thx01__BaseUrl: http://192.168.1.215:8097/v1
+  Models__Endpoints__thx01__ApiKeyEnv: LOTS_DECIDE_KEY
+  Models__Endpoints__thx01__TimeoutSeconds: "10"
+  Models__Aliases__route-laya__Targets__0__Endpoint: laya
+  Models__Aliases__route-laya__Targets__0__Model: multilingual
+  Models__Aliases__route-thx01__Targets__0__Endpoint: thx01
+  Models__Aliases__route-thx01__Targets__0__Model: THX-01
+  Routing__Shadow__Enabled: "true"
+  Routing__Shadow__Arms__0: route-thx01
+  Routing__Shadow__Arms__1: route-laya
   # Prices for the cost columns (#77): Berget AI's GLM-5.3-Flash in EUR; local models cost nothing.
   Models__Currency: EUR
   Models__Prices__zai-org_GLM-5.3-Flash__InputPerMillion: "0.25"
@@ -97,12 +114,14 @@ data:
     # cmdb profile: the (synthetic) telecom network CMDB. Its MCP server enforces its own scope per token;
     # this profile adds the shell's policy on top (who may use which class of tool, approvals, audit).
     name: cmdb
-    version: 7
+    version: 8
     description: >-
       The telecom network CMDB (synthetic data) - sites, cables, fibre, equipment, ports, circuits and services: search, trace,
       what a cut or dug-through cable affects, and plans for changes.
     # The router compares a question with these; without them a network question scores too low next to another context.
     routing:
+      # What it is about in a few words each: how a decision model tells it apart from the other contexts (Lots #403).
+      topics: [telecom network, sites, cables, fibre, equipment, ports, circuits, services, cable cuts, network changes]
       examples:
         - "En fiber är av i Malmö, vilka påverkas?"
         - "Jag har grävt av en kabel, vad påverkas?"
