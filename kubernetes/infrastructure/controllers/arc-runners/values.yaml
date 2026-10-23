@@ -20,7 +20,7 @@ template:
         type: RuntimeDefault
     containers:
       - name: runner
-        image: ghcr.io/actions/actions-runner:2.338.0
+        image: ghcr.io/actions/actions-runner:2.338.1
         command: ["/home/runner/run.sh"]
         securityContext:
           allowPrivilegeEscalation: false
