@@ -73,6 +73,9 @@ data:
   Models__Aliases__route-laya__Targets__0__Model: multilingual
   Models__Aliases__route-thx01__Targets__0__Endpoint: thx01
   Models__Aliases__route-thx01__Targets__0__Model: THX-01
+  # Keep the embedding model on the GPU PC loaded: Ollama unloads it after 5 idle minutes, and loading takes longer than the
+  # router waits (1.5 s), so the first question after a quiet spell was routed by its words alone.
+  Routing__KeepWarmMinutes: "4"
   Routing__Shadow__Enabled: "true"
   Routing__Shadow__Arms__0: route-thx01
   Routing__Shadow__Arms__1: route-laya
