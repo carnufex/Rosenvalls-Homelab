@@ -189,6 +189,8 @@ data:
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'openid'"]]
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'profile'"]]
             - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'email'"]]
+            # A refresh token only for this scope: Lots renews an expired sign-in with it instead of sending people back to sign in.
+            - !Find [authentik_core.propertymapping, [name, "authentik default OAuth Mapping: OpenID 'offline_access'"]]
       - id: lots_application
         model: authentik_core.application
         identifiers:

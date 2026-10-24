@@ -26,6 +26,8 @@ data:
   Auth__Mode: Oidc
   Auth__Oidc__Authority: https://authentik.rosenvall.se/application/o/lots/
   Auth__Oidc__ClientId: lots
+  # offline_access: Authentik issues a refresh token only for it, so an expired sign-in renews instead of ending (Lots #366).
+  Auth__Oidc__Scope: openid profile email offline_access
   Auth__Oidc__RoleClaim: groups
   Auth__Oidc__RolePrefix: lots-
   # Self-hosted model on the Ollama host (Service ollama/ollama -> LAN endpoint).
