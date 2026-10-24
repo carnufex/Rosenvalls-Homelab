@@ -1,0 +1,35 @@
+# Runner scale set "ngm-cluster" for carnufex/NextGenerationMe (ARC). Jobs reach it with `runs-on: ngm-cluster`.
+# Only the publish job of NGM's main branch uses it: it pushes the image built on a GitHub-hosted runner to the
+# LAN-only registry, signs it and bumps the ngm pins in this repo. Tests and builds stay on GitHub-hosted runners.
+# Same runner pod as lots-cluster (values.yaml); a personal account cannot share one scale set across repositories.
+githubConfigUrl: https://github.com/carnufex/NextGenerationMe
+githubConfigSecret: arc-github-app
+runnerScaleSetName: ngm-cluster
+minRunners: 0
+maxRunners: 1
+controllerServiceAccount:
+  namespace: arc-systems
+  name: arc-gha-rs-controller
+template:
+  spec:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1001 # the image's "runner" user (non-numeric USER, so runAsNonRoot needs the uid)
+      runAsGroup: 1001
+      fsGroup: 1001
+      seccompProfile:
+        type: RuntimeDefault
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:2.337.0
+        command: ["/home/runner/run.sh"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 2Gi
