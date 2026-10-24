@@ -29,7 +29,7 @@ spec:
             seccompProfile: { type: RuntimeDefault }
           containers:
             - name: polar-sync
-              image: registry.rosenvall.se/carnufex/ngm:sha-81cbd1e
+              image: registry.rosenvall.se/carnufex/ngm:sha-48b6643
               command:
                 - node
                 - -e
