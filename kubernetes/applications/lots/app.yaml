@@ -61,18 +61,13 @@ data:
   Models__Endpoints__documents__ApiKeyEnv: LOTS_DOCUMENTS_KEY
   Models__Aliases__rerank__Targets__0__Endpoint: documents
   Models__Aliases__rerank__Targets__0__Model: BAAI/bge-reranker-v2-m3
-  # Decision models in the shadow of the router (Lots #403, ADR 0053): Laya and THX-01 on the same GPU PC (CPU containers,
-  # services/decisions of carnufex/Lots, key in its .env). Each is asked "which context?" after the router has answered and never
-  # decides anything; Administration > Routing compares them. While the PC is off the arms answer nothing and questions go on.
-  Models__Endpoints__laya__BaseUrl: http://192.168.1.215:8096/v1
-  Models__Endpoints__laya__ApiKeyEnv: LOTS_DECIDE_KEY
-  Models__Endpoints__laya__HealthPath: ../health
-  Models__Endpoints__laya__TimeoutSeconds: "10"
+  # The decision model THX-01 on the same GPU PC (CPU container, services/decisions of carnufex/Lots, key in its .env; Lots #403,
+  # #412, ADR 0053). It answers "which context?" in the shadow of the router, and decides where the router is unsure (it would ask
+  # or hand to the front agent) when it is at least 70 % sure; Administration > Routing compares and counts. While the PC is off it
+  # answers nothing and the router's own answer stands. Laya was measured too (14 of 30 vs THX-01's 28) and dropped.
   Models__Endpoints__thx01__BaseUrl: http://192.168.1.215:8097/v1
   Models__Endpoints__thx01__ApiKeyEnv: LOTS_DECIDE_KEY
   Models__Endpoints__thx01__TimeoutSeconds: "10"
-  Models__Aliases__route-laya__Targets__0__Endpoint: laya
-  Models__Aliases__route-laya__Targets__0__Model: multilingual
   Models__Aliases__route-thx01__Targets__0__Endpoint: thx01
   Models__Aliases__route-thx01__Targets__0__Model: THX-01
   # Keep the embedding model on the GPU PC loaded: Ollama unloads it after 5 idle minutes, and loading takes longer than the
@@ -80,7 +75,8 @@ data:
   Routing__KeepWarmMinutes: "4"
   Routing__Shadow__Enabled: "true"
   Routing__Shadow__Arms__0: route-thx01
-  Routing__Shadow__Arms__1: route-laya
+  Routing__Decide__Arm: route-thx01
+  Routing__Decide__MinConfidence: "0.7"
   # Prices for the cost columns (#77): Berget AI's GLM-5.3-Flash in EUR; local models cost nothing.
   Models__Currency: EUR
   Models__Prices__zai-org_GLM-5.3-Flash__InputPerMillion: "0.25"
