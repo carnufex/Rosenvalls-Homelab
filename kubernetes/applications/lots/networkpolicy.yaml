@@ -75,8 +75,7 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
-    # The GPU PC on the LAN: Ollama (Service ollama/ollama, no selector), the voice and the document service and the decision
-    # model THX-01 8097 (by address).
+    # The GPU PC on the LAN: Ollama (Service ollama/ollama, no selector), the voice and the document service (by address).
     - toCIDR:
         - 192.168.1.215/32
       toPorts:
@@ -86,8 +85,6 @@ spec:
             - port: "8700"
               protocol: TCP
             - port: "8710"
-              protocol: TCP
-            - port: "8097"
               protocol: TCP
 ---
 apiVersion: cilium.io/v2
