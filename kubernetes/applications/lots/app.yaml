@@ -261,7 +261,7 @@ spec:
             claimName: lots-audio
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-0c9ca13@sha256:032f35c3106b6a67635d9846dc59927b32213a7484ac3e1f92ba46b53b95256e
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-6f00497@sha256:d2769b57c349c4630e64031a437b9f5321abacd4759d740c5d381279a559e679
           ports:
             - containerPort: 8080
               name: http
