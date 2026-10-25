@@ -82,6 +82,9 @@ data:
   # network questions at most 0.32. Measure again after changing the embedding model.
   Routing__Knowledge__Enabled: "true"
   Routing__Knowledge__MinSimilarity: "0.4"
+  # A short or pointing follow-up ("och i Lund?") is written out from the conversation's last turns before it is routed (Lots #407).
+  # The default alias: GLM-5.3-Flash at Berget, the local qwen3.5 after it; turns that read restricted data go to the local model only.
+  Routing__Rewrite__Alias: default
   # Prices for the cost columns (#77): Berget AI's GLM-5.3-Flash in EUR; local models cost nothing.
   Models__Currency: EUR
   Models__Prices__zai-org_GLM-5.3-Flash__InputPerMillion: "0.25"
