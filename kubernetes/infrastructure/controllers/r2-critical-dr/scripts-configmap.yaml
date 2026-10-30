@@ -156,13 +156,19 @@ data:
       --exclude='config/MediaCover' \
       --exclude='config/logs' \
       --exclude='config/Backups' \
-      --exclude='config/Sentry'
+      --exclude='config/Sentry' \
+      --exclude='config/logs.db*' \
+      --exclude='config/.reset-backups' \
+      --exclude='config/.restore-backups'
 
     capture_config sonarr media 'app.kubernetes.io/name=sonarr' sonarr /config \
       --exclude='config/MediaCover' \
       --exclude='config/logs' \
       --exclude='config/Backups' \
-      --exclude='config/Sentry'
+      --exclude='config/Sentry' \
+      --exclude='config/logs.db*' \
+      --exclude='config/.reset-backups' \
+      --exclude='config/.restore-backups'
 
     capture_config seerr media 'app.kubernetes.io/name=seerr' seerr /app/config \
       --exclude='config/.cache' \
