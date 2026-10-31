@@ -33,3 +33,4 @@ configMapGenerator:
     namespace: lots
     files:
       - skola-tests.yaml=gitops/skola-tests.yaml
+      - guards.yaml=gitops/guards.yaml

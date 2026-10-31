@@ -1,0 +1,7 @@
+# Guards applied by the shell itself (GitOps:Path). protected-names masks each user's class list ("Protected names" on the
+# account page) as [name n] before a hosted model or an external tool sees it; local models and the user's own view are untouched.
+kind: Guard
+name: protected-names
+type: builtin
+builtin: protected-names
+mode: enforce
