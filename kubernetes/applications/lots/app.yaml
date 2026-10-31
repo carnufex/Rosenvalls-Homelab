@@ -35,7 +35,7 @@ data:
   # faster, the first token of a later turn 116 ms instead of 175 ms. Ollama (ollama/ollama) stays for Rosenvall DevOps.
   # The chat model is Gemma 4 26B-A4B since 2026-10-31 (Lots #488): measured against qwen3.5 it passes the same evals, lets no red team
   # attack through, finds pupils' names without taking public figures for them and writes better Swedish; slower to the first token
-  # (1.6 s). Going back: Model__Model qwen3.5 (still on the server, loaded when asked for).
+  # (1.6 s). qwen3.5 was removed from the server on 2026-10-31.
   Model__BaseUrl: http://192.168.1.215:8720/v1
   Model__ApiKeyEnv: LOTS_MODEL_KEY
   Model__Model: gemma4-26b
