@@ -30,10 +30,13 @@ data:
   Auth__Oidc__Scope: openid profile email offline_access
   Auth__Oidc__RoleClaim: groups
   Auth__Oidc__RolePrefix: lots-
-  # Self-hosted model on the Ollama host (Service ollama/ollama -> LAN endpoint).
-  Model__BaseUrl: http://ollama.ollama.svc.cluster.local:11434/v1
-  Model__Model: qwen3.5:latest
-  # Ollama's num_ctx for qwen3.5: requests are fitted to it, tool schemas and the answer's room included (#173).
+  # Self-hosted model on the GPU PC: llama-server (Lots services/models), the chat model with vision and the embedding model on one
+  # port, by address like voice. Measured against Ollama with the same weights on 2026-10-31: the same eval results, decoding 16 %
+  # faster, the first token of a later turn 116 ms instead of 175 ms. Ollama (ollama/ollama) stays for Rosenvall DevOps.
+  Model__BaseUrl: http://192.168.1.215:8720/v1
+  Model__ApiKeyEnv: LOTS_MODEL_KEY
+  Model__Model: qwen3.5
+  # The server's context for qwen3.5 (c in models.ini): requests are fitted to it, tool schemas and the answer's room included (#173).
   Model__ContextTokens: "8192"
   # Lots #186: admins choose the chat model on the Models page (a ModelAlias over this one; Reset comes back here).
   Models__AdminEditable__0: default
@@ -48,7 +51,7 @@ data:
   Speech__Voices__sv: cb-default
   Speech__Voices__en: cb-default
   Speech__DefaultLanguage: sv
-  # Knowledge (ADR 0016): embeddings on the same Ollama, multilingual Arctic Embed 2 (#165). Users add their own sources on the
+  # Knowledge (ADR 0016): embeddings on the same model server, multilingual Arctic Embed 2 (#165), the same vectors as Ollama's. Users add their own sources on the
   # Knowledge page; none are defined as code here.
   Models__Aliases__embed__Targets__0__Endpoint: default
   Models__Aliases__embed__Targets__0__Model: snowflake-arctic-embed2
@@ -61,8 +64,8 @@ data:
   Models__Endpoints__documents__ApiKeyEnv: LOTS_DOCUMENTS_KEY
   Models__Aliases__rerank__Targets__0__Endpoint: documents
   Models__Aliases__rerank__Targets__0__Model: BAAI/bge-reranker-v2-m3
-  # Keep the embedding model on the GPU PC loaded: Ollama unloads it after 5 idle minutes, and loading takes longer than the
-  # router waits (1.5 s), so the first question after a quiet spell was routed by its words alone.
+  # Keep the embedding model on the GPU PC warm: loading takes longer than the router waits (1.5 s). llama-server keeps its models
+  # loaded; Ollama unloaded them after 5 idle minutes, and the first question after a quiet spell was routed by its words alone.
   Routing__KeepWarmMinutes: "4"
   # Routing is the router when it is sure, else the front agent, and people may choose contexts in the composer (Lots ADR 0056): the
   # decision models (THX-01), the knowledge signal and the follow-up rewriter were removed on 2026-10-25.
