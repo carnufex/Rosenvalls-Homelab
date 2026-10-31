@@ -28,3 +28,8 @@ configMapGenerator:
       - skola-svenska-som-andrasprak.grgrsva01.md=knowledge/skola/skola-svenska-som-andrasprak/grgrsva01.md
       - skola-svenska-som-andrasprak.sva.md=knowledge/skola/skola-svenska-som-andrasprak/sva.md
       - skola-svenska-som-andrasprak.svea.md=knowledge/skola/skola-svenska-som-andrasprak/svea.md
+  # Resources the shell applies itself (GitOps__Path=/gitops in app.yaml).
+  - name: lots-gitops
+    namespace: lots
+    files:
+      - skola-tests.yaml=gitops/skola-tests.yaml

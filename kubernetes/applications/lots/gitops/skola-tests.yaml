@@ -1,0 +1,110 @@
+# Tests of the teacher contexts (skola-planering, skola-bedomning), applied by the shell itself (GitOps:Path, managed by gitops).
+# Retrieval: the right syllabus comes first for each question (k 1), without a model. Routing: each question reaches the right
+# context for a teacher. Answers: real runs as svc-tests with the teacher role; planning uses the hosted model, assessment the local one.
+kind: TestSuite
+name: skola-svenska-retrieval
+target: retrieval
+source: skola-svenska
+k: 1
+schedule: { cron: "20,50 * * * *", timeZone: UTC }
+tests:
+  - prompt: Vilka betygskriterier gäller för betyget E i Svenska 1?
+    expect: [{ kind: document, value: "Svenska – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
+  - prompt: Vad ska undervisningen i svenska nivå 2 behandla?
+    expect: [{ kind: document, value: "Svenska – gymnasieskolan, ämnesbetyg med nivåer (GY25, elever som började från hösten 2025)" }]
+  - prompt: Centralt innehåll i svenska för årskurs 7–9
+    expect: [{ kind: document, value: "Svenska – grundskolan, kursplan (Lgr22, grundskoleämnen på introduktionsprogrammen)" }]
+  - prompt: Betygskriterier för betyget E i slutet av årskurs 9 i svenska
+    expect: [{ kind: document, value: "Svenska – grundskolan, kursplan (Lgr22, grundskoleämnen på introduktionsprogrammen)" }]
+    frozen: true
+  - prompt: Vad krävs för betyget A i svenska med ämnesbetyg (GY25)?
+    expect: [{ kind: document, value: "Svenska – gymnasieskolan, ämnesbetyg med nivåer (GY25, elever som började från hösten 2025)" }]
+  - prompt: Litteraturhistoria och epoker i kursen Svenska 3
+    expect: [{ kind: document, value: "Svenska – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
+    frozen: true
+---
+kind: TestSuite
+name: skola-sva-retrieval
+target: retrieval
+source: skola-svenska-som-andrasprak
+k: 1
+schedule: { cron: "20,50 * * * *", timeZone: UTC }
+tests:
+  - prompt: Centralt innehåll i Svenska som andraspråk 1
+    expect: [{ kind: document, value: "Svenska som andraspråk – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
+  - prompt: Vad ska undervisningen i svenska som andraspråk nivå 1 behandla?
+    expect: [{ kind: document, value: "Svenska som andraspråk – gymnasieskolan, ämnesbetyg med nivåer (GY25, elever som började från hösten 2025)" }]
+  - prompt: Svenska som andraspråk i årskurs 7–9, vilket centralt innehåll?
+    expect: [{ kind: document, value: "Svenska som andraspråk – grundskolan, kursplan (Lgr22, grundskoleämnen på introduktionsprogrammen)" }]
+  - prompt: Betyget C i svenska som andraspråk i slutet av årskurs 9
+    expect: [{ kind: document, value: "Svenska som andraspråk – grundskolan, kursplan (Lgr22, grundskoleämnen på introduktionsprogrammen)" }]
+    frozen: true
+  - prompt: Betygskriterier för E i Svenska som andraspråk 2
+    expect: [{ kind: document, value: "Svenska som andraspråk – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
+---
+kind: TestSuite
+name: skola-historia-retrieval
+target: retrieval
+source: skola-historia
+k: 1
+schedule: { cron: "20,50 * * * *", timeZone: UTC }
+tests:
+  - prompt: Centralt innehåll i Historia 1a1
+    expect: [{ kind: document, value: "Historia – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
+  - prompt: Vad ska undervisningen i historia nivå 1 behandla?
+    expect: [{ kind: document, value: "Historia – gymnasieskolan, ämnesbetyg med nivåer (GY25, elever som började från hösten 2025)" }]
+  - prompt: Historia i årskurs 7–9, vilket centralt innehåll?
+    expect: [{ kind: document, value: "Historia – grundskolan, kursplan (Lgr22, grundskoleämnen på introduktionsprogrammen)" }]
+  - prompt: Betygskriterier för betyget E i historia i slutet av årskurs 9
+    expect: [{ kind: document, value: "Historia – grundskolan, kursplan (Lgr22, grundskoleämnen på introduktionsprogrammen)" }]
+    frozen: true
+  - prompt: Betyget A i kursen Historia 2a
+    expect: [{ kind: document, value: "Historia – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
+---
+kind: TestSuite
+name: skola-routing
+target: routing
+runAs: { roles: [teacher] }
+schedule: { cron: "20,50 * * * *", timeZone: UTC }
+tests:
+  - prompt: Gör en skrivuppgift i svenska nivå 1 kopplad till centralt innehåll.
+    expect: [{ kind: context, value: skola-planering }]
+  - prompt: Vad säger ämnesplanen i historia om källkritik?
+    expect: [{ kind: context, value: skola-planering }]
+  - prompt: Planera tre lektioner om andra världskriget för språkintroduktion.
+    expect: [{ kind: context, value: skola-planering }]
+  - prompt: Ge respons på elevens uppsats som jag har bifogat.
+    expect: [{ kind: context, value: skola-bedomning }]
+  - prompt: Vilka betygskriterier uppfyller den här elevtexten, och vad saknas för C?
+    expect: [{ kind: context, value: skola-bedomning }]
+---
+kind: TestSuite
+name: skola-svar
+context: skola-planering
+description: The teacher contexts look up the syllabus they answer from, cite it and say which system it is.
+runAs: { roles: [teacher] }
+schedule: { cron: "20,50 * * * *", timeZone: UTC }
+tests:
+  - name: Criteria come from the GY11 syllabus
+    prompt: Vilka betygskriterier gäller för betyget E i kursen Svenska 1? Svara kort.
+    expect:
+      - { kind: usesTool, value: search_knowledge }
+      - { kind: cites, value: "Svenska – gymnasieskolan, kurser (GY11" }
+      - { kind: noWrites }
+  - name: A task is tied to GY25 central content
+    prompt: Gör en kort skrivuppgift för svenska nivå 1 i GY25, kopplad till det centrala innehållet.
+    expect:
+      - { kind: usesTool, value: search_knowledge }
+      - { kind: cites, value: "GY25" }
+      - { kind: matches, value: "centralt innehåll" }
+  - name: Assessment looks up the criteria and does not set a grade
+    context: skola-bedomning
+    prompt: |
+      Bedöm den här texten mot betygskriterierna för E i Svenska 1 (GY11). Sätt inget betyg, bara vad texten visar.
+
+      Text av [person 1]: "Jag tycker att skolan ska börja senare. Många elever är trötta på morgonen och lär sig mindre. En
+      undersökning visar att tonåringar sover bättre om de får sova längre. Därför borde skolan börja klockan nio."
+    expect:
+      - { kind: usesTool, value: search_knowledge }
+      - { kind: cites, value: "Svenska – gymnasieskolan, kurser (GY11" }
+      - { kind: noWrites }

@@ -111,6 +111,9 @@ data:
   DataProtection__Certificates__0__Path: /run/secrets/data-protection/tls.crt
   DataProtection__Certificates__0__KeyPath: /run/secrets/data-protection/tls.key
   Profiles__Path: /profiles
+  # Resources the shell applies itself as gitops-managed (Lots GitOps:Path): the gitops/ folder, as the ConfigMap lots-gitops.
+  # Prune removes only gitops-managed resources; what was applied in the UI or the API stays.
+  GitOps__Path: /gitops
   Agent__DefaultProfile: cmdb
   # The tool pack requires a bearer token (Lots #342): the shell sends LOTS_MCP_TOKEN (lots-secrets) to this host and to no other.
   Mcp__ToolServerAuth__TokenRef: env:LOTS_MCP_TOKEN
@@ -382,6 +385,9 @@ spec:
         - name: knowledge-skola
           configMap:
             name: lots-knowledge-skola
+        - name: gitops
+          configMap:
+            name: lots-gitops
       containers:
         - name: shell
           image: registry.rosenvall.se/carnufex/lots-shell:sha-b344295@sha256:f0bfd9806396a6910b7b4204f0b13f86171f7bb38f8df0ff66e3e379fb928ef8
@@ -409,6 +415,9 @@ spec:
               readOnly: true
             - name: audio
               mountPath: /data/audio
+            - name: gitops
+              mountPath: /gitops
+              readOnly: true
             - name: knowledge-skola
               mountPath: /knowledge/skola-historia/grgrhis01.md
               subPath: skola-historia.grgrhis01.md
