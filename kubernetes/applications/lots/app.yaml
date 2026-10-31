@@ -33,10 +33,13 @@ data:
   # Self-hosted model on the GPU PC: llama-server (Lots services/models), the chat model with vision and the embedding model on one
   # port, by address like voice. Measured against Ollama with the same weights on 2026-10-31: the same eval results, decoding 16 %
   # faster, the first token of a later turn 116 ms instead of 175 ms. Ollama (ollama/ollama) stays for Rosenvall DevOps.
+  # The chat model is Gemma 4 26B-A4B since 2026-10-31 (Lots #488): measured against qwen3.5 it passes the same evals, lets no red team
+  # attack through, finds pupils' names without taking public figures for them and writes better Swedish; slower to the first token
+  # (1.6 s). Going back: Model__Model qwen3.5 (still on the server, loaded when asked for).
   Model__BaseUrl: http://192.168.1.215:8720/v1
   Model__ApiKeyEnv: LOTS_MODEL_KEY
-  Model__Model: qwen3.5
-  # The server's context for qwen3.5 (c in models.ini): requests are fitted to it, tool schemas and the answer's room included (#173).
+  Model__Model: gemma4-26b
+  # The server's context for the chat model (c in models.ini): requests are fitted to it, tool schemas and the answer's room included (#173).
   Model__ContextTokens: "8192"
   # Lots #186: admins choose the chat model on the Models page (a ModelAlias over this one; Reset comes back here).
   Models__AdminEditable__0: default

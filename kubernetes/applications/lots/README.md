@@ -9,7 +9,7 @@ through per-call policy, approvals and an append-only audit log. Public at `http
 - `lots-postgresql` CloudNativePG cluster (runs, trace, approvals, audit). Migrations run at startup.
 - Profile `cmdb` (ConfigMap `lots-profiles`): tools of the CMDB's MCP server, used as the `cmdb-agents` service account.
   The homelab (Docker) profile is not deployed: it needs Docker access, which does not exist in the cluster.
-- Model: `qwen3.5` on the GPU PC's model server (llama-server, Lots `services/models`) at `192.168.1.215:8720`, key
+- Model: `gemma4-26b` (Gemma 4 26B-A4B; `qwen3.5` until 2026-10-31, still on the server to go back to) on the GPU PC's model server (llama-server, Lots `services/models`) at `192.168.1.215:8720`, key
   `LOTS_MODEL_KEY` (so a run fails while that host is off). Until 2026-10-31 it was `qwen3.5:latest` on Ollama via Service
   `ollama/ollama`, which stays for Rosenvall DevOps; going back is `Model__BaseUrl`, `Model__Model` and dropping `Model__ApiKeyEnv`.
 - Voice: the Lots voice service (Whisper, Chatterbox, meeting diarization) on the same GPU PC at `192.168.1.215:8700`
