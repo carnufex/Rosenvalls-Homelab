@@ -56,8 +56,6 @@ data:
   # School knowledge (the teacher contexts skola-planering and skola-bedomning): Skolverket's curricula and syllabi, written as
   # Markdown by knowledge/skolverket.py, mounted file by file under /knowledge (a directory source skips links, and a ConfigMap
   # volume is links). Public data: hosted models may read it.
-  # Questions and keywords on the subject sources: "Historia 1a1" found the GY25 syllabus first (retrieval suites in gitops/).
-  # The indexing gate makes them active only when those suites are not worse.
   Knowledge__Sources__0__Id: skola-styrdokument
   Knowledge__Sources__0__Name: "Läroplan för gymnasieskolan"
   Knowledge__Sources__0__Kind: directory
@@ -72,7 +70,6 @@ data:
   Knowledge__Sources__1__Readers__0: role:teacher
   Knowledge__Sources__1__Readers__1: role:admin
   Knowledge__Sources__1__Sensitivity: public
-  Knowledge__Sources__1__Questions: "true"
   Knowledge__Sources__2__Id: skola-svenska-som-andrasprak
   Knowledge__Sources__2__Name: "Svenska som andraspråk (GY25, GY11, Lgr22)"
   Knowledge__Sources__2__Kind: directory
@@ -80,7 +77,6 @@ data:
   Knowledge__Sources__2__Readers__0: role:teacher
   Knowledge__Sources__2__Readers__1: role:admin
   Knowledge__Sources__2__Sensitivity: public
-  Knowledge__Sources__2__Questions: "true"
   Knowledge__Sources__3__Id: skola-historia
   Knowledge__Sources__3__Name: "Historia (GY25, GY11, Lgr22)"
   Knowledge__Sources__3__Kind: directory
@@ -88,7 +84,6 @@ data:
   Knowledge__Sources__3__Readers__0: role:teacher
   Knowledge__Sources__3__Readers__1: role:admin
   Knowledge__Sources__3__Sensitivity: public
-  Knowledge__Sources__3__Questions: "true"
   Models__Aliases__embed__Targets__0__Endpoint: default
   Models__Aliases__embed__Targets__0__Model: snowflake-arctic-embed2
   # The document service on the same GPU PC (#167, ADR 0028): Docling layout, tables and OCR with page provenance, and the reranker
