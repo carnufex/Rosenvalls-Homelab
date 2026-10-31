@@ -12,3 +12,19 @@ resources:
   - toolpack.yaml
   - networkpolicy.yaml
   - httproute.yaml
+
+# School knowledge for Lots (knowledge/skolverket.py writes the files): one key per file, mounted by subPath in app.yaml.
+configMapGenerator:
+  - name: lots-knowledge-skola
+    namespace: lots
+    files:
+      - skola-historia.grgrhis01.md=knowledge/skola/skola-historia/grgrhis01.md
+      - skola-historia.his.md=knowledge/skola/skola-historia/his.md
+      - skola-historia.hist.md=knowledge/skola/skola-historia/hist.md
+      - skola-styrdokument.lgy2025.md=knowledge/skola/skola-styrdokument/lgy2025.md
+      - skola-svenska.grgrsve01.md=knowledge/skola/skola-svenska/grgrsve01.md
+      - skola-svenska.sve.md=knowledge/skola/skola-svenska/sve.md
+      - skola-svenska.sven.md=knowledge/skola/skola-svenska/sven.md
+      - skola-svenska-som-andrasprak.grgrsva01.md=knowledge/skola/skola-svenska-som-andrasprak/grgrsva01.md
+      - skola-svenska-som-andrasprak.sva.md=knowledge/skola/skola-svenska-som-andrasprak/sva.md
+      - skola-svenska-som-andrasprak.svea.md=knowledge/skola/skola-svenska-som-andrasprak/svea.md

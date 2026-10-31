@@ -126,7 +126,7 @@ data:
     metadata:
       name: Apps - Lots
     entries:
-      # Group names are the roles in Lots (prefix "lots-" is stripped): admin, planner, operator, auditor.
+      # Group names are the roles in Lots (prefix "lots-" is stripped): admin, planner, operator, auditor, teacher.
       - id: lots-admin-group
         model: authentik_core.group
         identifiers:
@@ -151,6 +151,13 @@ data:
           name: lots-auditor
         attrs:
           name: lots-auditor
+      # Teachers: the school contexts (skola-planering, skola-bedomning) and nothing else. Members are added in Authentik.
+      - id: lots-teacher-group
+        model: authentik_core.group
+        identifiers:
+          name: lots-teacher
+        attrs:
+          name: lots-teacher
       # Members declared on the group so the user's other groups are untouched.
       - model: authentik_core.group
         identifiers:
@@ -226,6 +233,12 @@ data:
           group: !KeyOf lots-auditor-group
         attrs:
           order: 4
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf lots_application
+          group: !KeyOf lots-teacher-group
+        attrs:
+          order: 5
   apps-cmdb.yaml: |
     version: 1
     metadata:
