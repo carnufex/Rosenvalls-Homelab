@@ -9,7 +9,9 @@ through per-call policy, approvals and an append-only audit log. Public at `http
 - `lots-postgresql` CloudNativePG cluster (runs, trace, approvals, audit). Migrations run at startup.
 - Profile `cmdb` (ConfigMap `lots-profiles`): tools of the CMDB's MCP server, used as the `cmdb-agents` service account.
   The homelab (Docker) profile is not deployed: it needs Docker access, which does not exist in the cluster.
-- Model: `qwen3.5:latest` on the Ollama host via Service `ollama/ollama` (so a run fails while that host is off).
+- Model: `qwen3.5` on the GPU PC's model server (llama-server, Lots `services/models`) at `192.168.1.215:8720`, key
+  `LOTS_MODEL_KEY` (so a run fails while that host is off). Until 2026-10-31 it was `qwen3.5:latest` on Ollama via Service
+  `ollama/ollama`, which stays for Rosenvall DevOps; going back is `Model__BaseUrl`, `Model__Model` and dropping `Model__ApiKeyEnv`.
 - Voice: the Lots voice service (Whisper, Chatterbox, meeting diarization) on the same GPU PC at `192.168.1.215:8700`
   (`Speech__BaseUrl`; started there with `docker compose up -d` in `services/voice` of carnufex/Lots). By address, not a
   selector-less Service like Ollama's: ArgoCD's default resource exclusions skip `Endpoints`, so such a Service gets no
@@ -22,7 +24,7 @@ through per-call policy, approvals and an append-only audit log. Public at `http
   with `toolpackUrl` `http://lots-toolpack:8080/mcp`; users then switch the tools on under Account > Tools. Its egress is limited to
   those public hosts (`networkpolicy.yaml`, policy `lots-toolpack`); a new news feed needs its host added there.
 - Plugins: the shell image ships its plugin catalog (internet, web-research, docker-ops); installed plugins live in the database.
-- Knowledge: embeddings with `snowflake-arctic-embed2` on the same Ollama (alias `embed`); users add their own sources on the
+- Knowledge: embeddings with `snowflake-arctic-embed2` on the same model server (alias `embed`; the same vectors as Ollama's); users add their own sources on the
   Knowledge page. Changing the model re-embeds in the background and switches when the new index is complete (#165).
 - Documents: the Lots document service (Docling: layout, tables, OCR, page provenance) and its reranker (bge-reranker-v2-m3) on
   the GPU PC at `192.168.1.215:8710` (`docker compose up -d` in `services/documents` of carnufex/Lots, key in its `.env`).
@@ -63,13 +65,14 @@ Put the new `tag@sha256:<digest>` into `app.yaml` and push; ArgoCD syncs it.
 ## Network
 
 Default deny (`networkpolicy.yaml`). Ingress only from the Cilium Gateway. Egress: PostgreSQL, Authentik and the CMDB by
-name (443), and the GPU PC `192.168.1.215`: Ollama `11434`, the voice service `8700`, the document service `8710` and the decision models `8096`/`8097`.
+name (443), and the GPU PC `192.168.1.215`: the model server `8720`, Ollama `11434`, the voice service `8700`, the document service `8710` and the decision models `8096`/`8097`.
 
 ## Troubleshooting
 
 - `kubectl -n lots get pods,cluster,externalsecret`
 - Sign-in fails with 403/empty roles: the user is not in a `lots-*` group (token claim `groups`).
-- Runs fail with a connection error: the Ollama host is off.
+- Runs fail with a connection error: the GPU PC is off, or its model server is down (`docker compose ps` in Lots
+  `services/models`; the watchdog starts a stopped one within a minute).
 - Voice unavailable: the PC is off or the voice container is down (`curl http://192.168.1.215:8700/health` from the LAN).
 - Documents listed as failed / no reranking: the document service is down (`curl http://192.168.1.215:8710/health`).
 - Routing page shows no decision model answers: the decision services are down (`curl http://192.168.1.215:8097/health`).

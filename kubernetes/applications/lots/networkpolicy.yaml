@@ -75,12 +75,15 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
-    # The GPU PC on the LAN: Ollama (Service ollama/ollama, no selector), the voice and the document service (by address).
+    # The GPU PC on the LAN, by address: the model server (llama-server), the voice and the document service. 11434 (Ollama) until
+    # the model server has run for a while, to go back by changing Model__BaseUrl alone.
     - toCIDR:
         - 192.168.1.215/32
       toPorts:
         - ports:
             - port: "11434"
+              protocol: TCP
+            - port: "8720"
               protocol: TCP
             - port: "8700"
               protocol: TCP
