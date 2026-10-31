@@ -6,7 +6,7 @@ name: skola-svenska-retrieval
 target: retrieval
 source: skola-svenska
 k: 1
-schedule: { cron: "20,50 * * * *", timeZone: UTC }
+schedule: { cron: "0 6 * * *", timeZone: Europe/Stockholm }
 tests:
   - prompt: Vilka betygskriterier gäller för betyget E i Svenska 1?
     expect: [{ kind: document, value: "Svenska – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
@@ -28,7 +28,7 @@ name: skola-sva-retrieval
 target: retrieval
 source: skola-svenska-som-andrasprak
 k: 1
-schedule: { cron: "20,50 * * * *", timeZone: UTC }
+schedule: { cron: "0 6 * * *", timeZone: Europe/Stockholm }
 tests:
   - prompt: Centralt innehåll i Svenska som andraspråk 1
     expect: [{ kind: document, value: "Svenska som andraspråk – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
@@ -47,7 +47,7 @@ name: skola-historia-retrieval
 target: retrieval
 source: skola-historia
 k: 1
-schedule: { cron: "20,50 * * * *", timeZone: UTC }
+schedule: { cron: "0 6 * * *", timeZone: Europe/Stockholm }
 tests:
   - prompt: Centralt innehåll i Historia 1a1
     expect: [{ kind: document, value: "Historia – gymnasieskolan, kurser (GY11, elever som började före hösten 2025)" }]
@@ -65,7 +65,7 @@ kind: TestSuite
 name: skola-routing
 target: routing
 runAs: { roles: [teacher] }
-schedule: { cron: "20,50 * * * *", timeZone: UTC }
+schedule: { cron: "0 6 * * *", timeZone: Europe/Stockholm }
 tests:
   - prompt: Gör en skrivuppgift i svenska nivå 1 kopplad till centralt innehåll.
     expect: [{ kind: context, value: skola-planering }]
@@ -83,7 +83,7 @@ name: skola-svar
 context: skola-planering
 description: The teacher contexts look up the syllabus they answer from, cite it and say which system it is.
 runAs: { roles: [teacher] }
-schedule: { cron: "20,50 * * * *", timeZone: UTC }
+schedule: { cron: "0 6 * * *", timeZone: Europe/Stockholm }
 tests:
   - name: Criteria come from the GY11 syllabus
     prompt: Vilka betygskriterier gäller för betyget E i kursen Svenska 1? Svara kort.
