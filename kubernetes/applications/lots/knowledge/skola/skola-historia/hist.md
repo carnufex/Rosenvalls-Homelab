@@ -141,13 +141,13 @@ Av 15 kap. 24 § andra stycket och 20 kap. 37 § andra stycket skollagen (2010:8
 
 ### Betyget E – Historia (GY25)
 
-Eleven visar **godtagbara** kunskaper om förändringsprocesser, händelser och aktörer under olika tidsperioder utifrån olika tolkningar och perspektiv. Eleven ger exempel på och förklarar**översiktligt** samband mellan skeenden i det förflutna och förhållanden i nutiden.
+Eleven visar **godtagbara** kunskaper om förändringsprocesser, händelser och aktörer under olika tidsperioder utifrån olika tolkningar och perspektiv. Eleven ger exempel på och förklarar **översiktligt** samband mellan skeenden i det förflutna och förhållanden i nutiden.
 
-Eleven för**enkla** resonemang om det historiska innehållet utifrån historiska begrepp och förklaringsmodeller.
+Eleven för **enkla** resonemang om det historiska innehållet utifrån historiska begrepp och förklaringsmodeller.
 
-Eleven formulerar frågor om det historiska innehållet och använder olika historiska källor för att undersöka historiska frågeställningar samt för**enkla** resonemang om källornas innehåll och användbarhet utifrån historisk metod.
+Eleven formulerar frågor om det historiska innehållet och använder olika historiska källor för att undersöka historiska frågeställningar samt för **enkla** resonemang om källornas innehåll och användbarhet utifrån historisk metod.
 
-Eleven för**enkla** resonemang om hur historia kan användas i olika sammanhang och för olika syften.
+Eleven för **enkla** resonemang om hur historia kan användas i olika sammanhang och för olika syften.
 
 ### Betyget D – Historia (GY25)
 
@@ -155,13 +155,13 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 ### Betyget C – Historia (GY25)
 
-Eleven visar **goda** kunskaper om förändringsprocesser, händelser och aktörer under olika tidsperioder utifrån olika tolkningar och perspektiv. Eleven ger exempel på och förklarar**utförligt** samband mellan skeenden i det förflutna och förhållanden i nutiden.
+Eleven visar **goda** kunskaper om förändringsprocesser, händelser och aktörer under olika tidsperioder utifrån olika tolkningar och perspektiv. Eleven ger exempel på och förklarar **utförligt** samband mellan skeenden i det förflutna och förhållanden i nutiden.
 
-Eleven för**utvecklade** resonemang om det historiska innehållet utifrån historiska begrepp och teorier.
+Eleven för **utvecklade** resonemang om det historiska innehållet utifrån historiska begrepp och teorier.
 
-Eleven formulerar**välgrundade** frågor om det historiska innehållet och använder olika historiska källor för att undersöka historiska frågeställningar samt för**välgrundade** resonemang om olika historiska källors innehåll och användbarhet utifrån historisk metod.
+Eleven formulerar **välgrundade** frågor om det historiska innehållet och använder olika historiska källor för att undersöka historiska frågeställningar samt för **välgrundade** resonemang om olika historiska källors innehåll och användbarhet utifrån historisk metod.
 
-Eleven för**utvecklade** resonemang om hur historia kan användas i olika sammanhang och för olika syften.
+Eleven för **utvecklade** resonemang om hur historia kan användas i olika sammanhang och för olika syften.
 
 ### Betyget B – Historia (GY25)
 
@@ -169,10 +169,10 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 ### Betyget A – Historia (GY25)
 
-Eleven visar **mycket goda** kunskaper om förändringsprocesser, händelser och aktörer under olika tidsperioder utifrån olika tolkningar och perspektiv. Eleven ger exempel på och förklarar**utförligt och nyanserat** samband mellan skeenden i det förflutna och förhållanden i nutiden.
+Eleven visar **mycket goda** kunskaper om förändringsprocesser, händelser och aktörer under olika tidsperioder utifrån olika tolkningar och perspektiv. Eleven ger exempel på och förklarar **utförligt och nyanserat** samband mellan skeenden i det förflutna och förhållanden i nutiden.
 
-Eleven för**utvecklade och nyanserade** resonemang om det historiska innehållet utifrån historiska begrepp och teorier.
+Eleven för **utvecklade och nyanserade** resonemang om det historiska innehållet utifrån historiska begrepp och teorier.
 
-Eleven formulerar**välgrundade och nyanserade** frågor om det historiska innehållet och använder olika historiska källor för att undersöka historiska frågeställningar samt för**välgrundade och nyanserade** resonemang om källornas innehåll och användbarhet utifrån historisk metod.
+Eleven formulerar **välgrundade och nyanserade** frågor om det historiska innehållet och använder olika historiska källor för att undersöka historiska frågeställningar samt för **välgrundade och nyanserade** resonemang om källornas innehåll och användbarhet utifrån historisk metod.
 
-Eleven för**utvecklade och nyanserade** resonemang om hur historia kan användas i olika sammanhang och för olika syften.
+Eleven för **utvecklade och nyanserade** resonemang om hur historia kan användas i olika sammanhang och för olika syften.

@@ -89,17 +89,17 @@ Av 15 kap. 24 § andra stycket och 20 kap. 37 § andra stycket skollagen (2010:8
 
 ### Betyget E – Svenska som andraspråk (GY25)
 
-Eleven kommunicerar muntligt med **viss** anpassning till syfte, mottagare och sammanhang. Eleven genomför muntliga framställningar med**viss säkerhet** i sitt framförande.
+Eleven kommunicerar muntligt med **viss** anpassning till syfte, mottagare och sammanhang. Eleven genomför muntliga framställningar med **viss säkerhet** i sitt framförande.
 
-Eleven skriver olika typer av texter med**viss** anpassning till syfte, mottagare och sammanhang. Eleven följer**i huvudsak** skriftspråkets normer för språkriktighet och språket är varierat och**delvis välformulerat**. Elevens språk kan innehålla andraspråksdrag i en utsträckning som inte hindrar den muntliga och skriftliga kommunikationen.
+Eleven skriver olika typer av texter med **viss** anpassning till syfte, mottagare och sammanhang. Eleven följer **i huvudsak** skriftspråkets normer för språkriktighet och språket är varierat och **delvis välformulerat**. Elevens språk kan innehålla andraspråksdrag i en utsträckning som inte hindrar den muntliga och skriftliga kommunikationen.
 
-Eleven läser sakprosa och för** enkla **resonemang om texternas innehåll, uppbyggnad, relevans och tillförlitlighet. Vid läsning av sakprosa visar eleven**godtagbar** läsförståelse. Eleven använder lästa texter på ett**i huvudsak fungerande** sätt i egna texter och tillämpar regler för citat- och referatteknik.
+Eleven läser sakprosa och för **enkla** resonemang om texternas innehåll, uppbyggnad, relevans och tillförlitlighet. Vid läsning av sakprosa visar eleven **godtagbar** läsförståelse. Eleven använder lästa texter på ett **i huvudsak fungerande** sätt i egna texter och tillämpar regler för citat- och referatteknik.
 
-Eleven redogör**översiktligt** för huvuddragen i litterära epoker och för**enkla** resonemang om samband mellan litterära verk och de sammanhang de tillkommit i.
+Eleven redogör **översiktligt** för huvuddragen i litterära epoker och för **enkla** resonemang om samband mellan litterära verk och de sammanhang de tillkommit i.
 
-Eleven läser skönlitteratur och visar**godtagbar** läsförståelse. Eleven gör**enkla** analyser av olika typer av skönlitteratur.
+Eleven läser skönlitteratur och visar **godtagbar** läsförståelse. Eleven gör **enkla** analyser av olika typer av skönlitteratur.
 
-Eleven visar**godtagbara** kunskaper om det svenska språket och för**enkla** resonemang om språkanvändning.
+Eleven visar **godtagbara** kunskaper om det svenska språket och för **enkla** resonemang om språkanvändning.
 
 ### Betyget D – Svenska som andraspråk (GY25)
 
@@ -107,17 +107,17 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 ### Betyget C – Svenska som andraspråk (GY25)
 
-Eleven kommunicerar muntligt med **god** anpassning till syfte, mottagare och sammanhang. Eleven genomför muntliga framställningar med**säkerhet** i sitt framförande.
+Eleven kommunicerar muntligt med **god** anpassning till syfte, mottagare och sammanhang. Eleven genomför muntliga framställningar med **säkerhet** i sitt framförande.
 
-Eleven skriver olika typer av texter med**god** anpassning till syfte, mottagare och sammanhang. Eleven följer**väl** skriftspråkets normer för språkriktighet och språket är varierat och**välformulerat**. Elevens språk kan innehålla andraspråksdrag i en utsträckning som inte hindrar den muntliga och skriftliga kommunikationen.
+Eleven skriver olika typer av texter med **god** anpassning till syfte, mottagare och sammanhang. Eleven följer **väl** skriftspråkets normer för språkriktighet och språket är varierat och **välformulerat**. Elevens språk kan innehålla andraspråksdrag i en utsträckning som inte hindrar den muntliga och skriftliga kommunikationen.
 
-Eleven läser sakprosa och för** utvecklade **resonemang om texternas innehåll, uppbyggnad, relevans och tillförlitlighet. Vid läsning av sakprosa visar eleven**god** läsförståelse. Eleven använder lästa texter på ett**fungerande** sätt i egna texter och tillämpar regler för citat- och referatteknik.
+Eleven läser sakprosa och för **utvecklade** resonemang om texternas innehåll, uppbyggnad, relevans och tillförlitlighet. Vid läsning av sakprosa visar eleven **god** läsförståelse. Eleven använder lästa texter på ett **fungerande** sätt i egna texter och tillämpar regler för citat- och referatteknik.
 
-Eleven redogör**utförligt** för huvuddragen i litterära epoker och för**utvecklade** resonemang om samband mellan litterära verk och de sammanhang de tillkommit i.
+Eleven redogör **utförligt** för huvuddragen i litterära epoker och för **utvecklade** resonemang om samband mellan litterära verk och de sammanhang de tillkommit i.
 
-Eleven läser skönlitteratur och visar**god** läsförståelse. Eleven gör**utvecklade** analyser av olika typer av skönlitteratur.
+Eleven läser skönlitteratur och visar **god** läsförståelse. Eleven gör **utvecklade** analyser av olika typer av skönlitteratur.
 
-Eleven visar**goda** kunskaper om det svenska språket och för**utvecklade** resonemang om språkanvändning.
+Eleven visar **goda** kunskaper om det svenska språket och för **utvecklade** resonemang om språkanvändning.
 
 ### Betyget B – Svenska som andraspråk (GY25)
 
@@ -125,14 +125,14 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 ### Betyget A – Svenska som andraspråk (GY25)
 
-Eleven kommunicerar muntligt med **mycket god** anpassning till syfte, mottagare och sammanhang. Eleven genomför muntliga framställningar med**god säkerhet** i sitt framförande.
+Eleven kommunicerar muntligt med **mycket god** anpassning till syfte, mottagare och sammanhang. Eleven genomför muntliga framställningar med **god säkerhet** i sitt framförande.
 
-Eleven skriver olika typer av texter med**mycket god** anpassning till syfte, mottagare och sammanhang. Eleven följer**mycket väl** skriftspråkets normer för språkriktighet och språket är varierat och**mycket välformulerat**. Elevens språk kan innehålla andraspråksdrag i en utsträckning som inte hindrar den muntliga och skriftliga kommunikationen.
+Eleven skriver olika typer av texter med **mycket god** anpassning till syfte, mottagare och sammanhang. Eleven följer **mycket väl** skriftspråkets normer för språkriktighet och språket är varierat och **mycket välformulerat**. Elevens språk kan innehålla andraspråksdrag i en utsträckning som inte hindrar den muntliga och skriftliga kommunikationen.
 
-Eleven läser sakprosa och för** välutvecklade **resonemang om texternas innehåll, uppbyggnad, relevans och tillförlitlighet. Vid läsning av sakprosa visar eleven**mycket god** läsförståelse. Eleven använder lästa texter på ett**väl fungerande** sätt i egna texter och tillämpar regler för citat- och referatteknik.
+Eleven läser sakprosa och för **välutvecklade** resonemang om texternas innehåll, uppbyggnad, relevans och tillförlitlighet. Vid läsning av sakprosa visar eleven **mycket god** läsförståelse. Eleven använder lästa texter på ett **väl fungerande** sätt i egna texter och tillämpar regler för citat- och referatteknik.
 
-Eleven redogör**utförligt och nyanserat** för huvuddragen i litterära epoker och för**välutvecklade** resonemang om samband mellan litterära verk och de sammanhang de tillkommit i.
+Eleven redogör **utförligt och nyanserat** för huvuddragen i litterära epoker och för **välutvecklade** resonemang om samband mellan litterära verk och de sammanhang de tillkommit i.
 
-Eleven läser skönlitteratur och visar**mycket god** läsförståelse. Eleven gör**utvecklade och nyanserade** analyser av olika typer av skönlitteratur.
+Eleven läser skönlitteratur och visar **mycket god** läsförståelse. Eleven gör **utvecklade och nyanserade** analyser av olika typer av skönlitteratur.
 
-Eleven visar**mycket goda** kunskaper om det svenska språket och för**välutvecklade** resonemang om språkanvändning.
+Eleven visar **mycket goda** kunskaper om det svenska språket och för **välutvecklade** resonemang om språkanvändning.

@@ -131,11 +131,11 @@ Eleven använder begrepp, metoder och verktyg från de samhällsorienterande äm
 
 ### Betygskriterier för betyget E i slutet av årskurs 6 – Historia (Lgr22)
 
-Eleven visar **grundläggande** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Eleven för** enkla** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors handlingar i förfluten tid. Eleven för också **enkla** resonemang om likheter och skillnader i människors levnadsvillkor under olika tidsperioder.
+Eleven visar **grundläggande** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Eleven för **enkla** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors handlingar i förfluten tid. Eleven för också **enkla** resonemang om likheter och skillnader i människors levnadsvillkor under olika tidsperioder.
 
-Eleven ställer frågor till historiska källor, beskriver vad som kan vara en historisk källa och ger**något** exempel på vad källorna kan berätta om det förflutna.
+Eleven ställer frågor till historiska källor, beskriver vad som kan vara en historisk källa och ger **något** exempel på vad källorna kan berätta om det förflutna.
 
-Eleven ger exempel på hur historia kan brukas i**något** sammanhang.
+Eleven ger exempel på hur historia kan brukas i **något** sammanhang.
 
 ### Betygskriterier för betyget D i slutet av årskurs 6 – Historia (Lgr22)
 
@@ -143,7 +143,7 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 ### Betygskriterier för betyget C i slutet av årskurs 6 – Historia (Lgr22)
 
-Eleven visar **goda** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Eleven för** utvecklade** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors handlingar i förfluten tid. Eleven för också **utvecklade** resonemang om likheter och skillnader i människors levnadsvillkor under olika tidsperioder.
+Eleven visar **goda** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Eleven för **utvecklade** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors handlingar i förfluten tid. Eleven för också **utvecklade** resonemang om likheter och skillnader i människors levnadsvillkor under olika tidsperioder.
 
 Eleven ställer frågor till historiska källor, beskriver vad som kan vara en historisk källa och ger **några** exempel på vad källorna kan berätta om det förflutna.
 
@@ -155,19 +155,19 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 ### Betygskriterier för betyget A i slutet av årskurs 6 – Historia (Lgr22)
 
-Eleven visar **mycket goda** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Eleven för** välutvecklade** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors handlingar i förfluten tid. Eleven för också **välutvecklade** resonemang om likheter och skillnader i människors levnadsvillkor under olika tidsperioder.
+Eleven visar **mycket goda** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Eleven för **välutvecklade** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors handlingar i förfluten tid. Eleven för också **välutvecklade** resonemang om likheter och skillnader i människors levnadsvillkor under olika tidsperioder.
 
 Eleven ställer frågor till historiska källor, beskriver vad som kan vara en historisk källa och ger **några välgrundade** exempel på vad källorna kan berätta om det förflutna.
 
-Eleven ger exempel på hur**och i vilket syfte** historia kan brukas i **olika** sammanhang.
+Eleven ger exempel på hur **och i vilket syfte** historia kan brukas i **olika** sammanhang.
 
 ### Betygskriterier för betyget E i slutet av årskurs 9 – Historia (Lgr22)
 
-Eleven visar **grundläggande** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Till detta hör att eleven visar kunskaper om särskilt centrala historiska skeenden, däribland Förintelsen. Eleven för**enkla** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors levnadsvillkor och handlingar i förfluten tid. Eleven för **enkla** resonemang om kontinuitet och förändring utifrån några långa historiska linjer.
+Eleven visar **grundläggande** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Till detta hör att eleven visar kunskaper om särskilt centrala historiska skeenden, däribland Förintelsen. Eleven för **enkla** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors levnadsvillkor och handlingar i förfluten tid. Eleven för **enkla** resonemang om kontinuitet och förändring utifrån några långa historiska linjer.
 
-Eleven ställer frågor till historiska källor och för**enkla** resonemang om vad källorna kan berätta om det förflutna samt om källornas relevans och trovärdighet.
+Eleven ställer frågor till historiska källor och för **enkla** resonemang om vad källorna kan berätta om det förflutna samt om källornas relevans och trovärdighet.
 
-Eleven för**enkla** resonemang om hur historia kan brukas i olika sammanhang och för olika syften.
+Eleven för **enkla** resonemang om hur historia kan brukas i olika sammanhang och för olika syften.
 
 ### Betygskriterier för betyget D i slutet av årskurs 9 – Historia (Lgr22)
 
@@ -175,11 +175,11 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 ### Betygskriterier för betyget C i slutet av årskurs 9 – Historia (Lgr22)
 
-Eleven visar **goda** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Till detta hör att eleven visar kunskaper om särskilt centrala historiska skeenden, däribland Förintelsen. Eleven för**utvecklade** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors levnadsvillkor och handlingar i förfluten tid. Eleven för också **utvecklade** resonemang om kontinuitet och förändring utifrån några långa historiska linjer.
+Eleven visar **goda** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Till detta hör att eleven visar kunskaper om särskilt centrala historiska skeenden, däribland Förintelsen. Eleven för **utvecklade** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors levnadsvillkor och handlingar i förfluten tid. Eleven för också **utvecklade** resonemang om kontinuitet och förändring utifrån några långa historiska linjer.
 
 Eleven ställer frågor till historiska källor och för **utvecklade** resonemang om vad källorna kan berätta om det förflutna samt om källornas relevans och trovärdighet.
 
-Eleven för**utvecklade** resonemang om hur historia kan brukas i olika sammanhang och för olika syften.
+Eleven för **utvecklade** resonemang om hur historia kan brukas i olika sammanhang och för olika syften.
 
 ### Betygskriterier för betyget B i slutet av årskurs 9 – Historia (Lgr22)
 
@@ -187,8 +187,8 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 ### Betygskriterier för betyget A i slutet av årskurs 9 – Historia (Lgr22)
 
-Eleven visar **mycket goda** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Till detta hör att eleven visar kunskaper om särskilt centrala historiska skeenden, däribland Förintelsen. Eleven för**välutvecklade** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors levnadsvillkor och handlingar i förfluten tid. Eleven för också **välutvecklade** resonemang om kontinuitet och förändring utifrån några långa historiska linjer.
+Eleven visar **mycket goda** kunskaper om händelser, aktörer och förändringsprocesser under olika tidsperioder samt om historiska begrepp. Till detta hör att eleven visar kunskaper om särskilt centrala historiska skeenden, däribland Förintelsen. Eleven för **välutvecklade** resonemang om orsaker till och konsekvenser av samhällsförändringar och av människors levnadsvillkor och handlingar i förfluten tid. Eleven för också **välutvecklade** resonemang om kontinuitet och förändring utifrån några långa historiska linjer.
 
 Eleven ställer frågor till historiska källor och för **välutvecklade** resonemang om vad källorna kan berätta om det förflutna samt om källornas relevans och trovärdighet.
 
-Eleven för**välutvecklade** resonemang om hur historia kan brukas i olika sammanhang och för olika syften.
+Eleven för **välutvecklade** resonemang om hur historia kan brukas i olika sammanhang och för olika syften.

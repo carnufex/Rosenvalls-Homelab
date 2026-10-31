@@ -168,13 +168,13 @@ Eleven söker information ur någon anvisad källa och återger grundläggande d
 
 ### Betygskriterier för betyget E i slutet av årskurs 6 – Svenska (Lgr22)
 
-Eleven samtalar om bekanta ämnen på ett sätt som **till viss del** upprätthåller samtalen. Dessutom förbereder och genomför eleven muntliga framställningar med**i huvudsak fungerande** inledning, innehåll och avslutning och**viss** anpassning till syfte och mottagare.
+Eleven samtalar om bekanta ämnen på ett sätt som **till viss del** upprätthåller samtalen. Dessutom förbereder och genomför eleven muntliga framställningar med **i huvudsak** **fungerande** inledning, innehåll och avslutning och **viss** anpassning till syfte och mottagare.
 
-Eleven skriver olika slags texter med **begripligt** innehåll,**i huvudsak fungerande** struktur och**viss** språklig variation. Eleven följer grundläggande regler för språkriktighet med **viss**säkerhet.
+Eleven skriver olika slags texter med **begripligt** innehåll, **i huvudsak** **fungerande** struktur och **viss** språklig variation. Eleven följer grundläggande regler för språkriktighet med **viss** säkerhet.
 
-Eleven läser skönlitteratur och sakprosatexter för barn och ungdomar med** flyt **och visar**grundläggande** läsförståelse. Dessutom sammanfattar eleven olika texter med **viss** säkerhet. Eleven för också**enkla** resonemang om tydligt framträdande budskap i olika texter.
+Eleven läser skönlitteratur och sakprosatexter för barn och ungdomar med **flyt** och visar **grundläggande** läsförståelse. Dessutom sammanfattar eleven olika texter med **viss** säkerhet. Eleven för också **enkla** resonemang om tydligt framträdande budskap i olika texter.
 
-Eleven söker och väljer med**viss** säkerhet information från ett avgränsat urval av källor och presenterar informationen med egna formuleringar och ämnesspecifika ord och begrepp. Eleven för** enkla** resonemang om informationens användbarhet.
+Eleven söker och väljer med **viss** säkerhet information från ett avgränsat urval av källor och presenterar informationen med egna formuleringar och ämnesspecifika ord och begrepp. Eleven för **enkla** resonemang om informationens användbarhet.
 
 Eleven för utifrån givna exempel enkla resonemang om några aspekter av språk och språkbruk i Sverige och Norden.
 
@@ -184,13 +184,13 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 ### Betygskriterier för betyget C i slutet av årskurs 6 – Svenska (Lgr22)
 
-Eleven samtalar om bekanta ämnen på ett sätt som upprätthåller samtalen **relativt väl**. Dessutom förbereder och genomför eleven muntliga framställningar med** fungerande **inledning, innehåll och avslutning och**relativt god** anpassning till syfte och mottagare.
+Eleven samtalar om bekanta ämnen på ett sätt som upprätthåller samtalen **relativt väl**. Dessutom förbereder och genomför eleven muntliga framställningar med **fungerande** inledning, innehåll och avslutning och **relativt god** anpassning till syfte och mottagare.
 
-Eleven skriver olika slags texter med **relativt tydligt** innehåll, **fungerande** struktur och**relativt god** språklig variation. Eleven följer grundläggande regler för språkriktighet med**relativt** **god** säkerhet.
+Eleven skriver olika slags texter med **relativt tydligt** innehåll, **fungerande** struktur och **relativt god** språklig variation. Eleven följer grundläggande regler för språkriktighet med **relativt** **god** säkerhet.
 
-Eleven läser skönlitteratur och sakprosatexter för barn och ungdomar med **gott flyt** och visar** god **läsförståelse. Dessutom sammanfattar eleven olika texter med** relativt god **säkerhet. Eleven för också**utvecklade** resonemang om tydligt framträdande budskap i olika texter.
+Eleven läser skönlitteratur och sakprosatexter för barn och ungdomar med **gott flyt** och visar **god** läsförståelse. Dessutom sammanfattar eleven olika texter med **relativt god** säkerhet. Eleven för också **utvecklade** resonemang om tydligt framträdande budskap i olika texter.
 
-Eleven söker och väljer med **relativt god** säkerhet information från ett avgränsat urval av källor och presenterar informationen med egna formuleringar och ämnesspecifika ord och begrepp. Eleven för**utvecklade** resonemang om informationens användbarhet.
+Eleven söker och väljer med **relativt god** säkerhet information från ett avgränsat urval av källor och presenterar informationen med egna formuleringar och ämnesspecifika ord och begrepp. Eleven för **utvecklade** resonemang om informationens användbarhet.
 
 Eleven för utifrån givna exempel enkla resonemang om några aspekter av språk och språkbruk i Sverige och Norden.
 
@@ -200,25 +200,25 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 ### Betygskriterier för betyget A i slutet av årskurs 6 – Svenska (Lgr22)
 
-Eleven samtalar om bekanta ämnen på ett sätt som upprätthåller samtalen **väl**. Dessutom förbereder och genomför eleven muntliga framställningar med** väl fungerande **inledning, innehåll och avslutning och**god** anpassning till syfte och mottagare.
+Eleven samtalar om bekanta ämnen på ett sätt som upprätthåller samtalen **väl**. Dessutom förbereder och genomför eleven muntliga framställningar med **väl** **fungerande** inledning, innehåll och avslutning och **god** anpassning till syfte och mottagare.
 
-Eleven skriver olika slags texter med **tydligt** innehåll, **väl** **fungerande** struktur och**god** språklig variation. Eleven följer grundläggande regler för språkriktighet med**god** säkerhet.
+Eleven skriver olika slags texter med **tydligt** innehåll, **väl** **fungerande** struktur och **god** språklig variation. Eleven följer grundläggande regler för språkriktighet med **god** säkerhet.
 
-Eleven läser skönlitteratur och sakprosatexter för barn och ungdomar med **mycket gott flyt** och visar** mycket god **läsförståelse. Dessutom sammanfattar eleven olika texter med** god **säkerhet. Eleven för också**välutvecklade** resonemang om tydligt framträdande budskap i olika texter.
+Eleven läser skönlitteratur och sakprosatexter för barn och ungdomar med **mycket gott flyt** och visar **mycket god** läsförståelse. Dessutom sammanfattar eleven olika texter med **god** säkerhet. Eleven för också **välutvecklade** resonemang om tydligt framträdande budskap i olika texter.
 
-Eleven söker och väljer med **god** säkerhet information från ett avgränsat urval av källor och presenterar informationen med egna formuleringar och ämnesspecifika ord och begrepp. Eleven för**välutvecklade** resonemang om informationens användbarhet.
+Eleven söker och väljer med **god** säkerhet information från ett avgränsat urval av källor och presenterar informationen med egna formuleringar och ämnesspecifika ord och begrepp. Eleven för **välutvecklade** resonemang om informationens användbarhet.
 
 Eleven för utifrån givna exempel enkla resonemang om några aspekter av språk och språkbruk i Sverige och Norden.
 
 ### Betygskriterier för betyget E i slutet av årskurs 9 – Svenska (Lgr22)
 
-Eleven samtalar om och diskuterar varierande ämnen på ett sätt som **till viss del** utvecklar samtalen och diskussionerna. Eleven framför åsikter med **till viss del** underbyggda argument. Dessutom förbereder och genomför eleven muntliga framställningar med **i huvudsak fungerande** struktur och innehåll och**viss** anpassning till syfte, mottagare och sammanhang.
+Eleven samtalar om och diskuterar varierande ämnen på ett sätt som **till viss del** utvecklar samtalen och diskussionerna. Eleven framför åsikter med **till viss del** underbyggda argument. Dessutom förbereder och genomför eleven muntliga framställningar med **i huvudsak** **fungerande** struktur och innehåll och **viss** anpassning till syfte, mottagare och sammanhang.
 
-Eleven skriver olika slags texter med **viss** språklig variation, **i huvudsak fungerande** struktur och innehåll samt**viss** anpassning till texttyp, syfte, mottagare och sammanhang. Eleven följer språkliga normer på ett**i huvudsak** **fungerande** sätt.
+Eleven skriver olika slags texter med **viss** språklig variation, **i huvudsak** **fungerande** struktur och innehåll samt **viss** anpassning till texttyp, syfte, mottagare och sammanhang. Eleven följer språkliga normer på ett **i huvudsak** **fungerande** sätt.
 
-Eleven läser skönlitteratur och sakprosatexter med**flyt** och visar**grundläggande** läsförståelse. Dessutom sammanfattar eleven olika texter med **viss** säkerhet. Eleven för**enkla** resonemang om innehållet i olika texter. Eleven visar också **grundläggande** kunskaper om skönlitteratur och de sammanhang som olika verk har tillkommit i.
+Eleven läser skönlitteratur och sakprosatexter med **flyt** och visar **grundläggande** läsförståelse. Dessutom sammanfattar eleven olika texter med **viss** säkerhet. Eleven för **enkla** resonemang om innehållet i olika texter. Eleven visar också **grundläggande** kunskaper om skönlitteratur och de sammanhang som olika verk har tillkommit i.
 
-Eleven söker och väljer med**viss** säkerhet information från olika källor och presenterar informationen på ett**i huvudsak** **fungerande** sätt, med egna formuleringar, ämnesrelaterat språk samt citat och källhänvisningar. Eleven för** till viss del** underbyggda resonemang om informationens och källornas trovärdighet och relevans.
+Eleven söker och väljer med **viss** säkerhet information från olika källor och presenterar informationen på ett **i huvudsak** **fungerande** sätt, med egna formuleringar, ämnesrelaterat språk samt citat och källhänvisningar. Eleven för **till viss del** underbyggda resonemang om informationens och källornas trovärdighet och relevans.
 
 Eleven för utifrån givna exempel **enkla** resonemang om några aspekter av språk och språkbruk i Sverige och Norden.
 
@@ -228,13 +228,13 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 ### Betygskriterier för betyget C i slutet av årskurs 9 – Svenska (Lgr22)
 
-Eleven samtalar om och diskuterar varierande ämnen på ett sätt som utvecklar samtalen och diskussionerna **relativt väl**. Eleven framför åsikter med** relativt väl **underbyggda argument. Dessutom förbereder och genomför eleven muntliga framställningar med** fungerande **struktur och innehåll och**relativt god** anpassning till syfte, mottagare och sammanhang.
+Eleven samtalar om och diskuterar varierande ämnen på ett sätt som utvecklar samtalen och diskussionerna **relativt väl**. Eleven framför åsikter med **relativt väl** underbyggda argument. Dessutom förbereder och genomför eleven muntliga framställningar med **fungerande** struktur och innehåll och **relativt god** anpassning till syfte, mottagare och sammanhang.
 
-Eleven skriver olika slags texter med **relativt god** språklig variation,**fungerande** struktur och innehåll samt**relativt god** anpassning till texttyp, syfte, mottagare och sammanhang. Eleven följer språkliga normer på ett **fungerande** sätt.
+Eleven skriver olika slags texter med **relativt god** språklig variation, **fungerande** struktur och innehåll samt **relativt god** anpassning till texttyp, syfte, mottagare och sammanhang. Eleven följer språkliga normer på ett **fungerande** sätt.
 
-Eleven läser skönlitteratur och sakprosatexter med**gott** **flyt** och visar**god** läsförståelse. Dessutom sammanfattar eleven olika texter med **god** säkerhet. Eleven för **utvecklade** resonemang om innehållet i olika texter. Eleven visar också**goda** kunskaper om skönlitteratur och de sammanhang som olika verk har tillkommit i.
+Eleven läser skönlitteratur och sakprosatexter med **gott** **flyt** och visar **god** läsförståelse. Dessutom sammanfattar eleven olika texter med **god** säkerhet. Eleven för **utvecklade** resonemang om innehållet i olika texter. Eleven visar också **goda** kunskaper om skönlitteratur och de sammanhang som olika verk har tillkommit i.
 
-Eleven söker och väljer med**relativt god** säkerhet information från olika källor och presenterar informationen på ett**fungerande** sätt, med egna formuleringar, ämnesrelaterat språk samt citat och källhänvisningar. Eleven för**relativt väl** underbyggda resonemang om informationens och källornas trovärdighet och relevans.
+Eleven söker och väljer med **relativt god** säkerhet information från olika källor och presenterar informationen på ett **fungerande** sätt, med egna formuleringar, ämnesrelaterat språk samt citat och källhänvisningar. Eleven för **relativt väl** underbyggda resonemang om informationens och källornas trovärdighet och relevans.
 
 Eleven för utifrån givna exempel **utvecklade** resonemang om några aspekter av språk och språkbruk i Sverige och Norden.
 
@@ -244,12 +244,12 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 ### Betygskriterier för betyget A i slutet av årskurs 9 – Svenska (Lgr22)
 
-Eleven samtalar om och diskuterar varierande ämnen på ett sätt som utvecklar samtalen och diskussionerna **väl**. Eleven framför åsikter med** väl **underbyggda argument. Dessutom förbereder och genomför eleven muntliga framställningar med** väl fungerande **struktur och innehåll och**god** anpassning till syfte, mottagare och sammanhang.
+Eleven samtalar om och diskuterar varierande ämnen på ett sätt som utvecklar samtalen och diskussionerna **väl**. Eleven framför åsikter med **väl** underbyggda argument. Dessutom förbereder och genomför eleven muntliga framställningar med **väl** **fungerande** struktur och innehåll och **god** anpassning till syfte, mottagare och sammanhang.
 
-Eleven skriver olika slags texter med **god** språklig variation,**väl fungerande** struktur och innehåll samt**god** anpassning till texttyp, syfte, mottagare och sammanhang. Eleven följer språkliga normer på ett**väl** **fungerande** sätt.
+Eleven skriver olika slags texter med **god** språklig variation, **väl** **fungerande** struktur och innehåll samt **god** anpassning till texttyp, syfte, mottagare och sammanhang. Eleven följer språkliga normer på ett **väl** **fungerande** sätt.
 
-Eleven läser skönlitteratur och sakprosatexter med**mycket gott** **flyt** och visar**mycket god** läsförståelse. Dessutom sammanfattar eleven olika texter med **mycket god** säkerhet. Eleven för**välutvecklade** resonemang om innehållet i olika texter. Eleven visar också**mycket goda** kunskaper om skönlitteratur och de sammanhang som olika verk har tillkommit i.
+Eleven läser skönlitteratur och sakprosatexter med **mycket gott** **flyt** och visar **mycket god** läsförståelse. Dessutom sammanfattar eleven olika texter med **mycket god** säkerhet. Eleven för **välutvecklade** resonemang om innehållet i olika texter. Eleven visar också **mycket goda** kunskaper om skönlitteratur och de sammanhang som olika verk har tillkommit i.
 
-Eleven söker och väljer med**god** säkerhet information från olika källor och presenterar informationen på ett**väl** **fungerande** sätt, med egna formuleringar, ämnesrelaterat språk samt citat och källhänvisningar. Eleven för**väl** underbyggda resonemang om informationens och källornas trovärdighet och relevans.
+Eleven söker och väljer med **god** säkerhet information från olika källor och presenterar informationen på ett **väl** **fungerande** sätt, med egna formuleringar, ämnesrelaterat språk samt citat och källhänvisningar. Eleven för **väl** underbyggda resonemang om informationens och källornas trovärdighet och relevans.
 
 Eleven för utifrån givna exempel **välutvecklade** resonemang om några aspekter av språk och språkbruk i Sverige och Norden.

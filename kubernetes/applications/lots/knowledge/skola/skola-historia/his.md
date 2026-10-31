@@ -43,11 +43,11 @@ Kursen historia 1a1 omfattar punkterna 1–2 och 4–5 under rubriken Ämnets sy
 
 #### Betyget E – Historia 1a1, 50 poäng (GY11)
 
-Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven**översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger**enkla** exempel på, och förklarar**översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** enkla **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **enkla** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra**enkla** reflektioner över materialets relevans. I värderingen utgår eleven från**något källkritiskt kriterium om källans användbarhet och dess betydelse för tolkningen**.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från **något källkritiskt kriterium om källans användbarhet och dess betydelse för tolkningen**.
 
-Eleven kan** översiktligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **översiktligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget D – Historia 1a1, 50 poäng (GY11)
 
@@ -55,11 +55,11 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 #### Betyget C – Historia 1a1, 50 poäng (GY11)
 
-Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven** utförligt **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar** utförligt **deras betydelse för olika skeenden. Eleven ger** enkla **exempel på, och förklarar**utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** välgrundade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven **utförligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **välgrundade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra**välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från**olika tolkningsmöjligheter av källmaterialet och värderar dessa med enkla omdömen**.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från **olika tolkningsmöjligheter av källmaterialet och värderar dessa med enkla omdömen**.
 
-Eleven kan** utförligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget B – Historia 1a1, 50 poäng (GY11)
 
@@ -67,11 +67,11 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 #### Betyget A – Historia 1a1, 50 poäng (GY11)
 
-Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem.**Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val**. Dessutom kan eleven** utförligt och nyanserat **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar**utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger**komplexa** exempel på, och förklarar**utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några** välgrundade och nyanserade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val**. Dessutom kan eleven **utförligt och nyanserat** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger **komplexa** exempel på, och förklarar **utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några **välgrundade och nyanserade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra**välgrundade och nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från**källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
+Eleven kan **med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade och nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt och nyanserat **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt och nyanserat** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
 
 ## Historia 1a2, 50 poäng (HISHIS01a2, GY11)
 
@@ -91,13 +91,13 @@ Kursen historia 1a2 omfattar punkterna 1–5 under rubriken Ämnets syfte, med s
 
 #### Betyget E – Historia 1a2, 50 poäng (GY11)
 
-Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar**översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** enkla **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **enkla** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda**några** historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda **några** historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från**något källkritiskt kriterium om källans användbarhet och dess betydelse för tolkningen**.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från **något källkritiskt kriterium om källans användbarhet och dess betydelse för tolkningen**.
 
-Eleven kan** översiktligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **översiktligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget D – Historia 1a2, 50 poäng (GY11)
 
@@ -105,13 +105,13 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 #### Betyget C – Historia 1a2, 50 poäng (GY11)
 
-Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven** utförligt **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar**utförligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar**utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** välgrundade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven **utförligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **välgrundade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra**välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från**källkritiska metoder och värderar med enkla omdömen olika tolkningsmöjligheter av källmaterialet**.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med enkla omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget B – Historia 1a2, 50 poäng (GY11)
 
@@ -119,13 +119,13 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 #### Betyget A – Historia 1a2, 50 poäng (GY11)
 
-Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med**nyanserade** omdömen sitt val. Dessutom kan eleven**utförligt och nyanserat** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar**utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger**komplexa** exempel på, och förklarar**utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några** välgrundade och nyanserade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med **nyanserade** omdömen sitt val. Dessutom kan eleven **utförligt och nyanserat** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger **komplexa** exempel på, och förklarar **utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några **välgrundade och nyanserade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med säkerhet** använda historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med säkerhet** använda historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan **med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra**välgrundade och** **nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från**källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
+Eleven kan **med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade och** **nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt och** **nyanserat** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt och** **nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt och** **nyanserat** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt och** **nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
 
 ## Historia 1b, 100 poäng (HISHIS01b, GY11)
 
@@ -146,13 +146,13 @@ Kursen historia 1b omfattar punkterna 1–5 under rubriken Ämnets syfte.
 
 #### Betyget E – Historia 1b, 100 poäng (GY11)
 
-Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar**översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** enkla **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **enkla** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda **några** historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda **några** historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från**något källkritiskt kriterium om källans användbarhet och dess betydelse för tolkningen**.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från **något källkritiskt kriterium om källans användbarhet och dess betydelse för tolkningen**.
 
-Eleven kan** översiktligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **översiktligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget D – Historia 1b, 100 poäng (GY11)
 
@@ -160,13 +160,13 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 #### Betyget C – Historia 1b, 100 poäng (GY11)
 
-Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val.** Dessutom kan eleven**utförligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar**utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** välgrundade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val.** Dessutom kan eleven **utförligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **välgrundade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan **med** **viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra**välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med enkla omdömen olika tolkningsmöjligheter av källmaterialet**.
+Eleven kan **med** **viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med enkla omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget B – Historia 1b, 100 poäng (GY11)
 
@@ -174,13 +174,13 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 #### Betyget A – Historia 1b, 100 poäng (GY11)
 
-Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem.**Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val.** Dessutom kan eleven**utförligt och nyanserat** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar**utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger**komplexa** exempel på, och förklarar **utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några** välgrundade och nyanserade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val.** Dessutom kan eleven **utförligt och nyanserat** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger **komplexa** exempel på, och förklarar **utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några **välgrundade och nyanserade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med säkerhet** använda historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med säkerhet** använda historiska begrepp för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra välgrundade och nyanserade reflektioner över materialets relevans. I värderingen utgår eleven från**källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
+Eleven kan **med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra välgrundade och nyanserade reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt och nyanserat **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt och nyanserat** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
 
 ## Historia 2a, 100 poäng (HISHIS02a, GY11)
 
@@ -199,13 +199,13 @@ Kursen historia 2a omfattar punkterna 1–5 under rubriken Ämnets syfte, med s�
 
 #### Betyget E – Historia 2a, 100 poäng (GY11)
 
-Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar**översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** enkla **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **enkla** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda **några** historiska begrepp och**någon** teori för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda **några** historiska begrepp och **någon** teori för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från**källkritiska kriterier om källans användbarhet och dess betydelse för tolkningen**.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska kriterier om källans användbarhet och dess betydelse för tolkningen**.
 
-Eleven kan** översiktligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **översiktligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget D – Historia 2a, 100 poäng (GY11)
 
@@ -213,13 +213,13 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 #### Betyget C – Historia 2a, 100 poäng (GY11)
 
-Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven** utförligt **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar** utförligt **deras betydelse för olika skeenden. Eleven ger** enkla **exempel på, och förklarar**utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** välgrundade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven **utförligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **välgrundade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda historiska begrepp och **olika** teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda historiska begrepp och **olika** teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
 Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med enkla omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget B – Historia 2a, 100 poäng (GY11)
 
@@ -227,13 +227,13 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 #### Betyget A – Historia 2a, 100 poäng (GY11)
 
-Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem.**Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val**. Dessutom kan eleven** utförligt och nyanserat **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar**utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger**komplexa** exempel på, och förklarar**utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några** välgrundade och nyanserade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val**. Dessutom kan eleven **utförligt och nyanserat** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger **komplexa** exempel på, och förklarar **utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några **välgrundade och nyanserade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med säkerhet** använda historiska begrepp och olika teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med säkerhet** använda historiska begrepp och olika teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra**välgrundade och nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från**källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
+Eleven kan **med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade och nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt och nyanserat **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt och nyanserat** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
 
 ## Historia 2b – kultur, 100 poäng (HISHIS02b, GY11)
 
@@ -253,13 +253,13 @@ Kursen historia 2b – kultur omfattar punkterna 1–5 under rubriken Ämnets sy
 
 #### Betyget E – Historia 2b – kultur, 100 poäng (GY11)
 
-Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar**översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** enkla **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **enkla** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda **några** historiska begrepp och**någon** teori för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda **några** historiska begrepp och **någon** teori för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från**källkritiska kriterier om källans användbarhet och dess betydelse för tolkningen**.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska kriterier om källans användbarhet och dess betydelse för tolkningen**.
 
-Eleven kan** översiktligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **översiktligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget D – Historia 2b – kultur, 100 poäng (GY11)
 
@@ -267,13 +267,13 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 #### Betyget C – Historia 2b – kultur, 100 poäng (GY11)
 
-Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven** utförligt **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar** utförligt **deras betydelse för olika skeenden. Eleven ger** enkla **exempel på, och förklarar**utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** välgrundade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven **utförligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **välgrundade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda historiska begrepp och **olika** teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda historiska begrepp och **olika** teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
 Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med enkla omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget B – Historia 2b – kultur, 100 poäng (GY11)
 
@@ -281,13 +281,13 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 #### Betyget A – Historia 2b – kultur, 100 poäng (GY11)
 
-Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem.**Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val**. Dessutom kan eleven** utförligt och nyanserat **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar**utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger**komplexa** exempel på, och förklarar**utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden** samt argumenterar för och emot olika sätt att se på dessa samband**. Dessutom kan eleven dra några** välgrundade och nyanserade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val**. Dessutom kan eleven **utförligt och nyanserat** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger **komplexa** exempel på, och förklarar **utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden **samt argumenterar för och emot olika sätt att se på dessa samband**. Dessutom kan eleven dra några **välgrundade och nyanserade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med säkerhet** använda historiska begrepp och olika teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med säkerhet** använda historiska begrepp och olika teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt gör**välgrundade och nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
+Eleven kan **med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt gör **välgrundade och nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från **källkritiska metoder och värderar med nyanserade omdömen olika tolkningsmöjligheter av källmaterialet**.
 
-Eleven kan** utförligt och nyanserat **redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt och nyanserat** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
 
 ## Historia 3, 100 poäng (HISHIS03, GY11)
 
@@ -307,13 +307,13 @@ Kursen historia 3 omfattar punkterna 1–5 under rubriken Ämnets syfte, med sä
 
 #### Betyget E – Historia 3, 100 poäng (GY11)
 
-Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar**översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** enkla **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **översiktligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. Dessutom kan eleven **översiktligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **översiktligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **översiktligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **enkla** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda **några** historiska begrepp och** någon **teori för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda **några** historiska begrepp och **någon** teori för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från källkritiska metoder och av eleven påvisade tolkningsmöjligheter. Dessutom motiverar eleven**översiktligt** sitt val av såväl metoder som tolkningar.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **enkla** reflektioner över materialets relevans. I värderingen utgår eleven från källkritiska metoder och av eleven påvisade tolkningsmöjligheter. Dessutom motiverar eleven **översiktligt** sitt val av såväl metoder som tolkningar.
 
-Eleven kan **översiktligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **översiktligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **översiktligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget D – Historia 3, 100 poäng (GY11)
 
@@ -321,13 +321,13 @@ Elevens kunskaper bedöms sammantaget vara mellan C och E.
 
 #### Betyget C – Historia 3, 100 poäng (GY11)
 
-Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven** utförligt **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar** utförligt **deras betydelse för olika skeenden. Eleven ger** enkla **exempel på, och förklarar**utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några** välgrundade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med enkla omdömen sitt val**. Dessutom kan eleven **utförligt** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt** deras betydelse för olika skeenden. Eleven ger **enkla** exempel på, och förklarar **utförligt**, samband mellan skeenden i det förflutna och förhållanden i nutiden. Dessutom kan eleven dra några **välgrundade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med viss säkerhet** använda historiska begrepp och **olika** teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med viss säkerhet** använda historiska begrepp och **olika** teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt gör**välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från källkritiska metoder och av eleven påvisade tolkningsmöjligheter. Dessutom motiverar eleven **utförligt** sitt val av såväl metoder som tolkningar.
+Eleven kan **med viss säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt gör **välgrundade** reflektioner över materialets relevans. I värderingen utgår eleven från källkritiska metoder och av eleven påvisade tolkningsmöjligheter. Dessutom motiverar eleven **utförligt** sitt val av såväl metoder som tolkningar.
 
-Eleven kan**utförligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**enkla** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **enkla** omdömen deras betydelse för nutida skeenden och händelser.
 
 #### Betyget B – Historia 3, 100 poäng (GY11)
 
@@ -335,10 +335,10 @@ Elevens kunskaper bedöms sammantaget vara mellan A och C.
 
 #### Betyget A – Historia 3, 100 poäng (GY11)
 
-Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem.**Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val**. Dessutom kan eleven** utförligt och nyanserat **redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar**utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger**komplexa** exempel på, och förklarar**utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några** välgrundade och nyanserade **slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
+Eleven kan **utförligt och nyanserat** redogöra för förändringsprocesser, händelser och personer under olika tidsperioder samt för olika tolkningar av dem. **Eleven jämför de olika tolkningarna, förordar en av dem och motiverar med nyanserade omdömen sitt val**. Dessutom kan eleven **utförligt och nyanserat** redogöra för förloppen av förändringsprocesserna och händelserna samt deras orsaker och konsekvenser. Eleven ger exempel på några enskilda personer och förklarar **utförligt och nyanserat** deras betydelse för olika skeenden. Eleven ger **komplexa** exempel på, och förklarar **utförligt och nyanserat**, samband mellan skeenden i det förflutna och förhållanden i nutiden samt argumenterar för och emot olika sätt att se på dessa samband. Dessutom kan eleven dra några **välgrundade och nyanserade** slutsatser om vad skeenden i det förflutna och förhållanden i nutiden kan ha för betydelse för framtiden.
 
-Eleven kan**med säkerhet** använda historiska begrepp och**olika** teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
+Eleven kan **med säkerhet** använda historiska begrepp och **olika** teorier för att formulera, utreda, förklara och dra slutsatser om historiska frågeställningar utifrån olika perspektiv.
 
-Eleven kan**med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra**välgrundade och nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från källkritiska metoder och av eleven påvisade tolkningsmöjligheter. Dessutom motiverar eleven**utförligt och nyanserat** sitt val av såväl metoder som tolkningar.
+Eleven kan **med säkerhet** söka, granska och tolka källmaterial för att besvara frågor om historiska skeenden samt göra **välgrundade och nyanserade** reflektioner över materialets relevans. I värderingen utgår eleven från källkritiska metoder och av eleven påvisade tolkningsmöjligheter. Dessutom motiverar eleven **utförligt och nyanserat** sitt val av såväl metoder som tolkningar.
 
-Eleven kan**utförligt och nyanserat** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt**utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med**nyanserade** omdömen deras betydelse för nutida skeenden och händelser.
+Eleven kan **utförligt och nyanserat** redogöra för några historiska skeenden och händelser som har använts på olika sätt samt **utförligt och nyanserat** förklara varför de har använts olika. Dessutom ger eleven några exempel på olika sätt att använda historia och värderar med **nyanserade** omdömen deras betydelse för nutida skeenden och händelser.

@@ -47,12 +47,11 @@ def get(path):
 
 
 def inline(fragment, keep_lines=False):
-    s = re.sub(r"<(strong|b)>(.*?)</\1>", r"**\2**", fragment, flags=re.S | re.I)
-    s = re.sub(r"<(em|i)>(.*?)</\1>", r"*\2*", s, flags=re.S | re.I)
+    # Spaces inside an emphasis go outside it ("<strong> viss </strong>" -> " **viss** "); adjacent ones are joined.
+    s = re.sub(r"<(strong|b)>(\s*)(.*?)(\s*)</\1>", lambda m: f"{m.group(2)}**{m.group(3)}**{m.group(4)}" if m.group(3) else m.group(2) + m.group(4), fragment, flags=re.S | re.I)
+    s = re.sub(r"<(em|i)>(\s*)(.*?)(\s*)</\1>", lambda m: f"{m.group(2)}*{m.group(3)}*{m.group(4)}" if m.group(3) else m.group(2) + m.group(4), s, flags=re.S | re.I)
     s = html.unescape(re.sub(r"<[^>]+>", "", s))
     s = s.replace("****", "")
-    s = re.sub(r"\*\*\s+([^*]+?)\s*\*\*", r" **\1**", s)  # "** viss **" -> " **viss**"
-    s = re.sub(r"\*\*([^*]+?)\s+\*\*", r"**\1** ", s)
     return s if keep_lines else re.sub(r"\s+", " ", s).strip()
 
 
