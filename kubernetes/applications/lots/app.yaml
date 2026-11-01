@@ -393,7 +393,7 @@ spec:
             name: lots-gitops
       containers:
         - name: shell
-          image: registry.rosenvall.se/carnufex/lots-shell:sha-6088ef8@sha256:bf2d6c67f1e28b1c67bb31b1f45f0f8430aaa79173ded3f562e4d180d259d05c
+          image: registry.rosenvall.se/carnufex/lots-shell:sha-0996867@sha256:7224d4d33762f1f76f7a21d1d5efd73ed9098e5ee3c7e97c8b94cfd49a62d09a
           ports:
             - containerPort: 8080
               name: http
