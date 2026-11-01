@@ -239,6 +239,128 @@ data:
           group: !KeyOf lots-teacher-group
         attrs:
           order: 5
+      # Sign-up (Lots #495, ADR 0064): anyone may create an account for Lots; it lands in "Lots sign-ups", which opens the Lots
+      # application and is no role (no lots- prefix). Lots then shows a waiting page until an admin gives roles in Lots
+      # (Auth__Access=Approval). The group opens no other application. Add an e-mail verification stage once Authentik sends mail.
+      - id: lots-signups-group
+        model: authentik_core.group
+        identifiers:
+          name: Lots sign-ups
+        attrs:
+          name: Lots sign-ups
+      - model: authentik_policies.policybinding
+        identifiers:
+          target: !KeyOf lots_application
+          group: !KeyOf lots-signups-group
+        attrs:
+          order: 6
+      - id: lots-enrollment-flow
+        model: authentik_flows.flow
+        identifiers:
+          slug: lots-enrollment
+        attrs:
+          name: Lots sign-up
+          title: Create a Lots account
+          designation: enrollment
+          authentication: require_unauthenticated
+      - id: lots-enrollment-field-username
+        model: authentik_stages_prompt.prompt
+        identifiers:
+          name: lots-enrollment-field-username
+        attrs:
+          field_key: username
+          label: Username
+          type: username
+          required: true
+          placeholder: Username
+          placeholder_expression: false
+          order: 0
+      - id: lots-enrollment-field-name
+        model: authentik_stages_prompt.prompt
+        identifiers:
+          name: lots-enrollment-field-name
+        attrs:
+          field_key: name
+          label: Name
+          type: text
+          required: true
+          placeholder: Name
+          placeholder_expression: false
+          order: 1
+      - id: lots-enrollment-field-email
+        model: authentik_stages_prompt.prompt
+        identifiers:
+          name: lots-enrollment-field-email
+        attrs:
+          field_key: email
+          label: Email
+          type: email
+          required: true
+          placeholder: Email
+          placeholder_expression: false
+          order: 2
+      - id: lots-enrollment-field-password
+        model: authentik_stages_prompt.prompt
+        identifiers:
+          name: lots-enrollment-field-password
+        attrs:
+          field_key: password
+          label: Password
+          type: password
+          required: true
+          placeholder: Password
+          placeholder_expression: false
+          order: 3
+      - id: lots-enrollment-field-password-repeat
+        model: authentik_stages_prompt.prompt
+        identifiers:
+          name: lots-enrollment-field-password-repeat
+        attrs:
+          field_key: password_repeat
+          label: Password (repeat)
+          type: password
+          required: true
+          placeholder: Password (repeat)
+          placeholder_expression: false
+          order: 4
+      - id: lots-enrollment-prompt
+        model: authentik_stages_prompt.promptstage
+        identifiers:
+          name: lots-enrollment-prompt
+        attrs:
+          fields:
+            - !KeyOf lots-enrollment-field-username
+            - !KeyOf lots-enrollment-field-name
+            - !KeyOf lots-enrollment-field-email
+            - !KeyOf lots-enrollment-field-password
+            - !KeyOf lots-enrollment-field-password-repeat
+      - id: lots-enrollment-user-write
+        model: authentik_stages_user_write.userwritestage
+        identifiers:
+          name: lots-enrollment-user-write
+        attrs:
+          user_creation_mode: always_create
+          user_type: external
+          create_users_group: !KeyOf lots-signups-group
+      - id: lots-enrollment-user-login
+        model: authentik_stages_user_login.userloginstage
+        identifiers:
+          name: lots-enrollment-user-login
+      - model: authentik_flows.flowstagebinding
+        identifiers:
+          target: !KeyOf lots-enrollment-flow
+          stage: !KeyOf lots-enrollment-prompt
+          order: 10
+      - model: authentik_flows.flowstagebinding
+        identifiers:
+          target: !KeyOf lots-enrollment-flow
+          stage: !KeyOf lots-enrollment-user-write
+          order: 20
+      - model: authentik_flows.flowstagebinding
+        identifiers:
+          target: !KeyOf lots-enrollment-flow
+          stage: !KeyOf lots-enrollment-user-login
+          order: 100
   apps-cmdb.yaml: |
     version: 1
     metadata:
