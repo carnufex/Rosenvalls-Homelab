@@ -30,6 +30,10 @@ data:
   Auth__Oidc__Scope: openid profile email offline_access
   Auth__Oidc__RoleClaim: groups
   Auth__Oidc__RolePrefix: lots-
+  # Sign-up with approval (Lots #495, ADR 0064): "Create an account" opens the Authentik enrollment flow lots-enrollment
+  # (blueprint apps-lots.yaml); people without a role then wait until an admin gives them roles under Administration > Identity.
+  Auth__Oidc__SignUpUrl: https://authentik.rosenvall.se/if/flow/lots-enrollment/
+  Auth__Access: Approval
   # Self-hosted model on the GPU PC: llama-server (Lots services/models), the chat model with vision and the embedding model on one
   # port, by address like voice. Measured against Ollama with the same weights on 2026-10-31: the same eval results, decoding 16 %
   # faster, the first token of a later turn 116 ms instead of 175 ms. Ollama (ollama/ollama) stays for Rosenvall DevOps.
