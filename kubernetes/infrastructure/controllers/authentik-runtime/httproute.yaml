@@ -17,6 +17,23 @@ spec:
     - authentik.rosenvall.se
     - authentik.rosenvall.local
   rules:
+    # SSO into Lots from the CMDB's chat (carnufex/cmdb ADR-0025): this one flow, which has nothing to click and is never reached without
+    # a session, may run in a hidden frame on that one origin. Every other page keeps X-Frame-Options: DENY.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /if/flow/default-provider-authorization-implicit-consent/
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            remove:
+              - X-Frame-Options
+            set:
+              - name: Content-Security-Policy
+                value: frame-ancestors https://cmdb.rosenvall.se
+      backendRefs:
+        - name: authentik-server
+          port: 80
     - matches:
         - path:
             type: PathPrefix
