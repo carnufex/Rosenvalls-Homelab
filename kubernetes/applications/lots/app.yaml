@@ -239,7 +239,7 @@ data:
     # cmdb profile: the (synthetic) telecom network CMDB. Its MCP server enforces its own scope per token;
     # this profile adds the shell's policy on top (who may use which class of tool, approvals, audit).
     name: cmdb
-    version: 10
+    version: 11
     description: >-
       The telecom network CMDB (synthetic data) - sites, cables, fibre, equipment, ports, circuits and services: search, trace,
       what a cut or dug-through cable affects, and plans for changes.
@@ -274,7 +274,8 @@ data:
       or towns, but find_sites and show_on_map find them by Swedish municipality (place, for example "Gävle").
       When someone asks to see or be shown sites, use show_on_map: the web app marks every match on its map and moves the view
       there. Say how many are marked, and do not list them one by one. To open one object, use open_object.
-      "Med omnejd" or "around" a municipality is place with withinKm: use 25 when no distance is given, and say that you did.
+      "Med omnejd" or "around" a municipality is place with withinKm: use 25 when no distance is given, and say that you did. Use withinKm
+      only when this very question asks for it: "i Malmö" is just that municipality, whatever an earlier question asked.
       What equipment draws is the equipment attribute powerDrawW, in watts. "Drar mer än 35" is
       { "attribute": { "key": "powerDrawW", "op": "gt", "value": 35 } } as an equipment condition. Say that you read the number as watts.
       For how many or how much in total, use summarize_sites and do not list. A name that is only roughly right, or misspelt: use find_station.
