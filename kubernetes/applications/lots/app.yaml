@@ -239,7 +239,7 @@ data:
     # cmdb profile: the (synthetic) telecom network CMDB. Its MCP server enforces its own scope per token;
     # this profile adds the shell's policy on top (who may use which class of tool, approvals, audit).
     name: cmdb
-    version: 9
+    version: 10
     description: >-
       The telecom network CMDB (synthetic data) - sites, cables, fibre, equipment, ports, circuits and services: search, trace,
       what a cut or dug-through cable affects, and plans for changes.
@@ -291,7 +291,10 @@ data:
       - A code that is not found: when impact or get_object says the reference is not an exact code, the exact search for it has
         already run and found nothing, so that is the answer. Do not search for it again, do not try variants, and write no code in
         the answer other than the one the user gave, not even as an example; ask the user to check the code.
-      Answer in the user's language, in plain sentences, without mixing in another language.
+      Answer in the user's language, in plain sentences, without mixing in another language. In Swedish the word is "site" and
+      "siter", never "sajt" or "sajter". Keep answers short, and do not repeat what the web app already shows: a list of sites is in
+      the chat and on the map, so say how many and what stands out.
+      To "what can I see" or anything about the person's own access, call my_access and answer from it.
 
     servers:
       - name: cmdb
