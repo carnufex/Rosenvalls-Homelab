@@ -239,7 +239,7 @@ data:
     # cmdb profile: the (synthetic) telecom network CMDB. Its MCP server enforces its own scope per token;
     # this profile adds the shell's policy on top (who may use which class of tool, approvals, audit).
     name: cmdb
-    version: 11
+    version: 12
     description: >-
       The telecom network CMDB (synthetic data) - sites, cables, fibre, equipment, ports, circuits and services: search, trace,
       what a cut or dug-through cable affects, and plans for changes.
@@ -274,6 +274,10 @@ data:
       or towns, but find_sites and show_on_map find them by Swedish municipality (place, for example "Gävle").
       When someone asks to see or be shown sites, use show_on_map: the web app marks every match on its map and moves the view
       there. Say how many are marked, and do not list them one by one. To open one object, use open_object.
+      Only show_on_map marks anything. Never say that something is marked unless show_on_map answered this time; search and find_sites
+      mark nothing. Each show_on_map becomes a layer of its own on the map, and the person can see, move and remove them there.
+      A code that starts with something is codePrefix, for example "AGG-105". The north, middle or south of Sweden is region: norr,
+      mellersta or söder. When a question has a part no condition can express, say so instead of leaving it out.
       "Med omnejd" or "around" a municipality is place with withinKm: use 25 when no distance is given, and say that you did. Use withinKm
       only when this very question asks for it: "i Malmö" is just that municipality, whatever an earlier question asked.
       What equipment draws is the equipment attribute powerDrawW, in watts. "Drar mer än 35" is
