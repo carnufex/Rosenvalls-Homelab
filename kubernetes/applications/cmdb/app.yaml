@@ -190,6 +190,15 @@ spec:
               value: agent_4901m3szgyjwexwsqjxav28bnrnt
             - name: VOICE_NOC_AGENT_ID
               value: agent_5601m3sj3df0f6jvg4w1bj13m92g
+            # The chat with the person's own context in Lots, over AG-UI (carnufex/cmdb ADR-0023).
+            - name: LOTS_URL
+              value: https://lots.rosenvall.se
+            - name: LOTS_OIDC_AUTHORITY
+              value: https://authentik.rosenvall.se/application/o/lots/
+            - name: LOTS_OIDC_CLIENT_ID
+              value: lots
+            - name: LOTS_CONTEXT
+              value: cmdb
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
