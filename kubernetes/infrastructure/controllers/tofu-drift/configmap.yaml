@@ -110,7 +110,8 @@ data:
     [ "${count}" -gt 25 ] && lines="${lines}
     • … and $(( count - 25 )) more"
     case "${result}" in
-      clean) msg="$(printf ':white_check_mark: *OpenTofu drift cleared* — `tofu plan` on master@%s reports no changes.\n_%s_' "${commit}" "${when}")" ;;
+      clean) what="drift cleared"; case "${prev_digest}" in error:*) what="drift check runs again";; esac
+             msg="$(printf ':white_check_mark: *OpenTofu %s* — `tofu plan` on master@%s reports no changes.\n_%s_' "${what}" "${commit}" "${when}")" ;;
       drift) msg="$(printf ':warning: *OpenTofu drift* — Proxmox/Talos no longer match master@%s\n_%s_ · %s\n\n%s\n\nReview locally with `.\\scripts\\tofu.ps1 plan` (Rosenvalls-Homelab). Either the live change belongs in Git, or apply a saved plan to undo it.' "${commit}" "${when}" "${planline}" "${lines}")" ;;
       *)     msg="$(printf ':rotating_light: *OpenTofu drift check could not run* (master@%s)\n_%s_\n```%s```\nLogs: `kubectl -n tofu-drift logs job/<latest>`' "${commit}" "${when}" "$(head -15 "${summary}")")" ;;
     esac
