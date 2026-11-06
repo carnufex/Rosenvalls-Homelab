@@ -44,9 +44,12 @@ locals {
 resource "talos_image_factory_schematic" "this" {
   for_each = local.schematic_configs
 
-  schematic = templatefile("${path.module}/image/schematic.yaml.tftpl", {
+  # Normalise line endings: a Windows checkout renders CRLF, the in-cluster
+  # drift check (Linux) LF, and the schematic string must be identical on both
+  # or every plan sees a new schematic and new Talos images.
+  schematic = replace(templatefile("${path.module}/image/schematic.yaml.tftpl", {
     needs_nvidia_extensions = each.value.needs_nvidia_extensions
-  })
+  }), "\r\n", "\n")
 }
 
 resource "proxmox_virtual_environment_download_file" "this" {
