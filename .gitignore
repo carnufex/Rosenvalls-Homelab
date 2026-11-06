@@ -21,6 +21,9 @@ clusters_crd.json
 # to change depending on the environment.
 *.tfvars
 *.tfvars.json
+# Exception: the cluster topology is desired state and lives in Git. It holds no
+# secrets - the Proxmox token comes from TF_VAR_proxmox_api_token.
+!tofu/terraform.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in

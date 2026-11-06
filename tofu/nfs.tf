@@ -14,6 +14,10 @@ resource "proxmox_virtual_environment_download_file" "nfs_debian" {
   file_name          = "debian-12-generic-amd64-20260722-2547.qcow2.img"
   checksum           = "5f4f2e1a242447a5e5c48cdc7c6bdfe7b44ffd1a58836ddea8cf6140a65dd702d9d67462cd6941dfd5f0efd0be1db840c2a6ffa82c24b913878be4c8ee7a6eee"
   checksum_algorithm = "sha512"
+  # The URL is pinned to a build and the file to its checksum, so there is nothing
+  # to re-check upstream. With the default (true) every refresh asks Proxmox to
+  # query the URL, which needs more than read access.
+  overwrite = false
 }
 
 resource "proxmox_virtual_environment_vm" "nfs" {

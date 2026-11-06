@@ -183,12 +183,58 @@ this VM or the WD Red disk.
 
 ## OpenTofu Matches The Live Cluster
 
-Since 2026-11-06 a plain `tofu -chdir=tofu plan` reports **No changes**. The
-drift (Kubernetes falling back to the provider default 1.31, boot disks moved by
-hand in Proxmox, Talos images still at v1.8.3) was reconciled in c724a0a and
-applied on 2026-11-06, together with worker-07's new 80G Longhorn disk.
+Since 2026-11-06 `tofu plan` reports **No changes**. The drift (Kubernetes
+falling back to the provider default 1.31, boot disks moved by hand in Proxmox,
+Talos images still at v1.8.3) was reconciled in c724a0a and applied on
+2026-11-06, together with worker-07's new 80G Longhorn disk.
 
-Keep it that way:
+### Running OpenTofu
+
+Always go through the wrapper:
+
+```powershell
+.\scripts	ofu.ps1 init -reconfigure   # once per checkout, after pulling this change
+.\scripts	ofu.ps1 plan -out=change.tfplan
+.\scripts	ofu.ps1 apply change.tfplan
+```
+
+- **State** is in R2, `rosenvall-homelab-backup/tofu-state/hemma-k8s.tfstate`,
+  encrypted by OpenTofu (pbkdf2 -> aes_gcm, `enforced`), locked with an S3 lock
+  file. It holds the Talos machine secrets. The passphrase is the Bitwarden
+  entry `tofu-state-passphrase` - lose it and the state is unreadable.
+- **tfvars**: `tofu/terraform.tfvars` is in Git. It must never contain a
+  secret; the Proxmox token comes from `TF_VAR_proxmox_api_token`.
+- **The wrapper** reads `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`,
+  `S3_ENDPOINT`, `tofu-state-passphrase` and `proxmox-tofu-token` from
+  Bitwarden (via `BWS_ACCESS_TOKEN`, or the cluster's `bitwarden-access-token`)
+  and clears them after the run. With the cluster down, set
+  `BWS_ACCESS_TOKEN` yourself first.
+- The old local state is kept as
+  `tofu/terraform.tfstate.pre-r2-migration-20261106.backup` (serial 239). Do not
+  use it: R2 continues from serial 240.
+
+### Drift check
+
+`CronJob/tofu-drift/tofu-drift` (`kubernetes/infrastructure/controllers/tofu-drift/`)
+runs `tofu plan -lock=false -detailed-exitcode` on `master` every day at 07:15
+and posts to `#homelab-alerts` when drift appears, changes, is still there after
+7 days, or clears. Silent otherwise. If the plan cannot run, it posts the error
+and the Job fails (`KubeJobFailed`).
+
+- Proxmox access: token `root@pam!tofu-drift` (Bitwarden
+  `proxmox-tofu-drift-token`), role `TofuDriftReader` = the `PVEAuditor`
+  privileges plus `VM.Config.Disk`. Proxmox answers 403 to reading VM disk
+  volumes without it, and without `VM.GuestAgent.Audit` the provider retries
+  agent calls until it times out.
+- The generated `local_file.kubeconfig` / `local_file.talosconfig` are excluded:
+  they only exist on the operator's machine.
+- What it last reported: `kubectl -n tofu-drift get cm tofu-drift-status -o yaml`.
+- Run it now: `kubectl -n tofu-drift create job --from=cronjob/tofu-drift tofu-drift-manual-$(Get-Date -Format HHmm)`;
+  add `FORCE_REPORT=true` to the job's env to post even when nothing changed.
+- Logs: `kubectl -n tofu-drift logs job/<name>`, one line
+  `tofu-drift: result=clean|drift|error commit=... resources=N digest=...`.
+
+### Keeping it clean
 
 - Change Proxmox VMs and Talos machine config through OpenTofu, not by hand. A
   manual change is drift the next plan will try to undo.

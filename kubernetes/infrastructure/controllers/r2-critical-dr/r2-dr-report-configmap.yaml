@@ -31,8 +31,9 @@ data:
     pct=$(( bytes * 100 / LIMIT ))
     mib=$(( bytes / 1048576 ))
 
-    # Freshness: newest object modtime across the bucket.
-    newest_date="$(rclone lsl "${bucket}" 2>/dev/null | awk '{print $2}' | sort | tail -1)"
+    # Freshness: newest object modtime across the bucket. tofu-state/ (the
+    # OpenTofu state, rewritten on every apply) is not a DR backup - leave it out.
+    newest_date="$(rclone lsl "${bucket}" --exclude "tofu-state/**" 2>/dev/null | awk '{print $2}' | sort | tail -1)"
     age_days="-1"
     if [ -n "${newest_date}" ]; then
       ne="$(date -u -d "${newest_date}" +%s 2>/dev/null || echo '')"

@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tofu-drift
+  namespace: tofu-drift
+spec:
+  # Daily `tofu plan` of master against the live Proxmox/Talos estate. Silent
+  # while there is no drift; posts to #homelab-alerts when drift appears,
+  # changes, persists for a week, or clears. A plan that cannot run fails the
+  # Job (KubeJobFailed) as well as posting.
+  schedule: "15 7 * * *"
+  timeZone: Europe/Stockholm
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 172800
+      backoffLimit: 0
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          serviceAccountName: tofu-drift
+          restartPolicy: Never
+          containers:
+            - name: plan
+              image: alpine:3.24.4@sha256:93b41ef40b1677fce8fcc64ff4af09daddfacf5040afde618bc46c1e2d1cc7d4
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "/scripts/tofu-drift.sh"]
+              env:
+                - name: REPO_URL
+                  value: https://github.com/carnufex/Rosenvalls-Homelab.git
+                - name: REPO_BRANCH
+                  value: master
+                - name: REMIND_DAYS
+                  value: "7"
+                - name: HOME
+                  value: /work
+                - name: TF_IN_AUTOMATION
+                  value: "1"
+              envFrom:
+                - secretRef:
+                    name: tofu-drift
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: work
+                  mountPath: /work
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsUser: 0
+                runAsGroup: 0
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 256Mi
+                limits:
+                  cpu: "1"
+                  memory: 768Mi
+          volumes:
+            - name: scripts
+              configMap:
+                name: tofu-drift
+                defaultMode: 0555
+            - name: work
+              emptyDir:
+                sizeLimit: 2Gi

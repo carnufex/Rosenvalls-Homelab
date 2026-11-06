@@ -1,0 +1,124 @@
+# What the job last reported. Written by the job only (data), Argo owns nothing
+# but the object itself, so ServerSideDiff never sees the job's fields as drift.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tofu-drift-status
+  namespace: tofu-drift
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tofu-drift
+  namespace: tofu-drift
+data:
+  tofu-drift.sh: |
+    #!/bin/sh
+    # Runs `tofu plan` for tofu/ on master and reports drift to Slack.
+    # Read-only: -lock=false, read-only Proxmox token, never applies, never
+    # writes state. Exit 0 = plan ran (drift or not), 1 = plan could not run.
+    set -u
+
+    TOFU_VERSION=1.10.7
+    TOFU_SHA256=c79bb458e7d7fa08c44be98b373ab3434647598808fc2a75dc9338aef7432ae6
+    REMIND_DAYS="${REMIND_DAYS:-7}"
+    FORCE_REPORT="${FORCE_REPORT:-false}"
+    WORK=/work
+
+    log() { echo "tofu-drift: $*"; }
+
+    apk add --no-cache git curl jq unzip coreutils >/dev/null 2>&1 || { log "apk add failed"; exit 1; }
+
+    curl -fsSL -o "${WORK}/tofu.zip" \
+      "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip" \
+      || { log "tofu download failed"; exit 1; }
+    echo "${TOFU_SHA256}  ${WORK}/tofu.zip" | sha256sum -c - >/dev/null || { log "tofu checksum mismatch"; exit 1; }
+    unzip -q -o "${WORK}/tofu.zip" tofu -d "${WORK}/bin"
+    export PATH="${WORK}/bin:${PATH}"
+
+    # --- status ConfigMap (what we last posted) via the API server ------------
+    SA=/var/run/secrets/kubernetes.io/serviceaccount
+    API="https://kubernetes.default.svc/api/v1/namespaces/tofu-drift/configmaps/tofu-drift-status"
+    kget() { curl -fsS --cacert "${SA}/ca.crt" -H "Authorization: Bearer $(cat ${SA}/token)" "${API}"; }
+    kset() { # $1 digest, $2 posted-at epoch
+      body="$(jq -n --arg d "$1" --arg p "$2" '{data:{digest:$d, postedAt:$p}}')"
+      curl -fsS -o /dev/null --cacert "${SA}/ca.crt" -H "Authorization: Bearer $(cat ${SA}/token)" \
+        -H 'Content-Type: application/merge-patch+json' -X PATCH --data "${body}" "${API}" \
+        || log "WARN could not store status"
+    }
+    status="$(kget 2>/dev/null || echo '{}')"
+    prev_digest="$(printf '%s' "${status}" | jq -r '.data.digest // "unknown"')"
+    prev_posted="$(printf '%s' "${status}" | jq -r '.data.postedAt // "0"')"
+    now="$(date -u +%s)"
+
+    slack() {
+      payload="$(jq -n --arg t "$1" '{text:$t}')"
+      code="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' \
+        --data "${payload}" "${SLACK_WEBHOOK_URL}")"
+      log "slack_status=${code}"
+      [ "${code}" = "200" ]
+    }
+
+    # --- plan ---------------------------------------------------------------
+    git clone -q --depth 1 --branch "${REPO_BRANCH}" "${REPO_URL}" "${WORK}/repo" || { log "git clone failed"; exit 1; }
+    commit="$(git -C "${WORK}/repo" rev-parse --short HEAD)"
+    cd "${WORK}/repo/tofu"
+
+    rc=1
+    for attempt in 1 2 3; do
+      if tofu init -input=false -no-color -lockfile=readonly > "${WORK}/init.txt" 2>&1; then
+        # The generated access files only exist on the operator's machine; a fresh
+        # clone would always see them as "will be created".
+        tofu plan -lock=false -input=false -no-color -detailed-exitcode           -exclude=local_file.kubeconfig -exclude=local_file.talosconfig > "${WORK}/plan.txt" 2>&1
+        rc=$?
+      else
+        cp "${WORK}/init.txt" "${WORK}/plan.txt"; rc=1
+      fi
+      # factory.talos.dev / Proxmox occasionally fail a single request; retry those.
+      [ "${rc}" -ne 1 ] && break
+      log "attempt ${attempt} failed (rc=1), retrying in 60s"
+      sleep 60
+    done
+
+    summary="${WORK}/summary.txt"
+    case "${rc}" in
+      0) result=clean;  : > "${summary}" ;;
+      2) result=drift;  grep -E '^  # ' "${WORK}/plan.txt" | sed 's/^  # //' > "${summary}" ;;
+      *) result=error;  grep -E 'Error|error' "${WORK}/plan.txt" | head -15 > "${summary}" ;;
+    esac
+    planline="$(grep -E '^Plan:' "${WORK}/plan.txt" | head -1)"
+    count="$(grep -c '' "${summary}" || true)"
+    digest="${result}:$(sort "${summary}" | sha256sum | cut -c1-16)"
+    [ "${result}" = clean ] && digest=clean
+    log "result=${result} commit=${commit} resources=${count} digest=${digest} prev=${prev_digest} ${planline}"
+
+    # --- report (silent while nothing changed) --------------------------------
+    post=false
+    if [ "${digest}" != "${prev_digest}" ]; then
+      # First ever run on a clean estate: nothing to report.
+      if [ "${result}" != clean ] || [ "${prev_digest}" != unknown ]; then post=true; fi
+    elif [ "${result}" != clean ] && [ $(( now - prev_posted )) -ge $(( REMIND_DAYS * 86400 )) ]; then
+      post=true
+    fi
+    [ "${FORCE_REPORT}" = true ] && post=true
+
+    when="$(date -u '+%Y-%m-%d %H:%M UTC')"
+    lines="$(head -25 "${summary}" | sed 's/^/• /')"
+    [ "${count}" -gt 25 ] && lines="${lines}
+    • … and $(( count - 25 )) more"
+    case "${result}" in
+      clean) msg="$(printf ':white_check_mark: *OpenTofu drift cleared* — `tofu plan` on master@%s reports no changes.\n_%s_' "${commit}" "${when}")" ;;
+      drift) msg="$(printf ':warning: *OpenTofu drift* — Proxmox/Talos no longer match master@%s\n_%s_ · %s\n\n%s\n\nReview locally with `.\\scripts\\tofu.ps1 plan` (Rosenvalls-Homelab). Either the live change belongs in Git, or apply a saved plan to undo it.' "${commit}" "${when}" "${planline}" "${lines}")" ;;
+      *)     msg="$(printf ':rotating_light: *OpenTofu drift check could not run* (master@%s)\n_%s_\n```%s```\nLogs: `kubectl -n tofu-drift logs job/<latest>`' "${commit}" "${when}" "$(head -15 "${summary}")")" ;;
+    esac
+
+    if [ "${post}" = true ]; then
+      printf '%s\n' "${msg}"
+      if slack "${msg}"; then kset "${digest}" "${now}"; else log "slack post failed"; exit 1; fi
+    else
+      log "nothing new to report (silent)"
+      [ "${digest}" != "${prev_digest}" ] && kset "${digest}" "${prev_posted}"
+    fi
+
+    [ "${result}" = error ] && exit 1
+    exit 0

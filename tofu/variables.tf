@@ -5,9 +5,23 @@ variable "proxmox" {
     endpoint     = string
     insecure     = bool
     username     = string
-    api_token    = string
+    # Deprecated: keep the token out of tfvars, pass var.proxmox_api_token instead.
+    api_token = optional(string)
   })
   sensitive = true
+}
+
+variable "proxmox_api_token" {
+  description = "Proxmox API token (user@realm!id=uuid). Set via TF_VAR_proxmox_api_token: scripts/tofu.ps1 reads the full-privilege token from Bitwarden; the in-cluster drift check uses the read-only PVEAuditor token."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "state_passphrase" {
+  description = "Passphrase for OpenTofu state encryption (Bitwarden: tofu-state-passphrase). Set via TF_VAR_state_passphrase."
+  type        = string
+  sensitive   = true
 }
 variable "cluster_name" {
   description = "Name of the Kubernetes cluster"

@@ -15,6 +15,9 @@
 
 - `tofu/` provisions Proxmox VMs and Talos configuration (control planes, disk workers,
   compute-only workers, the NFS VMs).
+- Run OpenTofu only through `scripts/tofu.ps1` (state is encrypted in R2, secrets come from Bitwarden);
+  `tofu/terraform.tfvars` is tracked and must never hold a secret. A daily `tofu-drift` CronJob posts
+  drift to `#homelab-alerts` - see `docs/operations/README.md`.
 - `tofu/output/kubeconfig` and `tofu/output/talosconfig` are the local access artifacts.
 - ArgoCD bootstraps from `kubernetes/bootstrap.yaml`.
 - `kubernetes/infrastructure/` is the platform layer (Cilium is managed here, outside the

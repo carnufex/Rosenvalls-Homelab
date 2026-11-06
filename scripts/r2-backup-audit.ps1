@@ -180,11 +180,11 @@ if (-not (Test-RcloneAvailable)) {
             throw "rclone lsf failed for $RawR2Remote"
         }
 
-        $outsideCritical = @($rawObjects | Where-Object { $_ -and ($_ -notmatch "^critical-dr/") })
+        $outsideCritical = @($rawObjects | Where-Object { $_ -and ($_ -notmatch "^(critical-dr|tofu-state)/") })
         if ($outsideCritical.Count -gt 0) {
-            Add-Failure "R2 contains $($outsideCritical.Count) object(s) outside critical-dr/. Run scripts/r2-critical-inventory.ps1 before deleting anything."
+            Add-Failure "R2 contains $($outsideCritical.Count) object(s) outside critical-dr/ and tofu-state/. Run scripts/r2-critical-inventory.ps1 before deleting anything."
         } else {
-            Write-Ok "All listable R2 objects are under critical-dr/."
+            Write-Ok "All listable R2 objects are under critical-dr/ or tofu-state/."
         }
 
         $sizeJson = & rclone size --json $RawR2Remote 2>$null

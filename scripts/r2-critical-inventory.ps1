@@ -27,6 +27,11 @@ function Get-Classification {
         return "KEEP"
     }
 
+    # OpenTofu state (encrypted by OpenTofu itself). Never a cleanup candidate.
+    if ($Path -match "^tofu-state/") {
+        return "KEEP"
+    }
+
     if ($Path -match "^(backupstore|volumes|authentik/live|authentik/dr|longhorn|manual|migration|plex|seerr|radarr|sonarr|jackett|deluge)") {
         return "DELETE"
     }
@@ -47,7 +52,7 @@ foreach ($path in @($rawListing)) {
     $rawObjects += [pscustomobject]@{
         Path = $path
         Classification = Get-Classification $path
-        Reason = if ($path -match "^critical-dr/") { "critical DR prefix" } else { "legacy or unknown R2 object" }
+        Reason = if ($path -match "^critical-dr/") { "critical DR prefix" } elseif ($path -match "^tofu-state/") { "OpenTofu state" } else { "legacy or unknown R2 object" }
     }
 }
 

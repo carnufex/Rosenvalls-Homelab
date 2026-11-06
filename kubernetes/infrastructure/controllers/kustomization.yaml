@@ -7,6 +7,7 @@ resources:
   - authentik-runtime
   - authentik-db-ops
   - r2-critical-dr
+  - tofu-drift
   - cert-manager
   - external-secrets
   - arc-controller

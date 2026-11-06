@@ -25,7 +25,7 @@ Partially verified:
 Missing or residual risk:
 
 - Talos API CA rotation is not complete until a dry-run and live rotation succeed all the way through.
-- Secure off-machine storage for current kubeconfig, talosconfig, local `terraform.tfvars`, and exported local CA must be maintained outside Git.
+- Secure off-machine storage for current kubeconfig, talosconfig, the Bitwarden `tofu-state-passphrase`, and exported local CA must be maintained outside Git.
 
 ## Recovery Modes
 
@@ -46,7 +46,7 @@ What Git does not give you:
 - Proxmox credentials
 - `bitwarden-access-token`
 - Cloudflare dashboard-side tunnel publishing
-- local `terraform.tfvars`
+- Bitwarden entry `tofu-state-passphrase` (without it the R2 OpenTofu state is unreadable)
 - an off-machine copy of `tofu/output/kubeconfig`
 - an off-machine copy of `tofu/output/talosconfig`
 
@@ -81,8 +81,12 @@ Full-cluster power-cycle drill evidence on 2026-05-25: all Talos nodes were rebo
 ## New Server Or Stolen Server Runbook
 
 1. Prepare the replacement server and restore Proxmox access.
-2. Restore or recreate local `tofu/terraform.tfvars`.
-3. Run `tofu init`, `tofu plan`, and `tofu apply`.
+2. `tofu/terraform.tfvars` is in Git. Get a Bitwarden machine token into
+   `$env:BWS_ACCESS_TOKEN` (the cluster copy is gone with the cluster) and, if
+   Proxmox was reinstalled, a new token into the Bitwarden entry `proxmox-tofu-token`.
+3. Run `.\scripts	ofu.ps1 init -reconfigure`, then `plan -out=<file>` and `apply <file>`.
+   The state (with the Talos machine secrets) comes from R2, so the existing
+   cluster identity is kept.
 4. Export `TALOSCONFIG` and `KUBECONFIG` from `tofu/output/`.
 5. Verify Talos and Kubernetes API health.
 6. Restore the manual `bitwarden-access-token` path or pass it into `bootstrap.ps1`.
@@ -103,7 +107,8 @@ Full-cluster power-cycle drill evidence on 2026-05-25: all Talos nodes were rebo
 | Slim app configs | Partial | Monthly encrypted R2 archive excludes metadata/cache/media |
 | Longhorn volumes | Partial | Daily backups to host1 NFS (off the storage host, same site); no offsite copy |
 | CNPG databases | Partial | Nightly pg_dump (authentik, cmdb, lots to host1; ngm to OneDrive); authentik restore verified 2026-10-11 |
-| Talos/Kubernetes access artifacts | Weak | Generated locally, no repo-defined off-machine backup policy |
+| OpenTofu state (incl. Talos machine secrets) | Strong | R2 `tofu-state/`, OpenTofu-encrypted; passphrase in Bitwarden `tofu-state-passphrase` |
+| Talos/Kubernetes access artifacts | Partial | Regenerable from the R2 state (`.\scripts	ofu.ps1 apply -replace=module.talos.talos_cluster_kubeconfig.this`) |
 | Headlamp cluster UI | Internal read-only | Helps inspect recovery state, but is not part of bootstrap |
 | DevOps preview namespaces | Automated TTL cleanup | Non-critical previews older than 24h are deleted by label-based cleanup |
 
@@ -154,7 +159,7 @@ Do not mix backup prefixes between fresh bootstrap and DR-restored clusters.
 - Cloudflare tunnel and published route ownership
 - Cloudflare DNS API token contract
 - R2 credentials
-- local `terraform.tfvars`
+- Bitwarden entry `tofu-state-passphrase` (without it the R2 OpenTofu state is unreadable)
 - current `tofu/output/kubeconfig`
 - current `tofu/output/talosconfig`
 - exported `gateway-local-ca`
