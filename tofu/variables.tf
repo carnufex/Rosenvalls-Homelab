@@ -26,6 +26,18 @@ variable "talos_version" {
   default     = "v1.14.4"
 }
 
+variable "talos_config_version" {
+  description = "Talos config contract the machine configs are generated with (talos_machine_configuration.talos_version). Kept at the contract the live configs were written in, so a version bump does not silently rewrite every node's config into a newer document layout. The live configs on hemma-k8s are in the v1.8 contract (verified 2026-11-06 against talosctl get machineconfig): v1.12+ splits them into ~30 typed documents. Moving forward is a deliberate migration, not a version bump."
+  type        = string
+  default     = "v1.8.3"
+}
+
+variable "kubernetes_version" {
+  description = "Kubernetes version rendered into the Talos machine configs. Must follow the live cluster: talosctl upgrade-k8s does not update it, and the talos provider's default is far older."
+  type        = string
+  default     = "v1.37.1"
+}
+
 variable "gateway" {
   description = "Network gateway"
   type        = string
@@ -134,6 +146,9 @@ variable "nodes_config" {
     host_node                    = optional(string)
     machine_type                 = string
     boot_disk_size_gib           = optional(number)
+    boot_datastore_id            = optional(string)
+    boot_file_format             = optional(string)
+    boot_discard                 = optional(string)
     ip                           = string
     mac_address                  = optional(string)
     vm_id                        = optional(number)
@@ -150,11 +165,13 @@ variable "nodes_config" {
       iommu_group  = number
     })))
     disks = optional(map(object({
-      device      = optional(string)
-      size        = optional(string)
-      type        = optional(string)
-      mountpoint  = optional(string)
-      unit_number = optional(number)
+      device       = optional(string)
+      size         = optional(string)
+      type         = optional(string)
+      mountpoint   = optional(string)
+      unit_number  = optional(number)
+      datastore_id = optional(string)
+      discard      = optional(string)
     })))
   }))
   default = {

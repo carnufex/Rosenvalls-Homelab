@@ -1,10 +1,11 @@
 data "talos_machine_configuration" "this" {
-  for_each         = var.nodes
-  cluster_name     = var.cluster.name
-  cluster_endpoint = "https://${var.cluster.endpoint}:6443"
-  machine_type     = each.value.machine_type
-  machine_secrets  = talos_machine_secrets.this.machine_secrets
-  talos_version    = var.cluster.talos_version
+  for_each           = var.nodes
+  cluster_name       = var.cluster.name
+  cluster_endpoint   = "https://${var.cluster.endpoint}:6443"
+  machine_type       = each.value.machine_type
+  machine_secrets    = talos_machine_secrets.this.machine_secrets
+  talos_version      = var.cluster.config_version
+  kubernetes_version = var.cluster.kubernetes_version
   config_patches = concat(
     [
       templatefile("${path.module}/machine-config/${each.value.machine_type}.yaml.tftpl", {
@@ -21,6 +22,9 @@ data "talos_machine_configuration" "this" {
         extra_labels                 = lookup(each.value, "extra_labels", {})
       })
     ],
+    # The installer the node reinstalls/upgrades with; the provider default is its own
+    # (old) Talos release, not the cluster's.
+    [yamlencode({ machine = { install = { image = "ghcr.io/siderolabs/installer:${var.cluster.talos_version}" } } })],
     # Conditionally add GPU patches for GPU-enabled worker nodes
     lookup(each.value, "igpu", false) ? [
       file("${path.module}/patches/gpu-modules.yaml"),

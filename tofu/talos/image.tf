@@ -34,7 +34,7 @@ locals {
     for image_node_key in distinct([
       for name, node in var.nodes : "${local.node_schematic_key[name]}|${node.host_node}"
       if node.host_node != local.proxmox_image_node
-    ]) : image_node_key => {
+      ]) : image_node_key => {
       schematic_key = split("|", image_node_key)[0]
       node_name     = split("|", image_node_key)[1]
     }

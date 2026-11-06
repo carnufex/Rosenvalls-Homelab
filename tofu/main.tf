@@ -46,11 +46,13 @@ module "talos" {
   }
 
   cluster = {
-    name            = var.cluster_name
-    endpoint        = var.cluster_endpoint
-    talos_version   = var.talos_version
-    proxmox_cluster = var.proxmox.cluster_name
-    gateway         = var.gateway
+    name               = var.cluster_name
+    endpoint           = var.cluster_endpoint
+    talos_version      = var.talos_version
+    kubernetes_version = var.kubernetes_version
+    config_version     = coalesce(var.talos_config_version, var.talos_version)
+    proxmox_cluster    = var.proxmox.cluster_name
+    gateway            = var.gateway
   }
 
   cilium = {
