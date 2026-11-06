@@ -181,30 +181,30 @@ preserve or restore the NFS data first and deliberately change that protection
 in a reviewed recovery operation. Never use destruction as troubleshooting for
 this VM or the WD Red disk.
 
-## OpenTofu State Is Drifted - Do Not Apply
+## OpenTofu Matches The Live Cluster
 
-`tofu -chdir=tofu plan` currently reports **15 to add, 11 to change, 14 to
-destroy** with no local edits at all. The state still describes the Talos image
-as `talos-v1.8.3-std-nocloud-amd64.img` while the fleet runs v1.14.0, so the
-image resources force replacement and drag seven
-`talos_machine_configuration_apply` resources with them.
+Since 2026-11-06 a plain `tofu -chdir=tofu plan` reports **No changes**. The
+drift (Kubernetes falling back to the provider default 1.31, boot disks moved by
+hand in Proxmox, Talos images still at v1.8.3) was reconciled in c724a0a and
+applied on 2026-11-06, together with worker-07's new 80G Longhorn disk.
 
-Nothing in this repository can be applied unscoped until that is reconciled.
-The targeted saved-plan gate documented under the nfs-01 sections above is not
-ceremony - it is the only safe way to touch OpenTofu here.
+Keep it that way:
 
-`talos_version` deserves particular care. Raising it to match reality also pulls
-`module.talos.talos_machine_secrets.this` into the plan and renders its
-certificate and key attributes as `(known after apply)`. It was bumped to
-v1.14.0 after the September 2026 upgrade and reverted for exactly that reason -
-the variable stays at v1.12.11 until the drift work happens, and the version
-should be corrected **as part of** that reconciliation, deliberately, not before
-it. See `terraform.tfstate.before-talos-version-state-reconcile-*.backup` for a
-previous encounter with the same trap.
-
-Consequence for capacity work: node topology changes that look like two lines in
-`nodes_config` - adding a Longhorn disk to a compute-only worker, for instance -
-cannot currently be delivered through OpenTofu.
+- Change Proxmox VMs and Talos machine config through OpenTofu, not by hand. A
+  manual change is drift the next plan will try to undo.
+- Always apply a saved plan you have read: `tofu plan -out=<file>`, review it,
+  `tofu apply <file>`. A saved plan refuses to run if state moved underneath it.
+- Before applying machine-config changes, dry-run the rendered configs
+  (`tofu show -json <plan>` -> `machine_configuration` per node) with
+  `talosctl apply-config --dry-run --mode auto` to see whether a node would
+  reboot.
+- `talos_config_version` stays at v1.8.3, the contract the live configs are
+  written in. Moving to v1.12+ splits every node's config into typed documents
+  and is a migration of its own.
+- `talos_cluster_kubeconfig` is only generated on create. If the cluster CA is
+  ever rotated, run `tofu apply -replace=module.talos.talos_cluster_kubeconfig.this`
+  or `local_file.kubeconfig` writes a kubeconfig with the old CA (this happened
+  on 2026-11-06).
 
 ## Talos Node Upgrades
 
@@ -253,10 +253,11 @@ Expect each storage-node reboot to cost a full round of replica rebuilds:
 rebuild one after another. Do not raise it to go faster - worker-01 already
 reports NodeDiskIOSaturation under normal load.
 
-Do **not** bump `talos_version` in `tofu/variables.tf` afterwards - see
-"OpenTofu State Is Drifted" above. It changes the plan for
-`talos_machine_secrets`, and OpenTofu cannot rebuild a node in this repo today
-anyway, so the variable is corrected during the state reconciliation instead.
+After the whole fleet is on the new version, bump `talos_version` so OpenTofu
+follows (see "OpenTofu Matches The Live Cluster" above). Expect the plan to
+replace the Talos images in Proxmox storage and change `machine.install.image`
+in every node's config - nothing else. `talos_machine_secrets` ignores
+`talos_version`, and `talos_config_version` stays where it is.
 
 ## High-Value Checks
 

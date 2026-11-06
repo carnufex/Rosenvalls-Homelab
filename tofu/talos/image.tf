@@ -58,6 +58,10 @@ resource "proxmox_virtual_environment_download_file" "this" {
   url                     = "${var.image.factory_url}/image/${talos_image_factory_schematic.this[each.key].id}/${var.image.version}/${var.image.platform}-${var.image.arch}.raw.gz"
   file_name               = "talos-${var.image.version}-${each.key}-${var.image.platform}-${var.image.arch}.img"
   decompression_algorithm = "gz"
+  # The stored file is the decompressed image, so its size never matches the
+  # .raw.gz Content-Length. With overwrite = true (the default) every plan would
+  # re-download all images; a version change still replaces them via url/file_name.
+  overwrite = false
 }
 
 resource "proxmox_virtual_environment_download_file" "per_node" {
@@ -69,4 +73,8 @@ resource "proxmox_virtual_environment_download_file" "per_node" {
   url                     = "${var.image.factory_url}/image/${talos_image_factory_schematic.this[each.value.schematic_key].id}/${var.image.version}/${var.image.platform}-${var.image.arch}.raw.gz"
   file_name               = "talos-${var.image.version}-${each.value.schematic_key}-${var.image.platform}-${var.image.arch}.img"
   decompression_algorithm = "gz"
+  # The stored file is the decompressed image, so its size never matches the
+  # .raw.gz Content-Length. With overwrite = true (the default) every plan would
+  # re-download all images; a version change still replaces them via url/file_name.
+  overwrite = false
 }
