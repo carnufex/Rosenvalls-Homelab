@@ -76,6 +76,7 @@ data:
       fi
       # factory.talos.dev / Proxmox occasionally fail a single request; retry those.
       [ "${rc}" -ne 1 ] && break
+      [ "${attempt}" -eq 3 ] && break
       log "attempt ${attempt} failed (rc=1), retrying in 60s"
       sleep 60
     done
@@ -84,7 +85,9 @@ data:
     case "${rc}" in
       0) result=clean;  : > "${summary}" ;;
       2) result=drift;  grep -E '^  # ' "${WORK}/plan.txt" | sed 's/^  # //' > "${summary}" ;;
-      *) result=error;  grep -E 'Error|error' "${WORK}/plan.txt" | head -15 > "${summary}" ;;
+      *) result=error;  grep -A4 -E '^Error' "${WORK}/plan.txt" | grep -vE '^\s*$' | head -15 > "${summary}"
+         [ -s "${summary}" ] || tail -15 "${WORK}/plan.txt" > "${summary}"
+         log "plan output (tail):"; tail -40 "${WORK}/plan.txt" ;;
     esac
     planline="$(grep -E '^Plan:' "${WORK}/plan.txt" | head -1)"
     count="$(grep -c '' "${summary}" || true)"
