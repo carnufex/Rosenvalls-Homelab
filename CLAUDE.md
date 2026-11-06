@@ -16,9 +16,14 @@ descriptions. Reach for:
 - **cloudflare-gateway-routing** — public ingress for `*.rosenvall.se`, Cloudflare
   5xx (esp. 530), TLS/cert issues, or adding/changing a public `HTTPRoute`.
 - **gitops-app-onboarding** — adding a new app under `kubernetes/applications/`.
+  Comes from the `gitops@carnufex` plugin (enabled in `.claude/settings.json`,
+  source `carnufex/claude-skills`); this cluster's facts for it — paths, the three
+  namespace whitelists, registry, storage, gateways, where the app's alert goes —
+  are in `.claude/profiles/gitops.md`. Change the facts there, the method in the
+  plugin repo.
 
 The legacy Codex versions remain in `.codex/skills/` for the Codex CLI; the
-`.claude/skills/` copies are the maintained, expanded versions for Claude.
+`.claude/skills/` copies and the plugin are the maintained versions for Claude.
 
 ## Working norms
 
