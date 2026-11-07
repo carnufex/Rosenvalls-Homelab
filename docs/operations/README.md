@@ -346,6 +346,29 @@ automatic VM resize. First check whether workloads can move off `desktop` or
 whether the physical host needs more RAM; `control-01` should only be increased
 after the host has enough reserve.
 
+## Proxmox Host Disk (desktop)
+
+On `desktop` the `local` and `desktop-lagring` storages share one root
+filesystem (`/dev/mapper/pve-root`, 94 GB), so the "Proxmox storage filling up"
+alert reports both at the same percentage. The filesystem holds the
+qcow2 boot disks of worker-01 (48G) and worker-02 (20G), the Talos and
+Debian images, apt's cache and the host's journal.
+
+- The boot disks have `discard=on` (2026-11-07). Talos does not trim on its
+  own, so freed blocks only go back to the host after a manual trim:
+  `scripts/talos-fstrim-pod.yaml`. The first trim shrank worker-02's file
+  from 21G to 14G.
+- Before the 2026-11-07 change, the files were fully allocated
+  (`discard=ignore`). Check with `du -h /media/lagring/images/*/*.qcow2`.
+- Safe cleanup on the host: `apt-get clean`, `journalctl --vacuum-size=200M`,
+  old kernels (`apt purge proxmox-kernel-<old>`; keep the running one and one
+  fallback), and ISO/images that no VM's config references.
+- Changing a disk option in tofu leaves it pending in Proxmox (bpg 0.66 does
+  not restart the VM). Drain the node, then run `qm shutdown <vmid> --timeout 900`
+  and `qm start <vmid>`. `qm reboot` uses a 300 s limit, which Talos's own drain
+  exceeds when a PDB blocks it (single-instance CNPG primaries, Longhorn
+  instance-manager).
+
 ## Cluster UI
 
 Use Headlamp for live Kubernetes object inspection:

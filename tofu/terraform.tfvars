@@ -33,10 +33,12 @@ nodes_config = {
     host_node          = "desktop"
     machine_type       = "worker"
     boot_disk_size_gib = 48
-    # Synced to the live VM 2026-11-06: the disk was moved/edited by hand in Proxmox.
+    # The disk was moved to desktop-lagring by hand in Proxmox (synced 2026-11-06).
+    # discard=on (2026-11-07) lets fstrim inside Talos return freed blocks to the
+    # qcow2 file, which lives on the desktop host's root filesystem.
     boot_datastore_id = "desktop-lagring"
     boot_file_format  = "qcow2"
-    boot_discard      = "ignore"
+    boot_discard      = "on"
     ip                = "192.168.1.211"
     vm_id             = 8002
     cpu               = 6
@@ -52,10 +54,12 @@ nodes_config = {
     host_node          = "desktop"
     machine_type       = "worker"
     boot_disk_size_gib = 20
-    # Synced to the live VM 2026-11-06: the disk was moved/edited by hand in Proxmox.
+    # The disk was moved to desktop-lagring by hand in Proxmox (synced 2026-11-06).
+    # discard=on (2026-11-07) lets fstrim inside Talos return freed blocks to the
+    # qcow2 file, which lives on the desktop host's root filesystem.
     boot_datastore_id = "desktop-lagring"
     boot_file_format  = "qcow2"
-    boot_discard      = "ignore"
+    boot_discard      = "on"
     ip                = "192.168.1.212" # IP för arbetarnoden 2
     vm_id             = 8003
     cpu               = 4

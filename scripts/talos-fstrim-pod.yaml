@@ -1,0 +1,25 @@
+# One-off fstrim of a Talos node's EPHEMERAL volume (/var).
+# Talos mounts /var without `discard` and runs no periodic trim, so blocks freed
+# by image GC and log rotation stay allocated in the Proxmox disk until this runs.
+# Only useful when the VM's boot disk has discard=on (tfvars `boot_discard`).
+#
+#   (Get-Content scripts/talos-fstrim-pod.yaml) -replace 'NODE','worker-01' | kubectl apply -f -
+#   kubectl -n kube-system logs fstrim-worker-01; kubectl -n kube-system delete pod fstrim-worker-01
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fstrim-NODE
+  namespace: kube-system
+spec:
+  nodeName: NODE
+  restartPolicy: Never
+  tolerations: [{operator: Exists}]
+  containers:
+    - name: fstrim
+      image: alpine:3.24.4@sha256:93b41ef40b1677fce8fcc64ff4af09daddfacf5040afde618bc46c1e2d1cc7d4
+      command: ["sh", "-c", "df -h /host/var | tail -1; fstrim -v /host/var"]
+      securityContext: {privileged: true}
+      volumeMounts:
+        - {name: var, mountPath: /host/var}
+  volumes:
+    - {name: var, hostPath: {path: /var}}
