@@ -10,6 +10,9 @@ metadata:
     # aborts on a detached volume, so keep it out of the groups that trim.
     recurring-job.longhorn.io/source: enabled
     recurring-job-group.longhorn.io/cold: enabled
+    # Longhorn copies PVC labels to the volume but never removes one, so the old
+    # group must be switched off explicitly (only "enabled" counts).
+    recurring-job-group.longhorn.io/default: disabled
 spec:
   accessModes: ["ReadWriteOnce"]
   storageClassName: longhorn
