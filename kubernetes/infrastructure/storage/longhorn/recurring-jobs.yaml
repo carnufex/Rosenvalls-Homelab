@@ -3,6 +3,8 @@
 #   default     app config and data: 2 local snapshots, 7 daily backups to host1, weekly trim
 #   cnpg        CloudNativePG data+WAL: weekly trim only, backed up by nightly pg_dump CronJobs
 #   disposable  Prometheus TSDB, Loki: weekly trim only, never snapshotted or backed up
+#   cold        volumes that are never mounted (cold copies): no jobs. filesystem-trim
+#               needs a mounted filesystem and aborts the whole run on a detached volume.
 # Seven local snapshots of churny volumes pinned overwritten blocks until a 10 GiB
 # volume used 22 GiB of node disk; off-node backups replace the long local history.
 apiVersion: longhorn.io/v1beta2

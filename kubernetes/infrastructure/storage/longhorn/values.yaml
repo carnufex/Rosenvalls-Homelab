@@ -102,6 +102,9 @@ defaultSettings:
   orphanResourceAutoDeletion: instance
   orphanResourceAutoDeletionGracePeriod: 300
   replicaSoftAntiAffinity: false
+  # A deleted snapshot that is the volume head's parent is only marked removed;
+  # let the weekly filesystem-trim purge it instead of pinning its blocks forever.
+  removeSnapshotsDuringFilesystemTrim: true
   concurrentAutomaticEngineUpgradePerNodeLimit: 3
   allowVolumeCreationWithDegradedAvailability: false
 

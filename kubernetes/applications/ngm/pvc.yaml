@@ -5,6 +5,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: ngm-data
   namespace: ngm
+  labels:
+    # Cold copy, never mounted since 2026-08-28: Longhorn's filesystem-trim job
+    # aborts on a detached volume, so keep it out of the groups that trim.
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/cold: enabled
 spec:
   accessModes: ["ReadWriteOnce"]
   storageClassName: longhorn

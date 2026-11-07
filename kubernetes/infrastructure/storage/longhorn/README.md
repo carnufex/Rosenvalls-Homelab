@@ -40,6 +40,7 @@ directly on the Longhorn volume; volumes without any recurring-job label are `de
 | `default` | app config and data | snapshot 02:30 keep 2, backup 03:00 keep 7, trim Sun 04:00 |
 | `cnpg` | CloudNativePG data + WAL PVCs (`spec.inheritedMetadata` on each Cluster) | trim only |
 | `disposable` | Prometheus TSDB, Loki | trim only |
+| `cold` | volumes that are never mounted (`ngm/ngm-data` cold copy) | none |
 
 - `BackupTarget/default` is `nfs://192.168.1.230:/srv/nfs/backup/longhorn`: host1's 8 TB
   `lagring` disk, exported by the Proxmox host (`scripts/configure-host1-backup-nfs.ps1`).
@@ -53,7 +54,14 @@ directly on the Longhorn volume; volumes without any recurring-job label are `de
   (`db-dump.yaml`) to `/srv/nfs/backup/db-dumps/<namespace>` (14 days); ngm dumps to OneDrive.
   CNPG only applies `inheritedMetadata` to new PVCs; existing PVCs were labelled by hand.
 - Moving a volume to another group leaves the old group's snapshots behind (no retention
-  applies any more); delete them by hand.
+  applies any more); delete them by hand. The same applies to the `system-backup-*`
+  snapshots a Longhorn SystemBackup takes before an upgrade: nothing ever removes them.
+- `weekly-filesystem-trim` aborts the whole run (`Action [trimFilesystem] not available`)
+  on the first detached volume in its groups, so the volumes after it are never trimmed.
+  A PVC that is kept but not mounted belongs in `cold`. Check with
+  `kubectl -n longhorn-system get volumes.longhorn.io | grep detached`.
+- `removeSnapshotsDuringFilesystemTrim` is on: a snapshot deleted while it is the volume
+  head's parent is only marked removed, and the weekly trim then purges it.
 - Disposable volumes and multi-instance CNPG volumes run with `numberOfReplicas: 1`. Volumes
   created before that class existed were patched on the Longhorn volume directly.
 
