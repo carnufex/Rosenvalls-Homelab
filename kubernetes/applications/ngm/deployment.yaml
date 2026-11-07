@@ -1,8 +1,8 @@
 ﻿# NGM (träna.rosenvall.se) — Next.js 15 standalone, Postgres via CNPG (database.yaml).
 # Single replica + Recreate is fine for the test environment; the app itself is
 # stateless since the 2026-08-28 Postgres migration.
-# Image is built locally and pushed to the self-hosted registry (see
-# NextGenerationMe/web/README.md). Pinned by sha tag; bump to deploy.
+# Image is built and pushed by NGM's CI (.github/workflows/ci.yml), which also
+# bumps this pin and the one in cronjob-polar-sync.yaml (sha tag + digest).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
