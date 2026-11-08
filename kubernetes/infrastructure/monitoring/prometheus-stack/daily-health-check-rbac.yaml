@@ -7,7 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "-5"
 ---
 # Cluster-wide READ only: the morning summary needs to see state across the
-# whole cluster (nodes, pods, ArgoCD apps, ExternalSecrets, Longhorn volumes).
+# whole cluster (nodes, pods, ArgoCD apps, ExternalSecrets, Longhorn volumes/replicas).
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -25,7 +25,7 @@ rules:
     resources: ["certificates"]
     verbs: ["get", "list"]
   - apiGroups: ["longhorn.io"]
-    resources: ["volumes", "nodes"]
+    resources: ["volumes", "nodes", "replicas"]
     verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

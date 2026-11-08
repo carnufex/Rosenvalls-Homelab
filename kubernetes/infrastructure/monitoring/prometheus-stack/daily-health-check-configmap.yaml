@@ -31,8 +31,12 @@ data:
     # transient OutOfSync/Progressing is normal during syncs. Real workload
     # impact still surfaces via the pod/Longhorn/alert checks below.
 
-    # --- External secrets (READY is the last column) ---
-    bad_es="$(kubectl get externalsecret -A --no-headers 2>/dev/null | awk '$NF!="True"{print $1"/"$2}')"
+    # --- External secrets (Ready condition; never parse table columns —
+    # ESO added a trailing LAST SYNC column and broke the old $NF check) ---
+    bad_es="$(kubectl get externalsecret -A -o json 2>/dev/null \
+      | jq -r '.items[]
+        | select(([.status.conditions[]? | select(.type=="Ready" and .status=="True")] | length) == 0)
+        | .metadata.namespace + "/" + .metadata.name')"
     [ -n "${bad_es}" ] && note ":red_circle: ExternalSecrets not synced: $(echo "${bad_es}" | paste -sd', ' -)"
 
     # --- Longhorn volumes (ignore detached/unknown) ---
@@ -40,6 +44,14 @@ data:
       -o custom-columns=N:.metadata.name,R:.status.robustness --no-headers 2>/dev/null \
       | awk '$2=="degraded" || $2=="faulted" {print $1" ("$2")"}')"
     [ -n "${bad_vols}" ] && note ":red_circle: Longhorn volumes: $(echo "${bad_vols}" | paste -sd', ' -)"
+
+    # --- Longhorn replicas in error, per node (a node whose rebuilds keep
+    # failing — e.g. engine binary missing after a disk swap — while volumes
+    # still look healthy on their other replica) ---
+    err_reps="$(kubectl get replicas.longhorn.io -n longhorn-system -o json 2>/dev/null \
+      | jq -r '[.items[] | select(.status.currentState=="error") | .spec.nodeID]
+        | group_by(.) | map("\(.[0]) (\(length))") | join(", ")')"
+    [ -n "${err_reps}" ] && note ":red_circle: Longhorn replicas in error: ${err_reps}"
 
     # --- Failing pods ---
     bad_pods="$(kubectl get pods -A --no-headers 2>/dev/null \

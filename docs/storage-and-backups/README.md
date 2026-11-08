@@ -33,6 +33,15 @@ Longhorn replica disks. Do not place multiple Longhorn VM disks on one of those
 physical disks and count them as independent replicas. Add dedicated SSD-backed
 data disks on workers on different Proxmox hosts when expanding Longhorn.
 
+**After mounting a new data disk over `/var/lib/longhorn` on a running node**,
+delete that node's `engine-image-ei-*` pod (and check it with
+`kubectl exec <instance-manager-pod> -- ls /host/var/lib/longhorn/engine-binaries/`).
+The engine-image pod's hostPath still points at the directory *under* the new
+mount, so the engine binary never lands on the new disk. Every replica rebuild to
+that node then fails with `stat .../engine-binaries/...longhorn: no such file`,
+longhorn-manager spins at its CPU limit retrying, snapshots time out and the
+nightly `default-daily-backup` job fails. Happened on worker-07 2026-11-06 → 08.
+
 Loki retains seven days of logs. Prometheus retains three days/20 GB and uses a
 single-replica observability StorageClass. Observability data is disposable and
 must not consume critical replica rebuild capacity.
