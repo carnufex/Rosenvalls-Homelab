@@ -148,6 +148,12 @@ This verifies the WireGuard interface, policy routing, external IP through the t
 ## Access Model
 
 - Media browser UIs are internal by default and attached directly to `gateway/internal`.
+- Sonarr and Radarr run **without a login on purpose** (owner's choice, 2026-11-09):
+  `<AuthenticationMethod>External</AuthenticationMethod>` in each `/config/config.xml`
+  (on the config PVC, not in Git). Only acceptable while their HTTPRoutes stay on
+  `gateway/internal` — before publishing either one on `gateway/external`, switch it
+  back to `Forms` (Sonarr user `crille`). To reset a forgotten password: set
+  `External`, restart, set the password under Settings → General → Security, set `Forms`.
 - Included internal hostnames:
   - `https://radarr.rosenvall.local`
   - `https://sonarr.rosenvall.local`
