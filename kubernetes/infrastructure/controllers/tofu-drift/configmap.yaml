@@ -16,7 +16,8 @@ data:
     #!/bin/sh
     # Runs `tofu plan` for tofu/ on master and reports drift to Slack.
     # Read-only: -lock=false, read-only Proxmox token, never applies, never
-    # writes state. Exit 0 = plan ran (drift or not), 1 = plan could not run.
+    # writes state. Exit 0 = plan ran (drift or not) or provider downloads were
+    # unreachable for the first run in a row; 1 = plan could not run.
     set -u
 
     TOFU_VERSION=1.10.7
@@ -46,6 +47,10 @@ data:
         -H 'Content-Type: application/merge-patch+json' -X PATCH --data "${body}" "${API}" \
         || log "WARN could not store status"
     }
+    kset_unavail() { # $1 consecutive runs where provider downloads were unreachable
+      body="$(jq -n --arg u "$1" '{data:{unavailableRuns:$u}}')"
+      curl -fsS -o /dev/null --cacert "${SA}/ca.crt" -H "Authorization: Bearer $(cat ${SA}/token)"         -H 'Content-Type: application/merge-patch+json' -X PATCH --data "${body}" "${API}"         || log "WARN could not store unavailableRuns"
+    }
     status="$(kget 2>/dev/null || echo '{}')"
     prev_digest="$(printf '%s' "${status}" | jq -r '.data.digest // "unknown"')"
     prev_posted="$(printf '%s' "${status}" | jq -r '.data.postedAt // "0"')"
@@ -65,21 +70,43 @@ data:
     cd "${WORK}/repo/tofu"
 
     rc=1
-    for attempt in 1 2 3; do
+    init_failed=false
+    for attempt in 1 2 3 4 5; do
       if tofu init -input=false -no-color -lockfile=readonly > "${WORK}/init.txt" 2>&1; then
+        init_failed=false
         # The generated access files only exist on the operator's machine; a fresh
         # clone would always see them as "will be created".
         tofu plan -lock=false -input=false -no-color -detailed-exitcode           -exclude=local_file.kubeconfig -exclude=local_file.talosconfig > "${WORK}/plan.txt" 2>&1
         rc=$?
       else
+        init_failed=true
         cp "${WORK}/init.txt" "${WORK}/plan.txt"; rc=1
       fi
-      # factory.talos.dev / Proxmox occasionally fail a single request; retry those.
+      # factory.talos.dev / Proxmox / GitHub release downloads occasionally fail
+      # for minutes at a time; back off 1, 2, 3, 4 min (10 min total).
       [ "${rc}" -ne 1 ] && break
-      [ "${attempt}" -eq 3 ] && break
-      log "attempt ${attempt} failed (rc=1), retrying in 60s"
-      sleep 60
+      [ "${attempt}" -eq 5 ] && break
+      log "attempt ${attempt} failed (rc=1, init_failed=${init_failed}), retrying in $(( 60 * attempt ))s"
+      sleep $(( 60 * attempt ))
     done
+
+    # Provider downloads that fail with a gateway/network error are an upstream
+    # outage, not a broken plan. Stay silent (and exit 0, so KubeJobFailed does
+    # not fire) the first time; report from the second run in a row.
+    prev_unavail="$(printf '%s' "${status}" | jq -r '.data.unavailableRuns // "0"')"
+    unavail_runs=0
+    if [ "${rc}" -eq 1 ] && [ "${init_failed}" = true ]        && grep -qiE 'Gateway Timeout|50[234] |timeout|connection reset|no such host|could not connect|failed to retrieve' "${WORK}/init.txt"; then
+      unavail_runs=$(( prev_unavail + 1 ))
+      kset_unavail "${unavail_runs}"
+      if [ "${unavail_runs}" -lt 2 ] && [ "${FORCE_REPORT}" != true ]; then
+        log "result=unavailable commit=${commit} run=${unavail_runs} - provider registry/GitHub unreachable, silent until it repeats"
+        tail -20 "${WORK}/init.txt"
+        exit 0
+      fi
+      log "provider downloads unreachable ${unavail_runs} runs in a row - reporting"
+    elif [ "${prev_unavail}" != 0 ]; then
+      kset_unavail 0
+    fi
 
     summary="${WORK}/summary.txt"
     case "${rc}" in
@@ -113,7 +140,7 @@ data:
       clean) what="drift cleared"; case "${prev_digest}" in error:*) what="drift check runs again";; esac
              msg="$(printf ':white_check_mark: *OpenTofu %s* — `tofu plan` on master@%s reports no changes.\n_%s_' "${what}" "${commit}" "${when}")" ;;
       drift) msg="$(printf ':warning: *OpenTofu drift* — Proxmox/Talos no longer match master@%s\n_%s_ · %s\n\n%s\n\nReview locally with `.\\scripts\\tofu.ps1 plan` (Rosenvalls-Homelab). Either the live change belongs in Git, or apply a saved plan to undo it.' "${commit}" "${when}" "${planline}" "${lines}")" ;;
-      *)     msg="$(printf ':rotating_light: *OpenTofu drift check could not run* (master@%s)\n_%s_\n```%s```\nLogs: `kubectl -n tofu-drift logs job/<latest>`' "${commit}" "${when}" "$(head -15 "${summary}")")" ;;
+      *)     msg="$(printf ':rotating_light: *OpenTofu drift check could not run* (master@%s)\n_%s_%s\n```%s```\nLogs: `kubectl -n tofu-drift logs job/<latest>`' "${commit}" "${when}" "$([ "${unavail_runs}" -ge 2 ] && echo " · provider downloads unreachable ${unavail_runs} runs in a row")" "$(head -15 "${summary}")")" ;;
     esac
 
     if [ "${post}" = true ]; then

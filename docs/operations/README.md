@@ -219,7 +219,11 @@ Always go through the wrapper:
 runs `tofu plan -lock=false -detailed-exitcode` on `master` every day at 07:15
 and posts to `#homelab-alerts` when drift appears, changes, is still there after
 7 days, or clears. Silent otherwise. If the plan cannot run, it posts the error
-and the Job fails (`KubeJobFailed`).
+and the Job fails (`KubeJobFailed`). Failed runs are retried 5 times with 1–4 min
+backoff. When `tofu init` cannot download providers (GitHub/registry 5xx or
+timeouts) the first run is silent and exits 0 (log line
+`result=unavailable ... run=1`); it only reports when that happens two runs in a
+row (`unavailableRuns` in the status ConfigMap).
 
 - Proxmox access: token `root@pam!tofu-drift` (Bitwarden
   `proxmox-tofu-drift-token`), role `TofuDriftReader` = the `PVEAuditor`
