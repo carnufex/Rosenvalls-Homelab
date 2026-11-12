@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: site
-          image: registry.rosenvall.se/carnufex/mypassion:sha-b2e6ed2@sha256:f4dfc39145ca5c0315cf52a77bf7cd54a9500b4d36428cdf1c0041f596b0ed37
+          image: registry.rosenvall.se/carnufex/mypassion:sha-6894431@sha256:21dd1e607ea6fbe660e7110d797ecc7dc13d58a22b20008180002d0803d48034
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
