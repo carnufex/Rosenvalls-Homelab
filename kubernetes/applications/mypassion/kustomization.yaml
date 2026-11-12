@@ -1,4 +1,4 @@
-﻿apiVersion: kustomize.config.k8s.io/v1beta1
+apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 # mypassion: the talk "Att bygga med agenter / Building with agents" as a static site at mypassion.rosenvall.se,
@@ -9,9 +9,7 @@ resources:
   - networkpolicy.yaml
   - deployment.yaml
   - service.yaml
-  # Authentik SSO + public route: enabled once the Bitwarden entries mypassion-oauth2-* exist
-  # (carnufex/mypassion scripts/create-oauth-secrets.ps1) and the Authentik blueprint apps-mypassion.yaml is loaded.
-  # - oauth2-proxy-externalsecret.yaml
-  # - oauth2-proxy-deployment.yaml
-  # - oauth2-proxy-service.yaml
-  # - httproute.yaml # mypassion.rosenvall.se -> oauth2-proxy -> mypassion
+  - oauth2-proxy-externalsecret.yaml
+  - oauth2-proxy-deployment.yaml
+  - oauth2-proxy-service.yaml
+  - httproute.yaml # mypassion.rosenvall.se -> oauth2-proxy -> mypassion

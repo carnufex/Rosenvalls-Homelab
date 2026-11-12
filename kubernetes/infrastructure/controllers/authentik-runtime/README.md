@@ -55,6 +55,7 @@ Required keys:
 - `PLEX_CLIENT_SECRET`
 - `CMDB_DEMO_PASSWORD` (the three synthetic cmdb demo users, `cmdb-demo-*`)
 - `CMDB_AGENT_TOKEN` (app password of the service account `cmdb-agent-demo`)
+- `MYPASSION_CLIENT_ID`, `MYPASSION_CLIENT_SECRET` (oauth2-proxy in front of `mypassion.rosenvall.se`; Bitwarden entries by name)
 
 ## Authentik Proxy Apps
 
