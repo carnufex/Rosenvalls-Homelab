@@ -1,0 +1,50 @@
+# The deck site: static nginx (nginx-unprivileged) serving the built viewer, slides and films. Only reachable through
+# oauth2-proxy (networkpolicy.yaml). Source and image build: https://github.com/carnufex/mypassion — its deploy.ps1
+# rewrites the image pin below; rollback = revert that commit.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mypassion
+  namespace: mypassion
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mypassion
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mypassion
+    spec:
+      imagePullSecrets:
+        - name: mypassion-registry
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: site
+          image: registry.rosenvall.se/carnufex/mypassion:sha-53a954b@sha256:97527ba821f045bfd5a2bf277d72cc2c02de40aa03824dcb5f77812cb75e7fb5
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe: { httpGet: { path: /healthz, port: http }, initialDelaySeconds: 2, periodSeconds: 10 }
+          livenessProbe: { httpGet: { path: /healthz, port: http }, initialDelaySeconds: 5, periodSeconds: 30 }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { cpu: 500m, memory: 128Mi }
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 64Mi }
