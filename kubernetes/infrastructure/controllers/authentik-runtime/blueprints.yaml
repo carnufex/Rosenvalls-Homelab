@@ -687,6 +687,9 @@ data:
           name: Grafana Admins
         attrs:
           name: Grafana Admins
+          # The owner: sign-in to Grafana (traces in Tempo, logs, dashboards). Declared here, so the list is the whole membership.
+          users:
+            - !Find [authentik_core.user, [username, "christopher.rosenvall@gmail.com"]]
       - id: grafana-editor-group
         model: authentik_core.group
         identifiers:
