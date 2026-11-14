@@ -13,12 +13,12 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: lots
+  # OpenMetrics, so histogram buckets keep their exemplars: a slow bucket links to a trace in Tempo.
+  scrapeProtocols: [OpenMetricsText1.0.0, PrometheusText0.0.4]
   endpoints:
     - port: metrics
       path: /metrics
       interval: 30s
-      # OpenMetrics, so histogram buckets keep their exemplars: a slow bucket links to a trace in Tempo.
-      scrapeProtocols: [OpenMetricsText1.0.0, PrometheusText0.0.4]
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
