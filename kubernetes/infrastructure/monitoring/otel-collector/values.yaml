@@ -35,26 +35,13 @@ alternateConfig:
       limit_percentage: 80
       spike_limit_percentage: 25
     batch: {}
-    tail_sampling:
-      decision_wait: 10s
-      policies:
-        - name: errors
-          type: status_code
-          status_code:
-            status_codes: [ERROR]
-        - name: policy-denied-or-approval
-          type: string_attribute
-          string_attribute:
-            key: lots.policy.decision
-            values: [Deny, RequireApproval]
-        - name: slow
-          type: latency
-          latency:
-            threshold_ms: 10000
-        - name: everything-else
-          type: probabilistic
-          probabilistic:
-            sampling_percentage: 25
+    # Every trace is kept except the probes': the homelab's traffic is small, and tail sampling decided on an agent run before
+    # its spans had arrived (a run takes longer than the decision window), so the slow runs were the ones dropped.
+    filter/probes:
+      error_mode: ignore
+      traces:
+        span:
+          - 'IsMatch(attributes["url.path"], "^/(health|healthz|ready|readyz|livez|metrics)(/.*)?$")'
   exporters:
     otlp/tempo:
       endpoint: tempo:4317
@@ -66,7 +53,7 @@ alternateConfig:
     pipelines:
       traces:
         receivers: [otlp]
-        processors: [memory_limiter, tail_sampling, batch]
+        processors: [memory_limiter, filter/probes, batch]
         exporters: [otlp/tempo]
       logs:
         receivers: [otlp]

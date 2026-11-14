@@ -74,8 +74,7 @@ models `8096`/`8097`.
 - Metrics: `/metrics` on port `9090` (`Metrics__Port`), scraped through `monitoring.yaml` (ServiceMonitor), alert rules
   `PrometheusRule/lots` (the Lots chart's rules), dashboard "Lots" in Grafana (`grafana/lots-dashboard.json`, a copy of the Lots
   repo's `deploy/grafana/lots-dashboard.json`: copy it again when that one changes).
-- Traces: OTLP to `otel-collector.monitoring:4317` (tail sampling: every error, denial, approval and trace over 10 s, a quarter of
-  the rest), stored a week in Tempo. The run log's **Trace** link opens the trace in Grafana Explore (`Telemetry__TraceUrlTemplate`,
+- Traces: OTLP to `otel-collector.monitoring:4317` (every trace but the health probes'), stored a week in Tempo. The run log's **Trace** link opens the trace in Grafana Explore (`Telemetry__TraceUrlTemplate`,
   `grafana.rosenvall.local`, LAN only); a span links to its log lines in Loki and a log line's `trace_id` back to the trace.
 
 ## Troubleshooting
