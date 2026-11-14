@@ -12,9 +12,20 @@ resources:
   - toolpack.yaml
   - networkpolicy.yaml
   - httproute.yaml
+  - monitoring.yaml
 
 # School knowledge for Lots (knowledge/skolverket.py writes the files): one key per file, mounted by subPath in app.yaml.
 configMapGenerator:
+  # The Lots Grafana dashboard (a copy of carnufex/Lots deploy/grafana/lots-dashboard.json); Grafana's sidecar finds it in any
+  # namespace by the grafana_dashboard label.
+  - name: lots-grafana-dashboard
+    namespace: lots
+    files:
+      - lots-dashboard.json=grafana/lots-dashboard.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
   - name: lots-knowledge-skola
     namespace: lots
     files:

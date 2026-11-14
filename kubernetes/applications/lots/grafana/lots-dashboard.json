@@ -1,0 +1,954 @@
+{
+  "title": "Lots",
+  "uid": "lots-shell",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "tags": [
+    "lots"
+  ],
+  "annotations": {
+    "list": [
+      {
+        "name": "Knowledge index switch",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "enable": true,
+        "iconColor": "purple",
+        "expr": "max by (embedding, reranker, chunker) (lots_knowledge_index) unless max by (embedding, reranker, chunker) (max_over_time(lots_knowledge_index[1h] offset 2m))",
+        "step": "1m",
+        "titleFormat": "Knowledge index switched",
+        "textFormat": "{{embedding}} · reranker {{reranker}} · chunker {{chunker}}"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "label": "Prometheus"
+      },
+      {
+        "name": "job",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "query": "label_values(lots_runs_started_total, job)",
+        "includeAll": true,
+        "multi": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Runs/min",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(lots_runs_started_total[5m])) * 60",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Failed runs (1h)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(lots_runs_finished_total{status=\"Failed\"}[1h]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Active runs",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum(lots_runs_active)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Stuck runs",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "max(lots_runs_stuck)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Pending approvals",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "max(lots_approvals_pending)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Oldest approval",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "max(lots_approvals_oldest_pending_age_seconds)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Runs by final status",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(lots_runs_finished_total[5m]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Run duration p50 / p95",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(lots_run_duration_seconds_bucket[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(lots_run_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Model latency p95 by model",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, model) (rate(lots_model_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{model}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Tokens/min by model",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (model, kind) (rate(lots_model_tokens_total[5m])) * 60",
+          "legendFormat": "{{model}} {{kind}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Prompt cache hit ratio by model",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (model) (rate(lots_model_tokens_total{kind=\"cached\"}[5m])) / sum by (model) (rate(lots_model_tokens_total{kind=\"prompt\"}[5m]))",
+          "legendFormat": "{{model}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Time to first token by model",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le, model) (rate(lots_model_first_token_seconds_bucket[5m])))",
+          "legendFormat": "p50 {{model}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, model) (rate(lots_model_first_token_seconds_bucket[5m])))",
+          "legendFormat": "p95 {{model}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Output rate by model",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le, model) (rate(lots_model_output_rate_bucket[5m])))",
+          "legendFormat": "p50 {{model}} tok/s",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.05, sum by (le, model) (rate(lots_model_output_rate_bucket[5m])))",
+          "legendFormat": "slowest 5% {{model}} tok/s",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Time between tokens by model",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le, model) (rate(lots_model_inter_token_seconds_bucket[5m])))",
+          "legendFormat": "p50 {{model}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, model) (rate(lots_model_inter_token_seconds_bucket[5m])))",
+          "legendFormat": "p95 {{model}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Model errors and fallbacks",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (model, endpoint, outcome) (rate(lots_model_calls_total[5m]))",
+          "legendFormat": "{{model}}@{{endpoint}} {{outcome}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Tool calls by decision",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 36,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (tool, decision) (rate(lots_tool_calls_total[5m]))",
+          "legendFormat": "{{tool}} {{decision}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Tool latency p95",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, tool) (rate(lots_tool_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{tool}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Approvals",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 44,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (event) (increase(lots_approvals_total[1h]))",
+          "legendFormat": "{{event}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Speech latency p95 (stt, tts first audio)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 52,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, direction) (rate(lots_speech_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{direction}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Knowledge search p95",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 52,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(lots_knowledge_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "state-timeline",
+      "title": "Knowledge index in use",
+      "description": "Which knowledge index search used when: embedding index, reranker and chunker version (lots_knowledge_index). A new row is an index switch; the dashboard marks it on every graph.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 108,
+        "w": 24,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "max by (embedding, reranker, chunker) (lots_knowledge_index)",
+          "legendFormat": "{{embedding}} · reranker {{reranker}} · chunker {{chunker}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showValue": "never",
+        "mergeValues": true
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Knowledge searches without a good hit, by source",
+      "description": "Of the searches in answered runs that got passages from a source, the share in which the answer cited none of them (lots_knowledge_source_searches, cited=false). Compare each source before and after an index switch.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 113,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (source) (rate(lots_knowledge_source_searches_total{cited=\"false\"}[1h])) / sum by (source) (rate(lots_knowledge_source_searches_total[1h]))",
+          "legendFormat": "{{source}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Knowledge searches that found nothing, by source",
+      "description": "Searches by the agent that found nothing per hour (what retrieval_misses lists), by the one source searched; * is a search over several sources.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 113,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (source) (increase(lots_knowledge_misses_total[1h]))",
+          "legendFormat": "{{source}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Knowledge citation rate by source",
+      "description": "Share of the passages a source gave answered runs that the answer cited (lots_knowledge_passages). my-* is every personal source together.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 121,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (source) (rate(lots_knowledge_passages_total{cited=\"true\"}[1h])) / sum by (source) (rate(lots_knowledge_passages_total[1h]))",
+          "legendFormat": "{{source}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Thumbs down per day, by knowledge source",
+      "description": "Answers rated down in the last day, counted once per knowledge source the answer cited (or was given, when it cited none) (lots_knowledge_ratings).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 121,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (source) (increase(lots_knowledge_ratings_total{rating=\"down\"}[1d]))",
+          "legendFormat": "{{source}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP requests by status",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 60,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$job\"}[5m]))",
+          "legendFormat": "{{http_response_status_code}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Undelivered notifications",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 60,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "max(lots_notifications_undelivered)",
+          "legendFormat": "outbox",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Guard decisions",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 68,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (guard, verdict, mode) (rate(lots_guard_verdicts_total{verdict!=\"abstain\"}[5m]))",
+          "legendFormat": "{{guard}} {{verdict}} ({{mode}})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Guard latency p95",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 68,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, guard) (rate(lots_guard_latency_seconds_bucket[10m])))",
+          "legendFormat": "{{guard}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Guards that could not decide",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 76,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (guard) (increase(lots_guard_failures_total[15m]))",
+          "legendFormat": "{{guard}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Use per feature (30 days)",
+      "description": "Use of each feature over the last 30 days, least used first: requests per feature slice (the route template mapped to its slice in this query), and for what is not an endpoint, runs per channel, guard verdicts, speech calls and knowledge searches. A 0 is a candidate for the removal review in docs/operations.md. Needs 30 days of Prometheus retention.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 84,
+        "w": 24,
+        "h": 20
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Uses (30 days)",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "\nlabel_replace(\n  sum by (feature) (\n    label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(increase(http_server_request_duration_seconds_count{job=~\"$job\", http_route!=\"\", http_route!~\"/?(metrics|health|health/ready)\"}[30d]), \"feature\", \"$1\", \"http_route\", \"/?([^/]+).*\"),\n    \"feature\", \"channels\", \"http_route\", \"/?v1/.*\"),\n    \"feature\", \"health\", \"http_route\", \"/?status\"),\n    \"feature\", \"introspection\", \"http_route\", \"/?mcp/.*\"),\n    \"feature\", \"me\", \"http_route\", \"/?people\"),\n    \"feature\", \"runs\", \"http_route\", \"/?route\"),\n    \"feature\", \"schedules\", \"http_route\", \"/?(triggers/.*|admin/schedules.*)\"),\n    \"feature\", \"tests\", \"http_route\", \"/?test-suites.*\"),\n    \"feature\", \"toolcalls\", \"http_route\", \"/?tool-calls.*\"),\n    \"feature\", \"voice\", \"http_route\", \"/?(admin/voices.*|runs/[^/]+/speak.*)\"),\n    \"feature\", \"secrets\", \"http_route\", \"/?admin/v1/(secrets|secret-stores).*\"),\n    \"feature\", \"security\", \"http_route\", \"/?(admin/api-tokens.*|me/tokens.*)\"),\n    \"feature\", \"usage\", \"http_route\", \"/?(admin/v1/quotas.*|me/quota)\"),\n    \"feature\", \"privacy\", \"http_route\", \"/?(admin/v1/data-report|me/data|me/export)\"),\n    \"feature\", \"admin\", \"http_route\", \"/?me/workspaces\"),\n    \"feature\", \"memory\", \"http_route\", \"/?me/memories.*\"),\n    \"feature\", \"settings\", \"http_route\", \"/?me/(away|preferences|settings|tools|voice)\"),\n    \"feature\", \"feedback\", \"http_route\", \"/?runs/[^/]+/feedback\"),\n    \"feature\", \"groups\", \"http_route\", \"/?conversations/[^/]+/organise\")\n  )\n  or label_replace(vector(0), \"feature\", \"admin\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"approvals\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"attachments\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"audit\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"channels\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"config\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"conversations\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"feedback\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"groups\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"health\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"insights\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"integrations\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"introspection\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"knowledge\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"me\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"meetings\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"memory\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"models\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"playbooks\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"privacy\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"runs\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"schedules\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"secrets\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"security\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"settings\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"tests\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"toolcalls\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"usage\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"voice\", \"\", \"\")\n, \"source\", \"requests: http_server_request_duration_seconds (http_route)\", \"\", \"\")\nor\nlabel_replace(\n  sum by (feature) (label_replace(increase(lots_run_outcomes_total{job=~\"$job\"}[30d]), \"feature\", \"runs via $1\", \"channel\", \"(.+)\"))\n  or label_replace(vector(0), \"feature\", \"runs via web\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"runs via api\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"runs via schedule\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"runs via webhook\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"runs via slack\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"runs via teams\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"runs via email\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"runs via voice\", \"\", \"\")\n, \"source\", \"runs: lots_run_outcomes (channel)\", \"\", \"\")\nor\nlabel_replace(\n  sum by (feature) (label_replace(increase(lots_guard_verdicts_total{job=~\"$job\", verdict!=\"abstain\"}[30d]), \"feature\", \"guard $1\", \"guard\", \"(.+)\"))\n  or sum by (feature) (label_replace(increase(lots_guard_verdicts_total{job=~\"$job\"}[30d]), \"feature\", \"guard $1\", \"guard\", \"(.+)\")) * 0\n, \"source\", \"verdicts other than abstain: lots_guard_verdicts (guard)\", \"\", \"\")\nor\nlabel_replace(\n  sum by (feature) (label_replace(increase(lots_speech_requests_total{job=~\"$job\"}[30d]), \"feature\", \"speech $1\", \"direction\", \"(.+)\"))\n  or label_replace(vector(0), \"feature\", \"speech stt\", \"\", \"\")\n  or label_replace(vector(0), \"feature\", \"speech tts\", \"\", \"\")\n, \"source\", \"calls: lots_speech_requests (direction)\", \"\", \"\")\nor\nlabel_replace(\n  sum by (feature) (label_replace(increase(lots_knowledge_searches_total{job=~\"$job\"}[30d]), \"feature\", \"knowledge search tool\", \"\", \"\"))\n  or label_replace(vector(0), \"feature\", \"knowledge search tool\", \"\", \"\")\n, \"source\", \"searches: lots_knowledge_searches\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "feature": 0,
+              "Value": 1,
+              "source": 2
+            },
+            "renameByName": {
+              "feature": "Feature",
+              "Value": "Uses (30 days)",
+              "source": "Counted from"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

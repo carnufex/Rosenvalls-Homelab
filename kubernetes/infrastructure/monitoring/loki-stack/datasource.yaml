@@ -8,9 +8,21 @@ metadata:
 data:
   loki-datasource.yaml: |-
     apiVersion: 1
+    # Recreated once with a fixed uid, so the Tempo datasource can link a span to its log lines.
+    deleteDatasources:
+      - name: Loki
+        orgId: 1
     datasources:
       - name: Loki
         type: loki
+        uid: loki
         url: http://loki-stack:3100
         access: proxy
         isDefault: false
+        jsonData:
+          # A log line's trace_id (Lots logs it in its JSON lines) opens the trace in Tempo.
+          derivedFields:
+            - name: trace_id
+              matcherRegex: '"trace_id":"(\w+)"'
+              url: '$${__value.raw}'
+              datasourceUid: tempo

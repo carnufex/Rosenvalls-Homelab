@@ -1,0 +1,26 @@
+fullnameOverride: tempo
+tempo:
+  reportingEnabled: false
+  retention: 168h   # a week of traces
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 768Mi
+persistence:
+  enabled: true
+  # Traces are disposable and churn: a single replica, like Prometheus' TSDB.
+  storageClassName: longhorn-observability-single
+  size: 10Gi
+serviceMonitor:
+  enabled: true
+  additionalLabels:
+    release: kube-prometheus-stack

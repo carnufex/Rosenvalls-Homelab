@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Tempo, single binary with local storage: traces from the OpenTelemetry Collector (otel-collector), a week kept.
+# Grafana reads them through the Tempo datasource (datasource.yaml), linked to Loki by trace id.
+resources:
+  - datasource.yaml
+
+helmCharts:
+  - name: tempo
+    repo: https://grafana.github.io/helm-charts
+    version: 1.24.4
+    releaseName: tempo
+    namespace: monitoring
+    valuesFile: values.yaml

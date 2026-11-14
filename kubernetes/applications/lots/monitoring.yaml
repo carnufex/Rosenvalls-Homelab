@@ -1,0 +1,75 @@
+# Prometheus for Lots: /metrics on the metrics port (Metrics__Port in app.yaml; the network policy admits Prometheus only), and the
+# alert rules of the Lots chart's alerts.yaml (charts/lots/templates/alerts.yaml in carnufex/Lots) with its default thresholds.
+# The Grafana dashboard is grafana/lots-dashboard.json, a copy of the Lots repo's deploy/grafana/lots-dashboard.json.
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lots
+  namespace: lots
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lots
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      # OpenMetrics, so histogram buckets keep their exemplars: a slow bucket links to a trace in Tempo.
+      scrapeProtocols: [OpenMetricsText1.0.0, PrometheusText0.0.4]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: lots
+  namespace: lots
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: lots
+      rules:
+        - alert: LotsDown
+          expr: absent(up{namespace="lots", service="lots"} == 1)
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: No Lots shell is answering scrapes.
+        - alert: LotsDependencyDown
+          expr: max by (name, kind) (lots_dependency_up) == 0
+          for: 5m
+          labels: { severity: warning }
+          annotations:
+            summary: "Lots dependency {{ $labels.name }} ({{ $labels.kind }}) is down."
+        - alert: LotsDatabaseDown
+          expr: max(lots_dependency_up{kind="postgres"}) == 0
+          for: 2m
+          labels: { severity: critical }
+          annotations:
+            summary: Lots cannot reach its database.
+        - alert: LotsRunsFailing
+          expr: sum(rate(lots_runs_finished_total{status="Failed"}[15m])) / clamp_min(sum(rate(lots_runs_finished_total[15m])), 1e-9) > 0.2
+          for: 15m
+          labels: { severity: warning }
+          annotations:
+            summary: More than 20 % of Lots runs fail.
+        - alert: LotsStuckRuns
+          expr: max(lots_runs_stuck) > 0
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: Runs are marked running but no worker holds their lease.
+        - alert: LotsModelFailingOver
+          expr: sum by (endpoint, model) (increase(lots_model_failovers_total[30m])) > 3
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "Model {{ $labels.model }} on {{ $labels.endpoint }} keeps failing over: calls wait on it before another model answers."
+        - alert: LotsModelSlow
+          expr: histogram_quantile(0.95, sum by (le) (rate(lots_model_duration_seconds_bucket[10m]))) > 30
+          for: 15m
+          labels: { severity: warning }
+          annotations:
+            summary: Lots model calls are slow (p95 over 30 s).

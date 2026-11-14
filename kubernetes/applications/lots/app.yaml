@@ -22,6 +22,12 @@ data:
   ASPNETCORE_ENVIRONMENT: Production
   HOME: /tmp
   Logging__LogLevel__Microsoft.EntityFrameworkCore: Warning
+  # Observability: /metrics on its own port (9090, scraped by Prometheus through servicemonitor.yaml, never behind the route),
+  # traces over OTLP to the collector in monitoring (tail sampling, then Tempo). The log's "Trace" link opens a run's trace in
+  # Grafana Explore (the shell puts the run's trace id in place of {traceId}).
+  Metrics__Port: "9090"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.monitoring:4317
+  Telemetry__TraceUrlTemplate: https://grafana.rosenvall.local/explore?schemaVersion=1&panes=%7B%22t%22:%7B%22datasource%22:%22tempo%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22datasource%22:%7B%22type%22:%22tempo%22,%22uid%22:%22tempo%22%7D,%22queryType%22:%22traceql%22,%22query%22:%22{traceId}%22%7D%5D,%22range%22:%7B%22from%22:%22now-7d%22,%22to%22:%22now%22%7D%7D%7D
   # Authentik application "lots" (blueprint apps-lots.yaml): public PKCE client, groups lots-* are the roles.
   Auth__Mode: Oidc
   Auth__Oidc__Authority: https://authentik.rosenvall.se/application/o/lots/
@@ -375,6 +381,8 @@ kind: Service
 metadata:
   name: lots
   namespace: lots
+  labels:
+    app.kubernetes.io/name: lots
 spec:
   selector:
     app.kubernetes.io/name: lots
@@ -382,6 +390,10 @@ spec:
     - name: http
       port: 8080
       targetPort: http
+    # /metrics only (Metrics__Port): the HTTPRoute points at http, so this port is never public.
+    - name: metrics
+      port: 9090
+      targetPort: metrics
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -448,6 +460,8 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+            - containerPort: 9090
+              name: metrics
           envFrom:
             - configMapRef:
                 name: lots-config

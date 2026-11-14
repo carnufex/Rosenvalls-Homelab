@@ -44,7 +44,25 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+    # Prometheus scrapes /metrics on the metrics port (servicemonitor.yaml).
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
   egress:
+    # Traces over OTLP to the collector in monitoring (OTEL_EXPORTER_OTLP_ENDPOINT in app.yaml).
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: opentelemetry-collector
+      toPorts:
+        - ports:
+            - port: "4317"
+              protocol: TCP
     - toEndpoints:
         - matchLabels:
             cnpg.io/cluster: lots-postgresql

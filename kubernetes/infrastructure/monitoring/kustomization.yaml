@@ -4,3 +4,5 @@ resources:
   - metrics-server
   - prometheus-stack
   - loki-stack
+  - tempo
+  - otel-collector
