@@ -62,6 +62,36 @@ docker push registry.rosenvall.se/carnufex/lots-shell:sha-<short>
 
 Put the new `tag@sha256:<digest>` into `app.yaml` and push; ArgoCD syncs it.
 
+## Incidents demo
+
+A demo of Lots' Incidents (carnufex/Lots `docs/incidents.md`, `docs/demo.md` "The incident path") on synthetic data. Nothing in it
+touches a real system: the "network" is the tool pack's demo pack, a made-up fibre network in Malmö, and the investigation is
+answered by the pack's scripted model, so it is the same every time.
+
+- **Run it:** sign in as an admin, **Incidents > Sources**, source `demo-network`, **Cut a cable**, confirm. The shell asks the tool
+  pack to cut cable MAL-019; the pack sends the alert to `POST /signals/demo-network`; after the 5 s settle time one run investigates
+  it in the `network` context. Follow **See the incidents**: about 12 s after pressing, the incident has a confirmed finding with two
+  pieces of evidence. The button is refused a second time within a minute.
+- **Restore it** (the cable stays cut and the incident open until then; a second drill only adds an occurrence):
+
+  ```bash
+  kubectl -n lots port-forward deploy/lots-toolpack 18080:8080
+  ```
+
+  ```bash
+  curl -X POST http://localhost:18080/demo/reset
+  ```
+
+  The pack restores the cable and sends the alert as resolved, which closes the incident. Restarting the tool pack also restores
+  the cable but sends nothing, so the incident stays open.
+- **Parts:** `Demo__*` on the tool pack (`toolpack.yaml`); the context `network` and the model alias `scripted` (`app.yaml`); the
+  alert source `demo-network` with its drill, the service `malmo-fibre` and the runbook skill (`gitops/incidents-demo.yaml`); the
+  tool pack to shell rule (`networkpolicy.yaml`); the alert source's secret `LOTS_DEMO_SIGNAL_SECRET` (`secrets.yaml`).
+- **Remove it:** delete those parts; the incidents it made stay in the database until Lots' retention removes them.
+- The tool pack image is built by hand (Lots' pipeline publishes only the shell): from a clean checkout of carnufex/Lots,
+  `docker build --platform linux/amd64 -f src/Lots.Mcp.Toolpack/Dockerfile -t registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-<short> .`,
+  push that tag, and pin it here by tag and digest.
+
 ## Network
 
 Default deny (`networkpolicy.yaml`). Ingress only from the Cilium Gateway, and from Prometheus to the metrics port `9090`.

@@ -45,3 +45,4 @@ configMapGenerator:
     files:
       - skola-tests.yaml=gitops/skola-tests.yaml
       - guards.yaml=gitops/guards.yaml
+      - incidents-demo.yaml=gitops/incidents-demo.yaml

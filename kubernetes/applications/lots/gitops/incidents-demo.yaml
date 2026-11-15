@@ -1,0 +1,33 @@
+# The incidents demo (carnufex/Lots docs/demo.md, "The incident path"): applied by the shell itself (GitOps:Path).
+# On Incidents > Sources an admin presses "Cut a cable": the shell asks the tool pack's demo pack to cut cable MAL-019 in its synthetic
+# network (toolpack.yaml); the pack sends the alert to POST /signals/demo-network; five seconds later the gate lets the incident through
+# and one run investigates it in the network context (app.yaml) with the scripted model, ending in a finding with two pieces of evidence.
+# To restore: POST /demo/reset on the tool pack (README.md). Nothing here touches a real system.
+kind: Skill
+name: fibre-cut-runbook
+description: What to check when an alert says a fibre cable lost light, and what a finding about it says.
+contexts: [network]
+body: |
+  1. network_incidents: is the cable listed as cut, since when, and is there planned work that explains it?
+  2. cable_impact for the cable: the circuits on it, their customers and priorities.
+  3. Rule out planned work (a change at the same site and time) and other incidents on other cables.
+  4. Report with report_finding: the cable and what it carries as the cause, the two results as evidence, what you ruled out,
+     and the next step: the field crew to the cable, and the duty manager calls gold customers within 30 minutes.
+---
+kind: Service
+name: malmo-fibre
+profile: network
+match:
+  - { network: malmo, alertname: FibreCut }
+runbooks: [fibre-cut-runbook]
+autonomy: observe
+---
+kind: AlertSource
+name: demo-network
+type: webhook
+secretRef: env:LOTS_DEMO_SIGNAL_SECRET
+identity: { user: svc-network-investigator, roles: [operator] }
+defaultProfile: network
+groupBy: [alertname, cable]
+gate: { minSeverity: warning, settleSeconds: 5, budget: { perDay: 50 } }
+drill: { url: "http://lots-toolpack:8080/demo/fault", label: Cut a cable }

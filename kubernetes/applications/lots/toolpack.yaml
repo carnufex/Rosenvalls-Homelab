@@ -43,7 +43,7 @@ spec:
           emptyDir: {}
       containers:
         - name: toolpack
-          image: registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-b2ba61c@sha256:ea32d1a2ec125a7926c5643e4f86b355171091942ee5f6979b1a0c0b6801b721
+          image: registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-1bf703c@sha256:89968cc0f00f522e8e115ba8c0bb80fc22f92523c00a7c3f330823a4c0032fbb
           ports:
             - containerPort: 8080
               name: http
@@ -62,6 +62,20 @@ spec:
                 secretKeyRef:
                   name: lots-secrets
                   key: LOTS_MCP_TOKEN
+            # The incidents demo (carnufex/Lots docs/demo.md, "The incident path"): the demo pack's synthetic fibre network in Malmö and
+            # its scripted model (served on /v1; the shell's model alias "scripted", app.yaml). POST /demo/fault, the drill "Cut a cable"
+            # on Incidents > Sources, cuts cable MAL-019 and sends its alert to the shell's alert source demo-network
+            # (gitops/incidents-demo.yaml); POST /demo/reset restores it and resolves the alert. Nothing here touches a real system.
+            # To take the demo out: these lines, gitops/incidents-demo.yaml, the network context and the scripted alias in app.yaml,
+            # the two rules in networkpolicy.yaml and LOTS_DEMO_SIGNAL_SECRET in secrets.yaml.
+            - { name: Demo__Enabled, value: "true" }
+            - { name: Demo__Model__Fixture, value: /app/demo/model.json }
+            - { name: Demo__Signals__Url, value: "http://lots:8080/signals/demo-network" }
+            - name: Demo__Signals__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: lots-secrets
+                  key: LOTS_DEMO_SIGNAL_SECRET
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

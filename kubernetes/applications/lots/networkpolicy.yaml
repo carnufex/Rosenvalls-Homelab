@@ -53,6 +53,14 @@ spec:
         - ports:
             - port: "9090"
               protocol: TCP
+    # The incidents demo: the tool pack's demo pack posts its alert to POST /signals/demo-network (toolpack.yaml).
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: lots-toolpack
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
   egress:
     # Traces over OTLP to the collector in monitoring (OTEL_EXPORTER_OTLP_ENDPOINT in app.yaml).
     - toEndpoints:
@@ -163,6 +171,14 @@ spec:
             - port: "8080"
               protocol: TCP
   egress:
+    # The incidents demo: the demo pack's alert to the shell (Demo__Signals__Url, toolpack.yaml).
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: lots
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     - toFQDNs:
         - matchPattern: "*.wikipedia.org"
         - matchName: api.open-meteo.com

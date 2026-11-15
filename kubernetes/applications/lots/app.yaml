@@ -103,6 +103,10 @@ data:
   Knowledge__Sources__3__Sensitivity: public
   Models__Aliases__embed__Targets__0__Endpoint: default
   Models__Aliases__embed__Targets__0__Model: snowflake-arctic-embed2
+  # The incidents demo: the tool pack's scripted model (toolpack.yaml, Demo__Model__Fixture), used only by the network context.
+  Models__Endpoints__demo__BaseUrl: http://lots-toolpack:8080/v1
+  Models__Aliases__scripted__Targets__0__Endpoint: demo
+  Models__Aliases__scripted__Targets__0__Model: demo-model
   # The document service on the same GPU PC (#167, ADR 0028): Docling layout, tables and OCR with page provenance, and the reranker
   # (#169, bge-reranker-v2-m3 on the GPU). By address for the same reason as voice. While the PC is off, new documents are listed
   # as failed and converted on the next index run, indexed ones stay searchable and search keeps the fused order.
@@ -159,6 +163,48 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-5"
 data:
+  network.yaml: |
+    kind: Profile
+    # DEMO (carnufex/Lots docs/demo.md): a synthetic fibre network in Malmö served by the tool pack's demo pack (toolpack.yaml),
+    # answered by its scripted model (alias "scripted") so the incident demo is the same every time. Nothing here touches a real
+    # system. The alert source demo-network, its service and its runbook are in gitops/incidents-demo.yaml.
+    name: network
+    version: 1
+    description: "Demo: the fibre network in Malmö - incidents, what a cable carries and for whom, ways around a cut."
+    model: scripted
+    routing:
+      examples:
+        - "Which customers are affected by the fibre cut?"
+        - "What does cable MAL-014 carry?"
+    instructions: |
+      You help the network operations centre of a fibre network in Malmö. Look things up with the tools instead of guessing:
+      network_incidents for what is broken, cable_impact for the circuits and customers on a cable, reroute_options for the ways
+      around it and plan_status for drafted plans. Cite what you used.
+      draft_reroute only drafts a plan in the CMDB; apply_plan switches live traffic. Say clearly what you drafted or applied, and
+      when a change waits for approval. report_finding records the finding of an incident investigation and works only in one.
+    servers:
+      - name: demo-network
+        url: http://lots-toolpack:8080/mcp
+    tools:
+      - { name: network_incidents, risk: read }
+      - { name: cable_impact, risk: read }
+      - { name: reroute_options, risk: read }
+      - { name: plan_status, risk: read }
+      - { name: report_finding, risk: read }
+      - { name: draft_reroute, risk: write }
+      - { name: apply_plan, risk: destructive }
+    roles:
+      - { name: operator, allow: [read] }
+      - { name: planner, allow: [read, write, destructive], requireApproval: [write, destructive] }
+      - { name: admin, allow: [read], approve: [write, destructive] }
+    approvals: { expireAfterHours: 24, twoPerson: [destructive], requireComment: [destructive] }
+    policyTests:
+      - { roles: [operator], tool: cable_impact, expect: allow }
+      - { roles: [operator], tool: report_finding, expect: allow }
+      - { roles: [operator], tool: draft_reroute, expect: deny }
+      - { roles: [operator], tool: apply_plan, expect: deny }
+      - { roles: [planner], tool: draft_reroute, expect: approval }
+      - { roles: [admin], tool: apply_plan, expect: deny }
   twin.yaml: |
     kind: Profile
     # Twin profile (ADR 0068): answers from the signed-in person's own twin, nothing else. Declarative; apply it like any resource.
