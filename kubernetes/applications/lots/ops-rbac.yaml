@@ -1,0 +1,49 @@
+# Incidents on the real cluster (README.md): the identity the tool pack's Kubernetes tools (k8s_list, k8s_describe, k8s_logs;
+# Kubernetes__InCluster in toolpack.yaml) use, and everything it may do. The tool pack has no namespace list of its own, so this RBAC
+# is the whole reach of those tools: one namespace, oncall-demo, read only. No ClusterRole, no Secrets, no ConfigMaps, no write verbs,
+# no exec. A k8s_* call anywhere else is a 403 from the API server.
+# To remove: this file (and its line in kustomization.yaml), Kubernetes__InCluster and serviceAccountName in toolpack.yaml (back to
+# lots-runtime), and the kube-apiserver rule in networkpolicy.yaml.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lots-toolpack
+  namespace: lots
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+# Pulls from the registry like lots-runtime.
+imagePullSecrets:
+  - name: lots-registry
+# The tool pack reads this token (a projected, read-only volume) to call the API server; the shell keeps lots-runtime, without one.
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lots-toolpack-read
+  namespace: oncall-demo
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/log, events, services]
+    verbs: [get, list, watch]
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, daemonsets]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lots-toolpack-read
+  namespace: oncall-demo
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+subjects:
+  - kind: ServiceAccount
+    name: lots-toolpack
+    namespace: lots
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: lots-toolpack-read

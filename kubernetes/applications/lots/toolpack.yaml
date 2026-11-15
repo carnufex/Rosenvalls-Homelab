@@ -33,7 +33,9 @@ spec:
       labels:
         app.kubernetes.io/name: lots-toolpack
     spec:
-      serviceAccountName: lots-runtime
+      # Its own ServiceAccount (ops-rbac.yaml), with a token: the Kubernetes tools read namespace oncall-demo with it, nothing else.
+      # The token is a projected read-only volume, so the read-only root filesystem below needs nothing more.
+      serviceAccountName: lots-toolpack
       securityContext:
         runAsNonRoot: true
         seccompProfile:
@@ -76,6 +78,10 @@ spec:
                 secretKeyRef:
                   name: lots-secrets
                   key: LOTS_DEMO_SIGNAL_SECRET
+            # Incidents on the real cluster (README.md): k8s_list, k8s_describe and k8s_logs (GET only, never Secrets or ConfigMaps)
+            # against the API server with the pod's ServiceAccount token. Its reach is the RBAC in ops-rbac.yaml: oncall-demo, read
+            # only. Used by the homelab-ops context (app.yaml). To remove: this line and the parts listed in ops-rbac.yaml.
+            - { name: Kubernetes__InCluster, value: "true" }
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

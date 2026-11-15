@@ -25,3 +25,17 @@ docker build --platform linux/amd64 -t registry.rosenvall.se/carnufex/oncall-too
 docker push registry.rosenvall.se/carnufex/oncall-tools:sha-<short>
 # then bump the tag in tools-deployment.yaml and push
 ```
+
+## Lots drill
+
+Lots (`applications/lots`, README "Incidents on the real cluster") investigates this namespace's alerts, and its alert source
+`homelab-alertmanager` has a drill button, **Break demo-api**. Pressing it makes Lots call
+`POST http://oncall-tools.oncall-demo.svc.cluster.local:8080/drill/break` with `Authorization: Bearer <DRILL_API_TOKEN>`: the same
+commit as `/oncall drill` (`1.0.0` -> `1.1.0` in `demo-api-deployment.yaml`, "Drill triggered from Lots.") and the same ArgoCD refresh.
+`POST /drill/reset` is `/oncall reset` ("Reset triggered from Lots."). Without `DRILL_API_TOKEN` both routes answer 404.
+
+- `/drill/` is not one of the oauth2-proxy bypass prefixes, so from outside the cluster it is behind SSO as well as the bearer.
+- Lots reads this namespace through its own ServiceAccount `lots-toolpack` (Role `lots-toolpack-read`, defined in
+  `applications/lots/ops-rbac.yaml`): get/list/watch on pods, pods/log, events, services, deployments, statefulsets, daemonsets.
+- The crash-loop detector and the Slack call card are unchanged: a Lots drill posts the same Slack alert as `/oncall drill`.
+- Remove: the `DRILL_API_TOKEN` key in `tools-externalsecret.yaml` (the routes then answer 404), and the parts listed in the Lots README.

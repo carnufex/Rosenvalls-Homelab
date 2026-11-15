@@ -32,7 +32,7 @@ spec:
         - name: oncall-demo-registry
       containers:
         - name: oncall-tools
-          image: registry.rosenvall.se/carnufex/oncall-tools:sha-e92c640
+          image: registry.rosenvall.se/carnufex/oncall-tools:sha-cfeaddc
           imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 8080 }
@@ -53,6 +53,8 @@ spec:
             - { name: DETECTOR_INTERVAL_MS, value: "2000" }
             - { name: INCIDENT_STORE_PATH, value: /data/incidents.json }
             - { name: LOG_LEVEL, value: info }
+          # oncall-tools-secrets carries DRILL_API_TOKEN too: the bearer of POST /drill/break and /drill/reset, the Lots drill
+          # (README.md, "Lots drill"). Remove that key from tools-externalsecret.yaml and both routes answer 404.
           envFrom:
             - secretRef: { name: oncall-tools-secrets }
           startupProbe:

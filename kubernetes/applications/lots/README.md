@@ -92,6 +92,52 @@ answered by the pack's scripted model, so it is the same every time.
   `docker build --platform linux/amd64 -f src/Lots.Mcp.Toolpack/Dockerfile -t registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-<short> .`,
   push that tag, and pin it here by tag and digest.
 
+## Incidents on the real cluster
+
+Lots' Incidents on a real fault in this cluster: an admin breaks the demo service `demo-api` in `oncall-demo` on purpose, the
+cluster's own alerting sends the alert to Lots, and one run investigates it with read-only Kubernetes tools, as the service identity
+`svc-homelab-sre`, and reports a finding with evidence. The agent changes nothing; it says what a person should do.
+
+- **Run it:** sign in as an admin, **Incidents > Sources**, source `homelab-alertmanager`, **Break demo-api**, confirm. Roughly:
+  1. The shell calls `POST http://oncall-tools.oncall-demo.svc.cluster.local:8080/drill/break` (bearer `LOTS_DRILL_ONCALL_TOKEN`).
+     oncall-tools commits `oncall-demo-api:1.1.0` in place of `1.0.0` to `applications/oncall-demo/demo-api-deployment.yaml` on
+     `master` ("Drill triggered from Lots.") and asks ArgoCD to refresh; the button's outcome line shows the commit (1-3 s).
+  2. ArgoCD rolls it out; the new pod crashes on boot and is in `CrashLoopBackOff` after its first restart (about 30 s). The old
+     1.0.0 pod keeps serving, so nothing is down.
+  3. `OncallDemoPodCrashLooping` fires on the next scrape and evaluation (up to about a minute; `for: 0s`), and Alertmanager's
+     route `lots` posts it to `POST /signals/homelab-alertmanager` after 5 s.
+  4. After the 20 s settle time the gate lets the incident through (service `demo-api`), and a run in the context `homelab-ops`
+     investigates: describe the pod, read the crashed container's previous log, compare with the healthy pod, `report_finding`
+     (about a minute). In all, about two to four minutes from the button to the finding.
+- **Restore it** (the crashing pod stays until then):
+  - `/oncall reset` in Slack; or
+  - `kubectl -n oncall-demo port-forward deploy/oncall-tools 18081:8080`, then
+    `curl -X POST -H "Authorization: Bearer <token>" http://localhost:18081/drill/reset` (the token is the Bitwarden entry
+    `LOTS_DRILL_ONCALL_TOKEN`); or
+  - revert the drill's commit on `master`.
+
+  The new pod goes, the alert resolves, and Alertmanager sends the resolved alert, which resolves the incident.
+- **What the agent can reach:** the tool pack's `k8s_list`, `k8s_describe` and `k8s_logs` (GET only), as the ServiceAccount
+  `lots-toolpack` (`ops-rbac.yaml`): get, list and watch on pods, pods/log, events, services, deployments, statefulsets and
+  daemonsets in `oncall-demo` alone. No other namespace (a 403), no Secrets, no ConfigMaps, no writes, no exec. It cannot commit,
+  roll back or call oncall-tools; only the drill button (an admin) and the reset (a person) do.
+- **What is sent to Lots:** only alerts with `namespace="oncall-demo"` for now (the first child route in
+  `infrastructure/monitoring/prometheus-stack/values.yaml`, with `continue: true`). Every alert, those included, still reaches
+  Slack `#homelab-alerts` as before; the last child route is the catch-all to `slack-homelab` that keeps it so.
+- **Parts:** the context `homelab-ops` (`app.yaml`, `lots-profiles`); the runbook `crashloop-runbook`, the service `demo-api` and the
+  alert source `homelab-alertmanager` with its drill (`gitops/incidents-homelab.yaml`); the ServiceAccount and the Role
+  (`ops-rbac.yaml`); `Kubernetes__InCluster` and `serviceAccountName: lots-toolpack` (`toolpack.yaml`); three rules in
+  `networkpolicy.yaml` (Alertmanager to the shell, the shell to oncall-tools, the tool pack to the API server); `LOTS_SIGNAL_HOMELAB`
+  and `LOTS_DRILL_ONCALL_TOKEN` (`secrets.yaml`); in `oncall-demo`, `DRILL_API_TOKEN` (`tools-externalsecret.yaml`); in
+  `monitoring`, the ExternalSecret `alertmanager-lots`, the receiver and the two routes in `values.yaml`, and
+  `oncall-demo-alerts.yaml`.
+- **When it does not work:** the shell's log lines for signals and investigations, Lots' alerts `LotsSignalsRefused` (a wrong
+  bearer: Alertmanager's copy of `LOTS_SIGNAL_HOMELAB`), `LotsInvestigationsFailing` and `LotsIncidentsNotInvestigated`
+  (`monitoring.yaml`; `LotsSignalsSilent` is not deployed: the source has no heartbeat), the drill's outcome line
+  and audit row (`GET /audit?tool=incident.drill`), the tool pack pod's readiness, and `hubble observe -n lots --verdict DROPPED`.
+- **Remove it:** delete those parts (the two Alertmanager routes and the receiver together); the incidents it made stay in the
+  database until Lots' retention removes them.
+
 ## Network
 
 Default deny (`networkpolicy.yaml`). Ingress only from the Cilium Gateway, and from Prometheus to the metrics port `9090`.

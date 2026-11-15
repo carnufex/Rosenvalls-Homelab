@@ -77,6 +77,8 @@ alertmanager:
     # /etc/alertmanager/secrets/alertmanager-slack/webhook-url
     secrets:
       - alertmanager-slack
+      # /etc/alertmanager/secrets/alertmanager-lots/token: the bearer of the receiver lots (alertmanager-lots-externalsecret.yaml).
+      - alertmanager-lots
     storage:
       volumeClaimTemplate:
         spec:
@@ -95,6 +97,17 @@ alertmanager:
       group_interval: 5m
       repeat_interval: 4h
       routes:
+        # Lots (applications/lots/README.md, "Incidents on the real cluster"): alerts of namespace oncall-demo also go to Lots,
+        # which opens an incident and investigates it. continue: true, so they go on through the routes below exactly as before;
+        # Lots is never the only path. Short timings for the demo: Lots settles and deduplicates itself. To remove: this route,
+        # the receiver lots, the catch-all route at the end, and alertmanager-lots in alertmanagerSpec.secrets.
+        - receiver: lots
+          matchers:
+            - namespace = "oncall-demo"
+          continue: true
+          group_wait: 5s
+          group_interval: 1m
+          repeat_interval: 4h
         # Longhorn capacity alerts go to the ops bot, which re-posts them to the
         # channel with a "Clean orphaned volumes" action button.
         - receiver: slack-ops-bot
@@ -107,8 +120,21 @@ alertmanager:
         - receiver: "null"
           matchers:
             - alertname = "InfoInhibitor"
+        # Catch-all, last: once a child route has matched (the lots route above does, with continue), Alertmanager no longer
+        # falls back to the root receiver, so without this an oncall-demo alert would reach only Lots. Everything no route above
+        # stopped reaches slack-homelab, as it did through the root receiver. Remove it together with the lots route.
+        - receiver: slack-homelab
     receivers:
       - name: "null"
+      # Lots' alert source homelab-alertmanager (the lots route above). Bearer: the Bitwarden entry LOTS_SIGNAL_HOMELAB.
+      - name: lots
+        webhook_configs:
+          - url: http://lots.lots.svc.cluster.local:8080/signals/homelab-alertmanager
+            send_resolved: true   # Lots needs the resolved notifications to settle and resolve incidents
+            max_alerts: 0
+            http_config:
+              authorization:
+                credentials_file: /etc/alertmanager/secrets/alertmanager-lots/token
       - name: slack-ops-bot
         webhook_configs:
           - url: http://slack-ops-bot.slack-ops-bot.svc.cluster.local:8080/alert

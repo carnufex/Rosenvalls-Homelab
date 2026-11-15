@@ -1,0 +1,25 @@
+# Incidents on the real cluster (applications/lots/README.md): the alert Lots investigates when demo-api crash-loops after a drill
+# (oncall-tools' POST /drill/break, or /oncall drill in Slack). Alertmanager routes alerts of namespace oncall-demo to Lots (receiver
+# lots, values.yaml) and, as every alert, to Slack.
+# To remove: this file and its line in kustomization.yaml.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: oncall-demo-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: oncall-demo
+      rules:
+        # A demo namespace: fire on the first evaluation that sees the crash loop (for: 0s), so a drill shows within a minute instead
+        # of the 10-15 minutes the cluster-wide crash-loop rules wait.
+        - alert: OncallDemoPodCrashLooping
+          expr: max by (namespace, pod, container) (kube_pod_container_status_waiting_reason{namespace="oncall-demo", reason="CrashLoopBackOff"}) > 0
+          for: 0s
+          labels:
+            severity: critical
+          annotations:
+            summary: "A pod in oncall-demo is crash looping"
+            description: "{{ $labels.namespace }}/{{ $labels.pod }} container {{ $labels.container }} is in CrashLoopBackOff."

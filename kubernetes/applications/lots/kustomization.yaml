@@ -10,6 +10,7 @@ resources:
   - audio.yaml
   - app.yaml
   - toolpack.yaml
+  - ops-rbac.yaml # Incidents on the real cluster: the tool pack's read-only reach into oncall-demo (README.md)
   - networkpolicy.yaml
   - httproute.yaml
   - monitoring.yaml
@@ -46,3 +47,4 @@ configMapGenerator:
       - skola-tests.yaml=gitops/skola-tests.yaml
       - guards.yaml=gitops/guards.yaml
       - incidents-demo.yaml=gitops/incidents-demo.yaml
+      - incidents-homelab.yaml=gitops/incidents-homelab.yaml

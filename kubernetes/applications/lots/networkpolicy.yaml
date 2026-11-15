@@ -61,6 +61,16 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+    # Incidents on the real cluster (README.md): Alertmanager posts alerts to POST /signals/homelab-alertmanager (receiver lots in
+    # infrastructure/monitoring/prometheus-stack/values.yaml). To remove: this rule and the oncall-tools egress rule below.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: alertmanager
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
   egress:
     # Traces over OTLP to the collector in monitoring (OTEL_EXPORTER_OTLP_ENDPOINT in app.yaml).
     - toEndpoints:
@@ -97,6 +107,16 @@ spec:
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: lots-toolpack
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    # Incidents on the real cluster (README.md): the drill "Break demo-api" calls POST /drill/break on oncall-tools in oncall-demo
+    # (alert source homelab-alertmanager, gitops/incidents-homelab.yaml).
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: oncall-demo
+            app.kubernetes.io/name: oncall-tools
       toPorts:
         - ports:
             - port: "8080"
@@ -178,6 +198,14 @@ spec:
       toPorts:
         - ports:
             - port: "8080"
+              protocol: TCP
+    # Incidents on the real cluster (README.md): the Kubernetes tools call the API server (Kubernetes__InCluster, toolpack.yaml).
+    # What they may read there is ops-rbac.yaml: oncall-demo, read only. To remove: this rule and the parts listed in ops-rbac.yaml.
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
               protocol: TCP
     - toFQDNs:
         - matchPattern: "*.wikipedia.org"

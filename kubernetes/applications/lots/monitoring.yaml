@@ -73,3 +73,24 @@ spec:
           labels: { severity: warning }
           annotations:
             summary: Lots model calls are slow (p95 over 30 s).
+        # Incidents (README.md, "Incidents on the real cluster"), from the chart's alerts.yaml. LotsSignalsSilent is left out: it needs
+        # a heartbeat (Alertmanager's Watchdog routed to the source), which the receiver lots does not get, so it would fire whenever
+        # oncall-demo has been quiet for ten minutes.
+        - alert: LotsSignalsRefused
+          expr: sum by (source) (increase(lots_incidents_signals_total{outcome=~"refused|limited"}[10m])) > 0
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "Signals to the alert source {{ $labels.source }} have been refused or limited for ten minutes (wrong secret, too large, unreadable, or over gate.requestsPerMinute): alerts are not reaching Lots, or late. The shell log says why."
+        - alert: LotsInvestigationsFailing
+          expr: sum(increase(lots_incidents_investigations_total{result="failed"}[15m])) > 0 unless sum(increase(lots_incidents_investigations_total{result=~"finding|inconclusive|cancelled"}[15m])) > 0
+          for: 15m
+          labels: { severity: warning }
+          annotations:
+            summary: "Incident investigations have been failing for 15 minutes: their runs end as failed (the model of the investigation context is down or refusing). The incident's run says why."
+        - alert: LotsIncidentsNotInvestigated
+          expr: max(lots_incidents_awaiting_run) > 0
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "Ready incidents have waited for an investigation run for ten minutes: the investigation worker is stuck or cannot start them (the shell log says why)."

@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - grafana-oauth-externalsecret.yaml
   - alertmanager-slack-externalsecret.yaml
+  - alertmanager-lots-externalsecret.yaml   # the bearer of the receiver lots (values.yaml)
   - grafana-http-route.yaml
   - prometheus-http-route.yaml
   - homelab-app-alerts.yaml
@@ -20,6 +21,7 @@ resources:
   - proxmox-storage-alert-cronjob.yaml
   - cilium-envoy-podmonitor.yaml
   - cilium-envoy-alerts.yaml
+  - oncall-demo-alerts.yaml   # OncallDemoPodCrashLooping, investigated by Lots (applications/lots/README.md)
 
 helmCharts:
   - name: kube-prometheus-stack
