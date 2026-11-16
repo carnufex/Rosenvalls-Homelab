@@ -31,7 +31,8 @@ spec:
   # The nightly dump's own role (db-dump.yaml). Lots' twin tables force row-level security, also for their owner, so a dump as
   # the application role "lots" stops at the first of them (pg_dump refuses to write a partial dump). This role reads every
   # row (BYPASSRLS) of every table (pg_read_all_data) and can change nothing. The application role stays without BYPASSRLS.
-  # The twin's content is sealed by the application, so what this role reads there is ciphertext; the keys are not in reach.
+  # The twin's text is sealed by the application, so this role reads ciphertext there (embeddings stay readable, as for any
+  # database administrator); the deployment key that opens it is not in the database.
   managed:
     roles:
       - name: lots_backup
