@@ -94,3 +94,11 @@ spec:
           labels: { severity: warning }
           annotations:
             summary: "Ready incidents have waited for an investigation run for ten minutes: the investigation worker is stuck or cannot start them (the shell log says why)."
+        # Incidents on the real cluster, the fix path (README.md): a proposed rollback nobody has answered for an hour (the chart's
+        # alerts.yaml, default approvalAgeSeconds 3600; homelab-ops lets it lapse after four hours). To remove: this rule.
+        - alert: LotsApprovalBacklog
+          expr: max(lots_approvals_oldest_pending_age_seconds) > 3600
+          for: 5m
+          labels: { severity: info }
+          annotations:
+            summary: An approval has been waiting longer than expected.

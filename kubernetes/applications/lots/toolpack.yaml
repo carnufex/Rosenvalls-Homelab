@@ -43,9 +43,13 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+        # The fix path (README.md): oncall-tools' OpenAPI document (configMapGenerator lots-oncall-openapi, kustomization.yaml).
+        - name: oncall-openapi
+          configMap:
+            name: lots-oncall-openapi
       containers:
         - name: toolpack
-          image: registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-1bf703c@sha256:89968cc0f00f522e8e115ba8c0bb80fc22f92523c00a7c3f330823a4c0032fbb
+          image: registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-1cf2546@sha256:d51456039efc7e203dc495df051571bd902496b79e357ed47347b9f561ba4863
           ports:
             - containerPort: 8080
               name: http
@@ -82,6 +86,22 @@ spec:
             # against the API server with the pod's ServiceAccount token. Its reach is the RBAC in ops-rbac.yaml: oncall-demo, read
             # only. Used by the homelab-ops context (app.yaml). To remove: this line and the parts listed in ops-rbac.yaml.
             - { name: Kubernetes__InCluster, value: "true" }
+            # Incidents on the real cluster, the fix path (README.md): the OpenAPI pack turns oncall-tools' two operations into the tools
+            # recent_changes (GET /ops/changes, read) and rollback_service (POST /ops/rollback, write: only demo-api, only back to its
+            # configured healthy tag, and only after a person approved it in Lots). It sends the drill's bearer (LOTS_ONCALL_OPS_AUTH, the
+            # whole Authorization header, from lots-secrets). Used by the homelab-ops context (app.yaml). To remove: these lines, the
+            # oncall-openapi volume and mount, and the parts listed in the README.
+            - { name: OpenApi__Spec, value: /etc/lots/openapi/oncall-ops.json }
+            - { name: OpenApi__BaseUrl, value: "http://oncall-tools.oncall-demo.svc.cluster.local:8080" }
+            - { name: OpenApi__AllowPrivateNetworks, value: "true" }
+            - { name: OpenApi__Operations__0, value: recent_changes }
+            - { name: OpenApi__Operations__1, value: rollback_service }
+            - { name: OpenApi__AuthHeaderRef, value: "env:LOTS_ONCALL_OPS_AUTH" }
+            - name: LOTS_ONCALL_OPS_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: lots-secrets
+                  key: LOTS_ONCALL_OPS_AUTH
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -90,6 +110,9 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            - name: oncall-openapi
+              mountPath: /etc/lots/openapi
+              readOnly: true
           resources:
             requests:
               cpu: 20m

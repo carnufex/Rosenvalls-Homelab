@@ -199,6 +199,16 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+    # Incidents on the real cluster, the fix path (README.md): the OpenAPI pack calls oncall-tools' GET /ops/changes and
+    # POST /ops/rollback in oncall-demo (OpenApi__BaseUrl, toolpack.yaml). To remove: this rule and the parts listed in the README.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: oncall-demo
+            app.kubernetes.io/name: oncall-tools
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     # Incidents on the real cluster (README.md): the Kubernetes tools call the API server (Kubernetes__InCluster, toolpack.yaml).
     # What they may read there is ops-rbac.yaml: oncall-demo, read only. To remove: this rule and the parts listed in ops-rbac.yaml.
     - toEntities:

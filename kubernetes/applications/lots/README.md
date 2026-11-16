@@ -96,7 +96,8 @@ answered by the pack's scripted model, so it is the same every time.
 
 Lots' Incidents on a real fault in this cluster: an admin breaks the demo service `demo-api` in `oncall-demo` on purpose, the
 cluster's own alerting sends the alert to Lots, and one run investigates it with read-only Kubernetes tools, as the service identity
-`svc-homelab-sre`, and reports a finding with evidence. The agent changes nothing; it says what a person should do.
+`svc-homelab-sre`, and reports a finding with evidence. When the finding says a release caused it, the agent then proposes one
+rollback, which waits for a person (the fix path, below); it changes nothing on its own.
 
 - **Run it:** sign in as an admin, **Incidents > Sources**, source `homelab-alertmanager`, **Break demo-api**, confirm. Roughly:
   1. The shell calls `POST http://oncall-tools.oncall-demo.svc.cluster.local:8080/drill/break` (bearer `LOTS_DRILL_ONCALL_TOKEN`).
@@ -119,21 +120,48 @@ cluster's own alerting sends the alert to Lots, and one run investigates it with
   The new pod goes, the alert resolves, and Alertmanager sends the resolved alert, which resolves the incident.
 - **What the agent can reach:** the tool pack's `k8s_list`, `k8s_describe` and `k8s_logs` (GET only), as the ServiceAccount
   `lots-toolpack` (`ops-rbac.yaml`): get, list and watch on pods, pods/log, events, services, deployments, statefulsets and
-  daemonsets in `oncall-demo` alone. No other namespace (a 403), no Secrets, no ConfigMaps, no writes, no exec. It cannot commit,
-  roll back or call oncall-tools; only the drill button (an admin) and the reset (a person) do.
+  daemonsets in `oncall-demo` alone. No other namespace (a 403), no Secrets, no ConfigMaps, no writes, no exec. Its only way to
+  change anything is the approved `rollback_service` above; the drill button (an admin) and the reset (a person) are not the agent's.
+- **The fix path:** the service `demo-api` has `autonomy: propose`, so its investigation runs with the role `responder`
+  (`proposeRoles` on the alert source) and may call oncall-tools' two operations through the tool pack's OpenAPI pack:
+  `recent_changes` (`GET /ops/changes`, read) and `rollback_service` (`POST /ops/rollback`, write). The runbook has it compare the
+  time of the last image change with when the pod started failing. After `report_finding`, and only when the finding says the
+  release caused it, the run calls `rollback_service` once with a one-line reason; Lots holds the call.
+  1. **Approve:** the proposal shows on the incident's page (Approve / Deny) and on **Approvals**; anyone with the `admin` role in
+     `homelab-ops` decides. Unanswered, it lapses after four hours; after an hour `LotsApprovalBacklog` fires (`monitoring.yaml`).
+  2. **After approval:** the tool pack calls `POST /ops/rollback` (bearer `LOTS_ONCALL_OPS_AUTH`); oncall-tools commits
+     `oncall-demo-api:1.0.0` in place of `1.1.0` to `demo-api-deployment.yaml` on `master` as `oncall-copilot` ("Approved in
+     Lots", with the reason), asks ArgoCD to refresh, and resolves the voice demo's open incidents in Slack as `/drill/reset` does
+     (1-3 s). ArgoCD rolls it out and the crashing pod goes in about a minute; the alert resolves and so does the incident.
+  3. **Denied** (or lapsed): nothing is committed; restore by hand as below.
+- **What the agent can and cannot do:** read one namespace (below) and ask for one rollback. `rollback_service` rolls back only
+  `demo-api` (oncall-tools' `ALLOWED_DEPLOYMENTS`), only to the healthy tag oncall-tools is configured with (`DEMO_GOOD_TAG`; the
+  request cannot name a tag or an image), and only after a person approved it. The commit is made by oncall-tools with its own
+  fine-grained GitHub token (limited to this repository; oncall-tools writes only `demo-api-deployment.yaml` with it); the agent
+  holds no token for GitHub, Kubernetes writes or Secrets. A person with
+  `admin` can approve but not call it (`policyTests` in `app.yaml`).
+- **Turn proposing off:** `autonomy: observe` on the service `demo-api` (`gitops/incidents-homelab.yaml`); the run then only
+  reports the finding. To remove the fix path: the OpenAPI lines, volume and mount (`toolpack.yaml`), `lots-oncall-openapi`
+  (`kustomization.yaml`, `openapi/oncall-ops.json`), `LOTS_ONCALL_OPS_AUTH` (`secrets.yaml`), the tool pack's rule to oncall-tools
+  (`networkpolicy.yaml`), `LotsApprovalBacklog` (`monitoring.yaml`), `proposeRoles` and the runbook's fix part, and in `homelab-ops`
+  the two tools, the `responder` role, `approvals` and their policy tests.
 - **What is sent to Lots:** only alerts with `namespace="oncall-demo"` for now (the first child route in
   `infrastructure/monitoring/prometheus-stack/values.yaml`, with `continue: true`). Every alert, those included, still reaches
   Slack `#homelab-alerts` as before; the last child route is the catch-all to `slack-homelab` that keeps it so.
 - **Parts:** the context `homelab-ops` (`app.yaml`, `lots-profiles`); the runbook `crashloop-runbook`, the service `demo-api` and the
   alert source `homelab-alertmanager` with its drill (`gitops/incidents-homelab.yaml`); the ServiceAccount and the Role
-  (`ops-rbac.yaml`); `Kubernetes__InCluster` and `serviceAccountName: lots-toolpack` (`toolpack.yaml`); three rules in
-  `networkpolicy.yaml` (Alertmanager to the shell, the shell to oncall-tools, the tool pack to the API server); `LOTS_SIGNAL_HOMELAB`
-  and `LOTS_DRILL_ONCALL_TOKEN` (`secrets.yaml`); in `oncall-demo`, `DRILL_API_TOKEN` (`tools-externalsecret.yaml`); in
+  (`ops-rbac.yaml`); `Kubernetes__InCluster`, `serviceAccountName: lots-toolpack` and the `OpenApi__*` lines (`toolpack.yaml`);
+  `lots-oncall-openapi` (`kustomization.yaml`); four rules in `networkpolicy.yaml` (Alertmanager to the shell, the shell and the
+  tool pack to oncall-tools, the tool pack to the API server); `LOTS_SIGNAL_HOMELAB`, `LOTS_DRILL_ONCALL_TOKEN` and
+  `LOTS_ONCALL_OPS_AUTH` (`secrets.yaml`); in `oncall-demo`, `DRILL_API_TOKEN` (`tools-externalsecret.yaml`); in
   `monitoring`, the ExternalSecret `alertmanager-lots`, the receiver and the two routes in `values.yaml`, and
   `oncall-demo-alerts.yaml`.
 - **When it does not work:** the shell's log lines for signals and investigations, Lots' alerts `LotsSignalsRefused` (a wrong
   bearer: Alertmanager's copy of `LOTS_SIGNAL_HOMELAB`), `LotsInvestigationsFailing` and `LotsIncidentsNotInvestigated`
-  (`monitoring.yaml`; `LotsSignalsSilent` is not deployed: the source has no heartbeat), the drill's outcome line
+  (`monitoring.yaml`; `LotsSignalsSilent` is not deployed: the source has no heartbeat), `LotsApprovalBacklog` for a rollback nobody
+  answered, a failed rollback as the tool's error in the run (`HTTP 502 ... commit_failed`, `HTTP 409 ... file_drifted`) and as a
+  failed fix on the incident, oncall-tools' log lines `ops: ...`, the rollback commit by `oncall-copilot` in this repository's
+  history, the drill's outcome line
   and audit row (`GET /audit?tool=incident.drill`), the tool pack pod's readiness, and `hubble observe -n lots --verdict DROPPED`.
 - **Remove it:** delete those parts (the two Alertmanager routes and the receiver together); the incidents it made stay in the
   database until Lots' retention removes them.
