@@ -94,6 +94,13 @@ spec:
           labels: { severity: warning }
           annotations:
             summary: "Ready incidents have waited for an investigation run for ten minutes: the investigation worker is stuck or cannot start them (the shell log says why)."
+        # The nightly dump (db-dump.yaml). KubeJobFailed also fires on a failed run; this one says how old the newest good dump is.
+        - alert: LotsDatabaseDumpStale
+          expr: time() - max(kube_cronjob_status_last_successful_time{namespace="lots", cronjob="lots-db-dump"}) > 26 * 3600
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "The Lots database has had no successful dump for over 26 hours (db-dump.yaml runs nightly at 01:25). See the last Job's log: kubectl -n lots logs job/<lots-db-dump-...>. Until it succeeds there is no fresh restorable backup."
         # Incidents on the real cluster, the fix path (README.md): a proposed rollback nobody has answered for an hour (the chart's
         # alerts.yaml, default approvalAgeSeconds 3600; homelab-ops lets it lapse after four hours). To remove: this rule.
         - alert: LotsApprovalBacklog

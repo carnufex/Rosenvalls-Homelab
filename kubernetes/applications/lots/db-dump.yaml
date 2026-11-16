@@ -3,6 +3,8 @@
 # CNPG volumes sit in the Longhorn "cnpg" recurring-job group, which only trims: a
 # crash-consistent snapshot of the data volume without a matching WAL volume is not a
 # restorable backup, this dump is. Restore: pg_restore --clean --if-exists -d lots <file>
+# The dump connects as lots_backup (database.yaml), not as the application role: the twin tables force row-level security, and
+# only a role that reads past it gets every row. Never add --enable-row-security: the dump would silently leave rows out.
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -100,10 +102,10 @@ spec:
                   value: lots
                 - name: PGUSER
                   valueFrom:
-                    secretKeyRef: { name: lots-postgresql-bootstrap, key: username }
+                    secretKeyRef: { name: lots-postgresql-backup, key: username }
                 - name: PGPASSWORD
                   valueFrom:
-                    secretKeyRef: { name: lots-postgresql-bootstrap, key: password }
+                    secretKeyRef: { name: lots-postgresql-backup, key: password }
               resources:
                 requests: { cpu: 50m, memory: 128Mi }
                 limits: { cpu: 500m, memory: 256Mi }
