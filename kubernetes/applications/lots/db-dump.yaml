@@ -49,6 +49,11 @@ kind: CronJob
 metadata:
   name: lots-db-dump
   namespace: lots
+  annotations:
+    # Last wave on purpose: ArgoCD fails a sync at the wave of a resource that is not healthy, and a CronJob whose last run
+    # failed is not. In an early wave one failed nightly dump stopped every rollout of Lots (2026-11-16). Here the rollout
+    # goes through and the app still shows Degraded until a dump succeeds.
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   schedule: "25 1 * * *"
   timeZone: Europe/Stockholm
