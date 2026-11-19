@@ -10,7 +10,7 @@ proxmox = {
 cluster_name     = "hemma-k8s"     # Namnet på ditt Kubernetes-kluster
 cluster_endpoint = "192.168.1.200" # En LEDIG IP-adress som blir VIP (Virtual IP) för klustret
 gateway          = "192.168.1.1"
-talos_version    = "v1.14.4"
+talos_version    = "v1.14.6"
 
 nodes_config = {
   "control-01" = {
