@@ -66,6 +66,26 @@ spec:
             - { name: LOTS_SIGNAL_URL, value: "http://lots.lots.svc.cluster.local:8080/signals/update-center" }
             # First run: log every decision the rules would take without applying anything. Remove once the auto: lines look right.
             - { name: AUTO_DRY_RUN, value: "true" }
+            # Source repo (and Dockerfile) of each own image, for the base-image tracking (BASE_IMAGES_ENABLED, update-center
+            # runtime-base-images and later). ghcr.io/carnufex/* (kingsguard) resolves by convention. Gatebound is left out while
+            # it is paused (manual publish from Gatebound-2d, no CI). Repos without CI only ever get proposals, never auto bumps.
+            - name: OWN_APP_REPOS
+              value: >-
+                registry.rosenvall.se/carnufex/hub-central=carnufex/hub-central:Dockerfile,
+                registry.rosenvall.se/carnufex/cmdb-api=carnufex/cmdb:src/api/Dockerfile,
+                registry.rosenvall.se/carnufex/cmdb-web=carnufex/cmdb:src/web/Dockerfile,
+                registry.rosenvall.se/carnufex/blogg=carnufex/rosenvall-blogg:deploy/Dockerfile,
+                registry.rosenvall.se/carnufex/update-center=carnufex/update-center:Dockerfile,
+                registry.rosenvall.se/carnufex/gatebound-support=carnufex/gatebound-support:Dockerfile,
+                registry.rosenvall.se/carnufex/ngm=carnufex/NextGenerationMe:web/Dockerfile,
+                registry.rosenvall.se/carnufex/mypassion=carnufex/mypassion:Dockerfile,
+                registry.rosenvall.se/carnufex/lots-shell=carnufex/Lots:src/Lots.Shell/Dockerfile,
+                registry.rosenvall.se/carnufex/lots-mcp-toolpack=carnufex/Lots:src/Lots.Mcp.Toolpack/Dockerfile,
+                registry.rosenvall.se/carnufex/portfolio=carnufex/rosenvall-portfolio:Dockerfile,
+                registry.rosenvall.se/carnufex/rosenvall-devops-api=carnufex/rosenvall-devops:src/Rosenvall.DevOps.Api/Dockerfile,
+                registry.rosenvall.se/carnufex/rosenvall-devops-frontend=carnufex/rosenvall-devops:frontend/Dockerfile,
+                registry.rosenvall.se/carnufex/oncall-demo-api=carnufex/oncall-voice-copilot:services/demo-api/Dockerfile,
+                registry.rosenvall.se/carnufex/oncall-tools=carnufex/oncall-voice-copilot:services/oncall-tools/Dockerfile
             - name: NODE_NAME
               valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
             - name: POD_NAME
