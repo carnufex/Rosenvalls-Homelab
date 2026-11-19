@@ -26,11 +26,11 @@ spec:
             key: ACCESS_SECRET_KEY
 
   storage:
-    size: 20Gi
+    size: 5Gi # data ~0.3 GiB (2026-11-19); was 20Gi
     storageClass: longhorn
 
   walStorage:
-    size: 20Gi
+    size: 4Gi # max_wal_size 1GB + wal_keep_size 512MB, ~0.5 GiB used; was 20Gi
     storageClass: longhorn
 
   backup:

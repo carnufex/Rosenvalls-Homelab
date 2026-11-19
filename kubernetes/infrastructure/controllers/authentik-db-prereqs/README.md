@@ -5,7 +5,7 @@ This app contains the Authentik namespace, runtime secrets, and CloudNativePG cl
 ## Current Stability Posture
 
 The live cluster currently runs Authentik PostgreSQL as a single-instance cluster with
-`20Gi` of WAL storage to prioritize service recovery over database HA. Restore a second
+`4Gi` of WAL storage (5Gi data; both were 20Gi until 2026-11-19, shrunk by dump/recreate/restore) to prioritize service recovery over database HA. Restore a second
 instance only after the primary is healthy and WAL growth is confirmed stable.
 
 ## Default Mode
