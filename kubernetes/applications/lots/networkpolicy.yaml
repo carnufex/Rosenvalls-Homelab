@@ -71,6 +71,15 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+    # Updates (README.md): update-center posts updates that need a decision to POST /signals/update-center.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: update-center
+            app.kubernetes.io/name: update-center
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
   egress:
     # Traces over OTLP to the collector in monitoring (OTEL_EXPORTER_OTLP_ENDPOINT in app.yaml).
     - toEndpoints:
@@ -103,10 +112,12 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # The tool pack (toolpack.yaml): MCP over HTTP inside the namespace.
+    # The tool packs (toolpack.yaml, toolpack-updates.yaml): MCP over HTTP inside the namespace.
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: lots-toolpack
+        - matchLabels:
+            app.kubernetes.io/name: lots-toolpack-updates
       toPorts:
         - ports:
             - port: "8080"
@@ -234,6 +245,34 @@ spec:
       toPorts:
         - ports:
             - port: "443"
+              protocol: TCP
+---
+# The updates tool pack (toolpack-updates.yaml): only the shell may call it, and it reaches only update-center's API.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lots-toolpack-updates
+  namespace: lots
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: lots-toolpack-updates
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: lots
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: update-center
+            app.kubernetes.io/name: update-center
+      toPorts:
+        - ports:
+            - port: "8080"
               protocol: TCP
 ---
 apiVersion: cilium.io/v2

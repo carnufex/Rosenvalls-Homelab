@@ -166,6 +166,34 @@ rollback, which waits for a person (the fix path, below); it changes nothing on 
 - **Remove it:** delete those parts (the two Alertmanager routes and the receiver together); the incidents it made stay in the
   database until Lots' retention removes them.
 
+## Updates
+
+The homelab updates itself as far as rules allow, and asks a person for the rest.
+
+- **What update-center does on its own** (carnufex/update-center, `docs/operations/update-center.md`): patch and digest bumps of
+  apps, fixes for high and critical CVEs up to a minor, Talos patches (then the tofu pin) and Proxmox packages, in its nightly window
+  (critical CVEs at once). Every bump is verified (ArgoCD synced and healthy, the new image running) and reverted automatically when
+  it is not.
+- **What comes to Lots:** everything its rules do not clear (majors, minors, databases and platform components under
+  `kubernetes/infrastructure`, Kubernetes minors) as `UpdateNeedsDecision`, advisories no update covers as `SecurityAdvisory`, and
+  every update that failed and was rolled back as `UpdateFailed`. update-center posts one alert per component to
+  `POST /signals/update-center` and resolves it when the component is up to date.
+- **What Lots does:** one incident per component (the service `updates`, `groupBy: [component]`), investigated in the context
+  `homelab-updates` as `svc-homelab-updates`: `get_update`, `release_notes`, a finding, and, when no manual step comes first,
+  the proposal `apply_update`. It waits for a person with admin on the incident page and on Approvals; the admin notice
+  `approval.requested` announces it in `#homelab-alerts`. Approved, update-center applies it with the same verification and rollback.
+- **Parts:** the context `homelab-updates` (`app.yaml`), `gitops/incidents-updates.yaml` (runbook, service, source),
+  `toolpack-updates.yaml` (a second tool pack with only the OpenAPI pack, pointed at update-center's `/api/lots/openapi.json`),
+  `Mcp__ToolServerAuth__Hosts__1` (`app.yaml`), the rules for update-center to the shell and the tool pack to update-center
+  (`networkpolicy.yaml`), `LOTS_SIGNAL_UPDATES` and `LOTS_UPDATES_AUTH` (`secrets.yaml`; Bitwarden `lots-signal-update-center` and
+  `update-center-lots-tool-token`, which update-center reads as `LOTS_SIGNAL_TOKEN` and `SERVICE_TOKENS`).
+- **When it does not work:** update-center's log lines `lots-signal: <fingerprint> <status> -> <http status>` and `auto: ...`,
+  `LotsSignalsRefused` (a wrong bearer), `LotsInvestigationsFailing`, `LotsApprovalBacklog`, the tool pack's startup warning when it
+  could not fetch the OpenAPI document (restart `deploy/lots-toolpack-updates` once update-center answers), and a failed or
+  rolled-back job on update-center's Jobs tab.
+- **Turn it off:** `autonomy: observe` on the service (findings only), `enabled: false` on the source (nothing in), or
+  `AUTO_ENABLED=false` on update-center (nothing applied on its own).
+
 ## Network
 
 Default deny (`networkpolicy.yaml`). Ingress only from the Cilium Gateway, and from Prometheus to the metrics port `9090`.

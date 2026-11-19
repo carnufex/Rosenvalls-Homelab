@@ -1,0 +1,102 @@
+# Updates (README.md, "Updates"): a second instance of the Lots tool pack with only its OpenAPI pack, pointed at update-center's
+# machine API (/api/lots/*, carnufex/update-center docs/API.md). It turns four operations into tools for the homelab-updates context
+# (app.yaml): get_update, release_notes and job_status (read) and apply_update (write: changes production, verified by update-center
+# with automatic rollback, and only after a person approved it in Lots). A second instance because one tool pack serves one OpenAPI
+# document, and the main one serves oncall-tools'. It sends LOTS_UPDATES_AUTH (the whole Authorization header, lots-secrets).
+# To remove: this file, its kustomization line, the Mcp__ToolServerAuth host and the homelab-updates context in app.yaml, the two
+# lots-toolpack-updates rules in networkpolicy.yaml and gitops/incidents-updates.yaml.
+apiVersion: v1
+kind: Service
+metadata:
+  name: lots-toolpack-updates
+  namespace: lots
+spec:
+  selector:
+    app.kubernetes.io/name: lots-toolpack-updates
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lots-toolpack-updates
+  namespace: lots
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lots-toolpack-updates
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lots-toolpack-updates
+    spec:
+      # No Kubernetes API access: the shell's ServiceAccount, without a token, only for the pull secret.
+      serviceAccountName: lots-runtime
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: toolpack
+          image: registry.rosenvall.se/carnufex/lots-mcp-toolpack:sha-1cf2546@sha256:d51456039efc7e203dc495df051571bd902496b79e357ed47347b9f561ba4863
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - { name: HOME, value: /tmp }
+            - { name: Mcp__AuthTokenRef, value: "env:LOTS_MCP_TOKEN" }
+            - name: LOTS_MCP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lots-secrets
+                  key: LOTS_MCP_TOKEN
+            # The spec is fetched from update-center at start (3 attempts); if it does not answer, the pack is left out until a restart.
+            - { name: OpenApi__Spec, value: "http://update-center.update-center.svc.cluster.local:8080/api/lots/openapi.json" }
+            - { name: OpenApi__BaseUrl, value: "http://update-center.update-center.svc.cluster.local:8080" }
+            - { name: OpenApi__AllowPrivateNetworks, value: "true" }
+            - { name: OpenApi__Operations__0, value: get_update }
+            - { name: OpenApi__Operations__1, value: release_notes }
+            - { name: OpenApi__Operations__2, value: apply_update }
+            - { name: OpenApi__Operations__3, value: job_status }
+            - { name: OpenApi__AuthHeaderRef, value: "env:LOTS_UPDATES_AUTH" }
+            - name: LOTS_UPDATES_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: lots-secrets
+                  key: LOTS_UPDATES_AUTH
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 192Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
