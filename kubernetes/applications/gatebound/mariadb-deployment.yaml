@@ -23,11 +23,16 @@ spec:
           type: RuntimeDefault
       containers:
         - name: mariadb
-          image: mariadb:11.4
+          image: mariadb:11.8.9@sha256:d36f18d65a0459510b8b0f643b226a6d299e3206486e2b64ff20754a6d291707
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: gatebound-mariadb
+          env:
+            # Run mariadb-upgrade on start when the data dir is from an older
+            # version (11.4 -> 11.8 on 2026-11-19); a no-op otherwise.
+            - name: MARIADB_AUTO_UPGRADE
+              value: "1"
           ports:
             - name: mysql
               containerPort: 3306
