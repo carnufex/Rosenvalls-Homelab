@@ -41,7 +41,7 @@ spec:
                     values: [worker-05, worker-06, worker-07, worker-08, worker-09]
       containers:
         - name: update-center
-          image: registry.rosenvall.se/carnufex/update-center:sha-d105c39 # bumped by scripts/deploy.ps1 in the update-center repo
+          image: registry.rosenvall.se/carnufex/update-center:sha-24117ad # bumped by scripts/deploy.ps1 in the update-center repo
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -61,6 +61,11 @@ spec:
             - { name: REFRESH_MINUTES, value: "30" }
             - { name: DATA_DIR, value: /tmp/update-center }
             - { name: TALOSCTL_CACHE, value: /tmp/update-center/talosctl }
+            # Updates that need a decision go to Lots (applications/lots/README.md, "Updates"); LOTS_SIGNAL_TOKEN and SERVICE_TOKENS come
+            # from update-center-env. Everything the autonomy rules clear is applied in the night window (AUTO_* in docs/API.md).
+            - { name: LOTS_SIGNAL_URL, value: "http://lots.lots.svc.cluster.local:8080/signals/update-center" }
+            # First run: log every decision the rules would take without applying anything. Remove once the auto: lines look right.
+            - { name: AUTO_DRY_RUN, value: "true" }
             - name: NODE_NAME
               valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
             - name: POD_NAME
