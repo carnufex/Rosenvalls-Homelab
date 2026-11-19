@@ -9,3 +9,4 @@ resources:
   - networkpolicy.yaml
   - deployment.yaml
   - service.yaml
+  - httproute.yaml # blogg.rosenvall.se on gateway/external (public, via the Cloudflare tunnel)
