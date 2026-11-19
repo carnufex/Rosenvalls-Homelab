@@ -1,5 +1,7 @@
 # Rosenvall DevOps
 
+> **PAUSED since 2026-11-19** (no use): deployments at `replicas: 0`, the hourly cleaner CronJobs `suspend: true`. PVCs, secrets and config are kept; resume by setting replicas back to 1 (and `suspend: false`).
+
 Rosenvall DevOps is routed through `gateway/internal` at `https://devops.rosenvall.se`.
 
 Runtime shape:

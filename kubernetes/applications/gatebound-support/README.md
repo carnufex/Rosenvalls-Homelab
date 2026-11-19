@@ -1,5 +1,7 @@
 # gatebound-support
 
+> **PAUSED since 2026-11-19** (no use): deployments at `replicas: 0`. PVCs, secrets and config are kept; resume by setting replicas back to 1.
+
 Player support for Gatebound: an ElevenLabs agent (text-first widget on
 gatebound.rosenvall.se) backed by this service. Source and architecture:
 <https://github.com/carnufex/gatebound-support> (`docs/SPEC.md`).

@@ -5,6 +5,7 @@ metadata:
   namespace: rosenvall-devops
 spec:
   schedule: "17 * * * *"
+  suspend: true # PAUSED 2026-11-19 with the rest of rosenvall-devops
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3

@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
-  replicas: 1
+  replicas: 0 # PAUSED 2026-11-19: scaled to 0 (no use); PVCs and config kept. Set back to 1 to resume.
   revisionHistoryLimit: 3
   selector:
     matchLabels:

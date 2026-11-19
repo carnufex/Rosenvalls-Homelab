@@ -8,7 +8,7 @@ metadata:
   name: gatebound-support-voicebot
   namespace: gatebound-support
 spec:
-  replicas: 1                 # one Discord gateway session; a second replica would fight over it
+  replicas: 0 # PAUSED 2026-11-19: scaled to 0 (no use); PVCs and config kept. Set back to 1 to resume.
   revisionHistoryLimit: 3
   strategy:
     type: Recreate

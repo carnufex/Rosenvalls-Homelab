@@ -19,7 +19,7 @@ resources:
   - impl-task-cleaner-cronjob.yaml
   - forgejo-pvc.yaml
   - forgejo-service.yaml
-  - forgejo-bootstrap-job.yaml
+  # - forgejo-bootstrap-job.yaml  # PAUSED 2026-11-19: PostSync hook needs Forgejo running; re-enable with the replicas
   - forgejo-deployment.yaml
   - forgejo-networkpolicy.yaml
   - api-service.yaml
