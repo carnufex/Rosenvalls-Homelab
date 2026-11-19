@@ -78,7 +78,7 @@ rules:
     verbs: ["create"]
   - apiGroups: [""]
     resources: ["configmaps"]
-    resourceNames: ["update-center-usage-history", "update-center-jobs"]
+    resourceNames: ["update-center-usage-history", "update-center-jobs", "update-center-security"]
     verbs: ["get", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

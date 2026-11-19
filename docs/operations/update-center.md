@@ -36,6 +36,18 @@ Scans every 30 min (or on "Uppdatera listan"):
    runs *Uppdatera alla patchar* by itself as one batch job (actor `auto-patch`, visible in the job history and
    in the Översikt patch group). Minor/major, Talos and Proxmox are never automatic.
 
+7. **Säkerhet (CVE watch)** - after each scan (at most every `SECURITY_REFRESH_MINUTES`, default 60) every
+   watched product is matched against advisories: the app version of each image (upstream GitHub repo via
+   `src/security/productmap.ts` or the `org.opencontainers.image.source` label), software embedded in images
+   (read from the image config env: `NGINX_VERSION`, `NODE_VERSION`, `PYTHON_VERSION`, ...; own builds on
+   registry.rosenvall.se included), and Talos/Kubernetes. Sources: GitHub repository security advisories,
+   nginx.org `security_advisories.html`, CISA KEV (flags actively exploited CVEs). New matches post ONE message
+   to `#homelab-alerts` (same webhook as Alertmanager); resolved ones get a ✅ line; nothing new = no post. A
+   source down for >24 h posts one warning. The seen-set lives in ConfigMap `update-center-security` (delete it
+   to get a fresh "CVE-bevakning startad" summary). Limits: OS/library packages are not scanned, Proxmox is not
+   covered, and an nginx match means "this version is affected" - most nginx CVEs need HTTP/2, HTTP/3, TLS,
+   mail or stream enabled.
+
 What counts as a pin and how a target is chosen (changed 2026-10-21, when Sonarr, Radarr, Jackett, Immich,
 ARC, the authentik image and others had been silently missing):
 
