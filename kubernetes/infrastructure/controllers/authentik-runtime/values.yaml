@@ -60,7 +60,6 @@ blueprints:
   secrets: []
 
 server:
-  replicas: 0 # MAINTENANCE 2026-11-19: authentik-postgresql PVC shrink (dump/recreate/restore)
   enabled: true
   # 1Gi stopped being enough as applications and policies were added (lots, cmdb):
   # the server sat at the limit and was OOM-killed or liveness-killed 7-12 times an
@@ -85,7 +84,6 @@ server:
     timeoutSeconds: 5
 
 worker:
-  replicas: 0 # MAINTENANCE 2026-11-19: authentik-postgresql PVC shrink (dump/recreate/restore)
   enabled: true
   deploymentStrategy:
     type: RollingUpdate
