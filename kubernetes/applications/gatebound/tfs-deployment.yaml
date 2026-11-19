@@ -10,7 +10,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
-  replicas: 1
+  replicas: 0 # PAUSED 2026-11-19: no traffic; data kept on the PVCs. Set back to 1 to resume (see README).
   revisionHistoryLimit: 3
   strategy:
     type: Recreate

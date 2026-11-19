@@ -1,5 +1,15 @@
 # Gatebound (OTLife) — Forgotten Server + website
 
+> **PAUSED since 2026-11-19.** No traffic, so mariadb, tfs and web run with
+> `replicas: 0` to free cluster capacity. Everything else stays: the PVCs
+> (`gatebound-mariadb-data` 5Gi, `gatebound-sprites`, `gatebound-play`), secrets,
+> config, the LB IP 192.168.1.223 and the HTTPRoute (it answers 503 while paused).
+> A full `mariadb-dump --all-databases` from the same day (MariaDB 11.8.9) is kept
+> off-cluster. **Resume:** set `replicas: 1` in `mariadb-deployment.yaml`, then
+> `tfs-deployment.yaml` and `web-deployment.yaml` once mariadb is Ready (TFS does
+> not reconnect to a DB that comes up after it), push, and check `Gatebound
+> Server Online!` in the tfs log.
+
 Onboarding of the Gatebound-2d game (source repo `D:\Github\Gatebound-2d`) into
 the cluster. Mirrors the game's `docker-compose.yml`. Plain kustomize (not Helm)
 to match the rest of `kubernetes/applications/`.
