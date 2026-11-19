@@ -27,11 +27,14 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgresql
-          image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+          image: ghcr.io/immich-app/postgres:17-vectorchord0.4.3-pgvector0.8.1@sha256:79b95b795f0911e95ffa4d092a2162c4d81a984d5629bc8f786afe0bc0657671
           imagePullPolicy: IfNotPresent
           env:
+            # pgdata17: fresh cluster restored from a pg_dumpall on 2026-11-19 (14 -> 17).
+            # The old PG14 directory pgdata/ stays on the volume as rollback; delete it
+            # once 17 has run a while (rollback = old image + PGDATA pgdata).
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: /var/lib/postgresql/data/pgdata17
             - name: POSTGRES_USER
               value: immich
             - name: POSTGRES_DB
