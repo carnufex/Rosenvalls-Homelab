@@ -72,7 +72,7 @@ Core = skala aldrig ner.
 | **devops-app-demo-klocka** | demo-klocka (inga requests) | 0 | 71 | – | – | demo-klocka.rosenvall.se, nät 0, skapad 2026-05-28, ns märkt `rosenvall-devops-board-app`, ligger **inte** i `kubernetes/applications/` | **Kandidat** (RDO-demo från maj) |
 | **devops-app-demo-local-git** | demo-local-git (inga requests) | 0 | 118 | – | – | demo-local-git.rosenvall.se, nät 0, skapad 2026-05-29, samma ursprung | **Kandidat** (RDO-demo från maj) |
 | **gatebound** (pausad 2026-11-19) | mariadb, tfs, web = 0 repl. | 0 | 0 | – | **14 / 1,9** (mariadb 5 + play 1 + sprites 1, ×2) | gatebound-web-route kvar; tfs låg på ~2,4 GiB/61 m i 30 d innan pausen | Redan nedskalad — kvarvarande 14 GiB Longhorn-schema |
-| **ollama** | inga pods; bara ns + Service/Endpoints (externt) | 0 | 0 | – | – | Ns 266 dygn gammalt | Inget körs — kan tas bort helt (gitops-städning) |
+| **ollama** | inga pods; bara ns + selector-lös Service/Endpoints → `192.168.1.215:11434` (Ollama på dev-PC:n, inte i klustret) | 0 | 0 | – | – | Kostar inget. `rosenvall-devops/configmap.yaml` pekar `Ai__OllamaEndpoint` hit | Går att ta bort, men RDO:s AI-endpoint går sönder om den inte flyttas först |
 
 ## Slutsatser
 
