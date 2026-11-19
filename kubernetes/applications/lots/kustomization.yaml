@@ -49,6 +49,7 @@ configMapGenerator:
       - guards.yaml=gitops/guards.yaml
       - incidents-demo.yaml=gitops/incidents-demo.yaml
       - incidents-homelab.yaml=gitops/incidents-homelab.yaml
+      - incidents-updates.yaml=gitops/incidents-updates.yaml
   # Incidents on the real cluster, the fix path (README.md): the OpenAPI document of oncall-tools' GET /ops/changes and
   # POST /ops/rollback, mounted read-only into the tool pack (OpenApi__Spec, toolpack.yaml). openapi/oncall-ops.json is a byte-identical
   # copy of services/oncall-tools/openapi/ops.json in carnufex/oncall-voice-copilot: copy it again when that file changes. To remove:
