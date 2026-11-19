@@ -93,13 +93,17 @@ worker:
   resources:
     requests:
       cpu: 500m
-      memory: 6Gi
+      # 6Gi/7Gi dated from the Aug 2026 OOM, whose root cause (expired channel
+      # messages, fixed in authentik 2025.10.4) is gone: the worker's daily max
+      # over 30 days is ~500 MiB. 1Gi request, 3Gi limit: a repeat of that leak is
+      # OOM-killed (HomelabPodCrashLooping) long before it starves the node.
+      memory: 1Gi
     limits:
       # Kept the request at 500m so scheduling is unchanged, but the worker
       # runs bursty task batches and sat pinned against a 500m ceiling from
       # the 2026.8 upgrade onwards (CPUThrottlingHigh, continuously firing).
       cpu: 2000m
-      memory: 7Gi
+      memory: 3Gi
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
