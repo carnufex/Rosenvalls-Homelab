@@ -1,0 +1,43 @@
+# Default deny in both directions with DNS open, then the site answers only the Cilium Gateway (HTTPRoute blogg on
+# gateway/external). The site makes no outbound calls. Debug drops: hubble observe -n blogg --verdict DROPPED
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+  namespace: blogg
+spec:
+  endpointSelector: {}
+  ingress:
+    - {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: blogg
+  namespace: blogg
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: blogg
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

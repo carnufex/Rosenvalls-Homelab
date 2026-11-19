@@ -1,0 +1,62 @@
+# blogg.rosenvall.se: static Astro site served by nginx-unprivileged (uid 101) on :8080, read-only root.
+# Source, image build and deploy script: https://github.com/carnufex/rosenvall-blogg (deploy/deploy.sh rewrites the
+# image pin below); rollback = revert that commit.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blogg
+  namespace: blogg
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: blogg
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: blogg
+    spec:
+      imagePullSecrets:
+        - name: blogg-image-pull
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: site
+          image: registry.rosenvall.se/carnufex/blogg:sha-5ede3be@sha256:f389752e342713311789fa474b1b929c6607d83219e23421d383978960ba60ba
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe: { httpGet: { path: /healthz, port: http }, initialDelaySeconds: 2, periodSeconds: 10 }
+          livenessProbe: { httpGet: { path: /healthz, port: http }, initialDelaySeconds: 5, periodSeconds: 30 }
+          resources:
+            requests: { cpu: 10m, memory: 24Mi }
+            limits: { cpu: 300m, memory: 96Mi }
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 32Mi }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: blogg
