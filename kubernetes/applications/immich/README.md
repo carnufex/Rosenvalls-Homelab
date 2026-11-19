@@ -16,8 +16,13 @@ the internal endpoint before it was enabled.
 - Immich server: `ghcr.io/immich-app/immich-server:v3.1.0`, digest-pinned
 - Machine learning: `ghcr.io/immich-app/immich-machine-learning:v3.1.0`,
   digest-pinned, CPU-only
-- PostgreSQL 14 with VectorChord: the exact digest used by the Immich v3.1.0
-  release compose file
+- PostgreSQL 17 with VectorChord 0.4.3 + pgvector 0.8.1
+  (`ghcr.io/immich-app/postgres:17-vectorchord0.4.3-pgvector0.8.1`, digest-pinned).
+  Moved from 14 on 2026-11-19 by `pg_dumpall` into a fresh cluster in
+  `PGDATA=/var/lib/postgresql/data/pgdata17`; the old 14 directory `pgdata/` is
+  still on the volume as rollback (old image + `PGDATA=.../pgdata`). A Postgres
+  major change in this image always needs dump/restore, never an image swap on
+  the same directory.
 - Valkey 9: the exact digest used by the Immich v3.1.0 release compose file
 - Media: the dedicated 2 TiB WD Red-backed NFS export
   `192.168.1.231:/srv/nfs/immich`, mounted directly at `/data`
