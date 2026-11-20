@@ -4,50 +4,84 @@ metadata:
   name: proxmox-storage-alert
   namespace: monitoring
 data:
-  # Alert-only Proxmox storage-fill check. Silent when every pool is below
-  # THRESHOLD; posts to Slack only when a pool is filling. Prometheus does NOT
-  # scrape Proxmox, so this closes the blind spot that caused the 2026-07-13
-  # local-lvm-full io-error outage (thin pool hit 100% -> QEMU froze the VMs).
+  # Proxmox storage-fill check. Prometheus does NOT scrape Proxmox, so this closes
+  # the blind spot that caused the 2026-07-13 local-lvm-full io-error outage (thin
+  # pool hit 100% -> QEMU froze the VMs).
+  #
+  # It raises alerts in Alertmanager instead of posting to Slack itself, so
+  # Alertmanager is its memory: one alert per pool at or above THRESHOLD
+  # (ProxmoxStorageFilling, labels node and storage), announced once in
+  # #homelab-alerts, repeated every repeat_interval while it lasts, and
+  # announced as resolved when the pool is below the threshold again. The same
+  # alert reaches Lots through the route lots (values.yaml), where a repeat is
+  # an occurrence of the open incident, never a second one.
+  #
+  # Every run sends the pools that are filling again with an end time
+  # KEEP_SECONDS ahead (three runs: one missed run does not resolve and re-fire
+  # the alert), and ends what it had firing that no longer holds.
   proxmox-storage-alert.sh: |
     #!/bin/sh
     set -eu
 
     THRESHOLD="${THRESHOLD:-85}"
     PVE_URL="${PVE_URL:-https://192.168.1.111:8006/api2/json}"
-    WEBHOOK="$(cat /etc/slack/webhook-url)"
+    AM_URL="${AM_URL:-http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093}"
+    KEEP_SECONDS="${KEEP_SECONDS:-6000}"
     TOKEN="$(cat /etc/proxmox/token)"
 
-    slack() {
-      # $1 = JSON-safe text
-      payload="$(jq -n --arg t "$1" '{text:$t}')"
-      curl -sk --max-time 15 -X POST -H 'Content-type: application/json' \
-        --data "$payload" "$WEBHOOK" >/dev/null 2>&1 || true
+    # What this check has firing in Alertmanager now. When that cannot be read,
+    # nothing is ended early: the alerts end by themselves after KEEP_SECONDS.
+    active="$(curl -s --max-time 15 -G --data-urlencode 'filter=check="proxmox-storage"' \
+        --data 'active=true' --data 'silenced=true' --data 'inhibited=true' \
+        "${AM_URL}/api/v2/alerts" || true)"
+    printf '%s' "$active" | jq -e 'type == "array"' >/dev/null 2>&1 || active='[]'
+
+    send() {
+      # $1 = what fires now, a JSON array of {labels, annotations}
+      # $2 = what was firing and may be ended when it is not in $1
+      payload="$(jq -cn --argjson firing "$1" --argjson was "$2" --argjson keep "$KEEP_SECONDS" '
+        ($firing | map(. + {endsAt: (now + $keep | floor | todate)}))
+        + ($was
+           | map(select(.labels as $l | ($firing | any(.labels == $l)) | not))
+           | map({labels, annotations, startsAt, endsAt: (now | floor | todate)}))')"
+      if [ "$payload" = "[]" ]; then return 0; fi
+      code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 -X POST \
+        -H 'Content-Type: application/json' --data "$payload" "${AM_URL}/api/v2/alerts" || true)"
+      echo "alertmanager_status=${code} sent=$(printf '%s' "$payload" | jq length)"
+      [ "$code" = "200" ]
     }
 
     # Query storage usage across all Proxmox nodes in one call.
-    if ! resp="$(curl -sk --max-time 20 \
-        -H "Authorization: PVEAPIToken=${TOKEN}" \
-        "${PVE_URL}/cluster/resources?type=storage")"; then
-      slack ":rotating_light: *Proxmox storage-check FAILED* — could not reach the Proxmox API at ${PVE_URL}. The control node or Proxmox host may be down. Investigate."
-      echo "ERROR: Proxmox API unreachable"
+    resp="$(curl -sk --max-time 20 -H "Authorization: PVEAPIToken=${TOKEN}" \
+        "${PVE_URL}/cluster/resources?type=storage" || true)"
+    if ! printf '%s' "$resp" | jq -e '.data | type == "array"' >/dev/null 2>&1; then
+      echo "ERROR: Proxmox API unreachable or answered without data"
+      failed="$(jq -cn --arg url "$PVE_URL" '[{
+        labels: {alertname: "ProxmoxStorageCheckFailed", severity: "warning", check: "proxmox-storage"},
+        annotations: {
+          summary: "The Proxmox storage check could not read the Proxmox API.",
+          description: "No answer with data from \($url). The control node or the Proxmox host may be down, or the token is refused. Until it answers, a filling pool is not noticed."}}]')"
+      # The pools are unknown, so no ProxmoxStorageFilling alert is ended.
+      send "$failed" '[]' || { echo "ERROR: could not post to Alertmanager"; exit 1; }
       exit 0
     fi
 
-    # Lines for every pool at/above the threshold.
-    alerts="$(printf '%s' "$resp" | jq -r --argjson t "$THRESHOLD" '
+    # One alert per pool at or above the threshold. The labels are the pool's
+    # identity; the numbers are annotations, so a pool that grows is the same alert.
+    firing="$(printf '%s' "$resp" | jq -c --argjson t "$THRESHOLD" '[
       .data[]
       | select(.maxdisk > 0)
       | (.disk / .maxdisk * 100) as $pct
       | select($pct >= $t)
-      | "• *\(.node)/\(.storage)* — \($pct|floor)% used (\((.disk/1073741824)|floor)/\((.maxdisk/1073741824)|floor) GB)"
-    ')"
+      | {labels: {alertname: "ProxmoxStorageFilling", severity: "warning", check: "proxmox-storage",
+                  node: .node, storage: .storage},
+         annotations: {
+           summary: "Proxmox storage \(.node)/\(.storage) is \($pct | floor)% full (\((.disk / 1073741824) | floor)/\((.maxdisk / 1073741824) | floor) GB).",
+           description: "At or above \($t)%. A full pool freezes VMs with io-error and can take down the control plane. Free space, delete unused disks, or move a disk to WD-red before it reaches 100%."}}]')"
 
-    if [ -n "$alerts" ]; then
-      slack ":warning: *Proxmox storage filling up* (≥${THRESHOLD}%)
-    ${alerts}
-
-    _A full pool freezes VMs with \`io-error\` and can take down the control plane. Free space, delete unused disks, or move a disk to WD-red before it reaches 100%._"
-      echo "ALERT sent:"; printf '%s\n' "$alerts"
+    if [ "$firing" = "[]" ]; then
+      echo "OK: all Proxmox storage pools below ${THRESHOLD}%"
     else
-      echo "OK — all Proxmox storage pools below ${THRESHOLD}%"
+      echo "FILLING:"; printf '%s' "$firing" | jq -r '.[].annotations.summary'
     fi
+    send "$firing" "$active" || { echo "ERROR: could not post to Alertmanager"; exit 1; }

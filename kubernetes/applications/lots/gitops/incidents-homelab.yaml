@@ -50,9 +50,15 @@ runbooks: [crashloop-runbook]
 # propose: the investigation may propose the runbook's fix (rollback_service), which waits for a person's approval. To turn proposing
 # off: autonomy: observe (the run then only reports the finding).
 autonomy: propose
+# The drill's fault is decided right away; the source's settle time below is for alerts that often resolve by themselves.
+settleSeconds: 20
 ---
-# The cluster's Alertmanager (receiver lots, infrastructure/monitoring/prometheus-stack/values.yaml). For now only alerts from namespace
-# oncall-demo are routed here; every alert still reaches Slack as before. The secret is the Bitwarden entry LOTS_SIGNAL_HOMELAB.
+# The cluster's Alertmanager (receiver lots, infrastructure/monitoring/prometheus-stack/values.yaml). Every alert is routed here
+# except Lots' own (Lots*); every alert still reaches Slack as before. The two cron checks come the same way: the Proxmox storage
+# check raises ProxmoxStorageFilling, and the tofu-drift job OpenTofuDrift, in Alertmanager. An alert no service claims is one
+# incident per alertname and namespace in homelab-ops, investigated read-only; a repeat of a firing alert is an occurrence of
+# that incident. settleSeconds 120: an alert that resolves within two minutes is settled without an investigation.
+# The secret is the Bitwarden entry LOTS_SIGNAL_HOMELAB.
 kind: AlertSource
 name: homelab-alertmanager
 type: alertmanager
@@ -62,7 +68,7 @@ secretRef: env:LOTS_SIGNAL_HOMELAB
 identity: { user: svc-homelab-sre, roles: [observer], proposeRoles: [responder] }
 defaultProfile: homelab-ops
 groupBy: [alertname, namespace]
-gate: { minSeverity: warning, settleSeconds: 20, budget: { perDay: 20, perServicePerDay: 10 } }
+gate: { minSeverity: warning, settleSeconds: 120, budget: { perDay: 20, perServicePerDay: 10 } }
 ignore:
   - { alertname: Watchdog }
   - { alertname: InfoInhibitor }

@@ -14,7 +14,8 @@ metadata:
 data:
   tofu-drift.sh: |
     #!/bin/sh
-    # Runs `tofu plan` for tofu/ on master and reports drift to Slack.
+    # Runs `tofu plan` for tofu/ on master and reports drift to Slack, and raises
+    # the same result as an alert in Alertmanager so Lots gets it (the last block).
     # Read-only: -lock=false, read-only Proxmox token, never applies, never
     # writes state. Exit 0 = plan ran (drift or not) or provider downloads were
     # unreachable for the first run in a row; 1 = plan could not run.
@@ -149,6 +150,46 @@ data:
     else
       log "nothing new to report (silent)"
       [ "${digest}" != "${prev_digest}" ] && kset "${digest}" "${prev_posted}"
+    fi
+
+    # --- the same result as an alert, for Lots ---------------------------------
+    # Every run: OpenTofuDrift while the plan shows drift, OpenTofuDriftCheckFailed
+    # while it cannot run. Alertmanager's route lots sends them to Lots, where a
+    # repeat is an occurrence of the open incident; its route for these two names
+    # ends in the null receiver, because Slack is told above, by this job
+    # (prometheus-stack/values.yaml). The alert is kept three days ahead, so a
+    # day without a result does not resolve it and start a second incident, and
+    # it is ended here as soon as a run shows it no longer holds. A plan that
+    # could not run ends nothing: the drift is unknown then.
+    AM_URL="${AM_URL:-http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093}"
+    am_active="$(curl -s --max-time 15 -G --data-urlencode 'filter=check="tofu-drift"' \
+      --data 'active=true' --data 'silenced=true' --data 'inhibited=true' "${AM_URL}/api/v2/alerts" || true)"
+    printf '%s' "${am_active}" | jq -e 'type == "array"' >/dev/null 2>&1 || am_active='[]'
+    case "${result}" in
+      clean) am_firing='[]'; am_was="${am_active}" ;;
+      drift) am_was="${am_active}"
+             am_firing="$(jq -cn --arg c "${commit}" --arg p "${planline}" --arg l "$(head -25 "${summary}")" '[{
+               labels: {alertname: "OpenTofuDrift", severity: "warning", check: "tofu-drift"},
+               annotations: {
+                 summary: "OpenTofu drift: Proxmox/Talos no longer match master.",
+                 description: "tofu plan on master@\($c). \($p)\n\($l)\nReview locally with scripts/tofu.ps1 plan (Rosenvalls-Homelab). Either the live change belongs in Git, or a saved plan undoes it."}}]')" ;;
+      *)     am_was='[]'
+             am_firing="$(jq -cn --arg c "${commit}" --arg l "$(head -15 "${summary}")" '[{
+               labels: {alertname: "OpenTofuDriftCheckFailed", severity: "warning", check: "tofu-drift"},
+               annotations: {
+                 summary: "The OpenTofu drift check could not run.",
+                 description: "tofu plan on master@\($c) failed, so drift is not noticed.\n\($l)\nLogs: kubectl -n tofu-drift logs job/<latest>"}}]')" ;;
+    esac
+    am_payload="$(jq -cn --argjson firing "${am_firing}" --argjson was "${am_was}" '
+      ($firing | map(. + {endsAt: (now + 259200 | floor | todate)}))
+      + ($was
+         | map(select(.labels as $l | ($firing | any(.labels == $l)) | not))
+         | map({labels, annotations, startsAt, endsAt: (now | floor | todate)}))')"
+    if [ -n "${am_payload}" ] && [ "${am_payload}" != "[]" ]; then
+      am_code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 -X POST -H 'Content-Type: application/json' \
+        --data "${am_payload}" "${AM_URL}/api/v2/alerts" || true)"
+      log "alertmanager_status=${am_code} sent=$(printf '%s' "${am_payload}" | jq length)"
+      [ "${am_code}" = "200" ] || log "WARN the alert did not reach Alertmanager, so Lots does not see this result"
     fi
 
     [ "${result}" = error ] && exit 1

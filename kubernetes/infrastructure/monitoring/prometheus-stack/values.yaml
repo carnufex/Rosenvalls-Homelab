@@ -97,17 +97,25 @@ alertmanager:
       group_interval: 5m
       repeat_interval: 4h
       routes:
-        # Lots (applications/lots/README.md, "Incidents on the real cluster"): alerts of namespace oncall-demo also go to Lots,
-        # which opens an incident and investigates it. continue: true, so they go on through the routes below exactly as before;
-        # Lots is never the only path. Short timings for the demo: Lots settles and deduplicates itself. To remove: this route,
-        # the receiver lots, the catch-all route at the end, and alertmanager-lots in alertmanagerSpec.secrets.
+        # Lots (applications/lots/README.md, "Incidents on the real cluster"): every alert also goes to Lots, which opens an
+        # incident and investigates it. continue: true, so they go on through the routes below exactly as before; Lots is never
+        # the only path. Left out: Lots' own alerts (Lots*, applications/lots/monitoring.yaml), which it cannot investigate
+        # when it is the thing that is down. Short timings: Lots settles and deduplicates itself (a repeat of a firing alert is
+        # an occurrence of its open incident, never a second incident). To remove: this route, the receiver lots, the
+        # OpenTofu route below, the catch-all route at the end, and alertmanager-lots in alertmanagerSpec.secrets.
         - receiver: lots
           matchers:
-            - namespace = "oncall-demo"
+            - alertname !~ "Lots.+"
           continue: true
           group_wait: 5s
           group_interval: 1m
           repeat_interval: 4h
+        # The tofu-drift job (infrastructure/controllers/tofu-drift) posts its result to Slack itself, with its own memory (when
+        # drift appears, changes, clears, and a weekly reminder), and raises these alerts only so Lots gets them through the
+        # route above. Without this route Slack would get every drift twice.
+        - receiver: "null"
+          matchers:
+            - alertname =~ "OpenTofuDrift|OpenTofuDriftCheckFailed"
         # Longhorn capacity alerts go to the ops bot, which re-posts them to the
         # channel with a "Clean orphaned volumes" action button.
         - receiver: slack-ops-bot
@@ -121,8 +129,8 @@ alertmanager:
           matchers:
             - alertname = "InfoInhibitor"
         # Catch-all, last: once a child route has matched (the lots route above does, with continue), Alertmanager no longer
-        # falls back to the root receiver, so without this an oncall-demo alert would reach only Lots. Everything no route above
-        # stopped reaches slack-homelab, as it did through the root receiver. Remove it together with the lots route.
+        # falls back to the root receiver, so without this an alert would reach only Lots. Everything no route above stopped
+        # reaches slack-homelab, as it did through the root receiver. Remove it together with the lots route.
         - receiver: slack-homelab
     receivers:
       - name: "null"

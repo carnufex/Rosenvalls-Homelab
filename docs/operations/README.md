@@ -225,6 +225,13 @@ timeouts) the first run is silent and exits 0 (log line
 `result=unavailable ... run=1`); it only reports when that happens two runs in a
 row (`unavailableRuns` in the status ConfigMap).
 
+Every run also raises its result as an alert in Alertmanager, for Lots:
+`OpenTofuDrift` while the plan shows drift, `OpenTofuDriftCheckFailed` while it
+cannot run. Alertmanager sends them to Lots only (their route ends in `null`:
+the job tells Slack itself). In Lots a drift is one incident for as long as it
+lasts; the job ends the alert when a plan is clean. Log line:
+`tofu-drift: alertmanager_status=200 sent=N`.
+
 - Proxmox access: token `root@pam!tofu-drift` (Bitwarden
   `proxmox-tofu-drift-token`), role `TofuDriftReader` = the `PVEAuditor`
   privileges plus `VM.Config.Disk`. Proxmox answers 403 to reading VM disk
@@ -353,8 +360,12 @@ after the host has enough reserve.
 ## Proxmox Host Disk (desktop)
 
 On `desktop` the `local` and `desktop-lagring` storages share one root
-filesystem (`/dev/mapper/pve-root`, 94 GB), so the "Proxmox storage filling up"
-alert reports both at the same percentage. The filesystem holds the
+filesystem (`/dev/mapper/pve-root`, 94 GB), so the alert `ProxmoxStorageFilling`
+reports both at the same percentage. (`CronJob/monitoring/proxmox-storage-alert`
+checks every pool every 30 minutes and raises one alert per pool at 85% or more
+in Alertmanager, which tells `#homelab-alerts` once, again every 4 h while it
+lasts, and when it is over, and passes it to Lots as one incident. Log lines:
+`FILLING:` or `OK:`, and `alertmanager_status=200 sent=N`.) The filesystem holds the
 qcow2 boot disks of worker-01 (48G) and worker-02 (20G), the Talos and
 Debian images, apt's cache and the host's journal.
 

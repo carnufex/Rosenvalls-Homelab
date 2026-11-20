@@ -5,7 +5,8 @@ metadata:
   namespace: monitoring
 spec:
   # Every 30 min. A thin pool can go from ~85% to full in under an hour under
-  # load, so we check often enough to leave time to act.
+  # load, so we check often enough to leave time to act. The check raises alerts
+  # in Alertmanager (the script's header), which tells Slack and Lots once.
   schedule: "*/30 * * * *"
   timeZone: Europe/Stockholm
   concurrencyPolicy: Forbid
@@ -40,9 +41,6 @@ spec:
                 - name: script
                   mountPath: /scripts
                   readOnly: true
-                - name: slack
-                  mountPath: /etc/slack
-                  readOnly: true
                 - name: proxmox
                   mountPath: /etc/proxmox
                   readOnly: true
@@ -64,9 +62,6 @@ spec:
               configMap:
                 name: proxmox-storage-alert
                 defaultMode: 0555
-            - name: slack
-              secret:
-                secretName: alertmanager-slack
             - name: proxmox
               secret:
                 secretName: proxmox-monitoring-token

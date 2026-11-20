@@ -145,17 +145,25 @@ rollback, which waits for a person (the fix path, below); it changes nothing on 
   (`kustomization.yaml`, `openapi/oncall-ops.json`), `LOTS_ONCALL_OPS_AUTH` (`secrets.yaml`), the tool pack's rule to oncall-tools
   (`networkpolicy.yaml`), `LotsApprovalBacklog` (`monitoring.yaml`), `proposeRoles` and the runbook's fix part, and in `homelab-ops`
   the two tools, the `responder` role, `approvals` and their policy tests.
-- **What is sent to Lots:** only alerts with `namespace="oncall-demo"` for now (the first child route in
-  `infrastructure/monitoring/prometheus-stack/values.yaml`, with `continue: true`). Every alert, those included, still reaches
-  Slack `#homelab-alerts` as before; the last child route is the catch-all to `slack-homelab` that keeps it so.
+- **What is sent to Lots:** every alert except Lots' own (`alertname !~ "Lots.+"`: it cannot investigate itself being down); the
+  first child route in `infrastructure/monitoring/prometheus-stack/values.yaml`, with `continue: true`. Every alert still reaches
+  Slack `#homelab-alerts` as before; the last child route is the catch-all to `slack-homelab` that keeps it so. The two cron
+  checks come the same way, as alerts they raise in Alertmanager: the Proxmox storage check (`ProxmoxStorageFilling`,
+  `ProxmoxStorageCheckFailed`; Alertmanager also tells Slack, once and then every `repeat_interval`) and the tofu-drift job
+  (`OpenTofuDrift`, `OpenTofuDriftCheckFailed`; the job tells Slack itself, so their route after `lots` ends in `null`).
+- **One thing, one incident:** Alertmanager repeats a firing alert every 4 h and both checks send theirs again on every run. In
+  Lots each of those is an occurrence of the alert's open incident (also of one the gate skipped), never a second incident and
+  never a second investigation or approval notice. A new incident starts only after the alert resolved and fires again. Only
+  `demo-api` is a service; every other alert is one incident per `alertname` and `namespace` in `homelab-ops`, investigated
+  read-only. An alert that resolves within the source's two-minute settle time is settled without an investigation.
 - **Parts:** the context `homelab-ops` (`app.yaml`, `lots-profiles`); the runbook `crashloop-runbook`, the service `demo-api` and the
   alert source `homelab-alertmanager` with its drill (`gitops/incidents-homelab.yaml`); the ServiceAccount and the Role
   (`ops-rbac.yaml`); `Kubernetes__InCluster`, `serviceAccountName: lots-toolpack` and the `OpenApi__*` lines (`toolpack.yaml`);
   `lots-oncall-openapi` (`kustomization.yaml`); four rules in `networkpolicy.yaml` (Alertmanager to the shell, the shell and the
   tool pack to oncall-tools, the tool pack to the API server); `LOTS_SIGNAL_HOMELAB`, `LOTS_DRILL_ONCALL_TOKEN` and
   `LOTS_ONCALL_OPS_AUTH` (`secrets.yaml`); in `oncall-demo`, `DRILL_API_TOKEN` (`tools-externalsecret.yaml`); in
-  `monitoring`, the ExternalSecret `alertmanager-lots`, the receiver and the two routes in `values.yaml`, and
-  `oncall-demo-alerts.yaml`.
+  `monitoring`, the ExternalSecret `alertmanager-lots`, the receiver and the three routes in `values.yaml` (`lots`, the
+  OpenTofu route to `null`, the catch-all), and `oncall-demo-alerts.yaml`.
 - **When it does not work:** the shell's log lines for signals and investigations, Lots' alerts `LotsSignalsRefused` (a wrong
   bearer: Alertmanager's copy of `LOTS_SIGNAL_HOMELAB`), `LotsInvestigationsFailing` and `LotsIncidentsNotInvestigated`
   (`monitoring.yaml`; `LotsSignalsSilent` is not deployed: the source has no heartbeat), `LotsApprovalBacklog` for a rollback nobody
@@ -163,8 +171,9 @@ rollback, which waits for a person (the fix path, below); it changes nothing on 
   failed fix on the incident, oncall-tools' log lines `ops: ...`, the rollback commit by `oncall-copilot` in this repository's
   history, the drill's outcome line
   and audit row (`GET /audit?tool=incident.drill`), the tool pack pod's readiness, and `hubble observe -n lots --verdict DROPPED`.
-- **Remove it:** delete those parts (the two Alertmanager routes and the receiver together); the incidents it made stay in the
-  database until Lots' retention removes them.
+- **Remove it:** delete those parts (the three Alertmanager routes and the receiver together); the incidents it made stay in the
+  database until Lots' retention removes them. The storage check then still reaches Slack through Alertmanager; the tofu-drift
+  job's alert block can stay (nothing routes it) or go.
 
 ## Updates
 
