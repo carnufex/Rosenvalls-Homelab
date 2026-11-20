@@ -5,8 +5,8 @@ Source: `carnufex/NextGenerationMe` → `web/` (Next.js 15, standalone output, P
 
 - **Host**: `träna.rosenvall.se` (punycode `xn--trna-moa.rosenvall.se` in the HTTPRoute).
   Covered by the wildcard DNS record and wildcard certificate — no Cloudflare changes needed.
-- **Image**: `registry.rosenvall.se/carnufex/ngm:sha-<gitshort>` — built locally from
-  `NextGenerationMe/web/`, pushed to the self-hosted registry, tag bumped here to deploy.
+- **Image**: `registry.rosenvall.se/carnufex/ngm:sha-<gitshort>@sha256:<digest>` — built from
+  `NextGenerationMe/web/` by NGM's CI on every push to main, pinned here by the deployer bot.
 - **Database**: CNPG cluster `ngm-postgresql` (2 instances, Postgres 17, `longhorn-critical`,
   `database.yaml`). The app reads `DATABASE_URL` from the CNPG-generated secret
   `ngm-postgresql-app` (key `uri`). Migrated from SQLite 2026-08-28; the old SQLite file
@@ -52,7 +52,11 @@ removed in the 2026-10-20 pivot to a private personal tool.
 3. Restart: `kubectl -n ngm rollout restart deployment/ngm`. The "Fortsätt med Google"
    button appears on /login automatically when the env vars are present.
 
-Build & deploy:
+Build & deploy: every push to NGM `main` is deployed by its CI (`.github/workflows/ci.yml`): the
+image is built on a GitHub-hosted runner, pushed and cosign-signed from the ARC runner scale set
+`ngm-cluster` (`infrastructure/controllers/arc-runners`), and the bot commits
+`ngm:sha-<gitshort>@sha256:<digest>` into `deployment.yaml` and `cronjob-polar-sync.yaml`.
+By hand (fallback):
 
 ```
 cd NextGenerationMe/web
