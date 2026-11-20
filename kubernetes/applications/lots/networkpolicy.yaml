@@ -221,7 +221,7 @@ spec:
             - port: "8080"
               protocol: TCP
     # Incidents on the real cluster (README.md): the Kubernetes tools call the API server (Kubernetes__InCluster, toolpack.yaml).
-    # What they may read there is ops-rbac.yaml: oncall-demo, read only. To remove: this rule and the parts listed in ops-rbac.yaml.
+    # What they may read there is ops-rbac.yaml: every namespace, read only, no Secrets. To remove: this rule and the parts listed in ops-rbac.yaml.
     - toEntities:
         - kube-apiserver
       toPorts:

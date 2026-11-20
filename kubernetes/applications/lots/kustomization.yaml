@@ -11,7 +11,7 @@ resources:
   - app.yaml
   - toolpack.yaml
   - toolpack-updates.yaml # Updates: update-center's machine API as tools for the homelab-updates context (README.md)
-  - ops-rbac.yaml # Incidents on the real cluster: the tool pack's read-only reach into oncall-demo (README.md)
+  - ops-rbac.yaml # Incidents on the real cluster: the tool pack's read-only reach into the cluster (README.md)
   - networkpolicy.yaml
   - httproute.yaml
   - monitoring.yaml

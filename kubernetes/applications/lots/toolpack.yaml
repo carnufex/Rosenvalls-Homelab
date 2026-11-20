@@ -33,7 +33,7 @@ spec:
       labels:
         app.kubernetes.io/name: lots-toolpack
     spec:
-      # Its own ServiceAccount (ops-rbac.yaml), with a token: the Kubernetes tools read namespace oncall-demo with it, nothing else.
+      # Its own ServiceAccount (ops-rbac.yaml), with a token: the Kubernetes tools read the cluster with it (no Secrets), nothing else.
       # The token is a projected read-only volume, so the read-only root filesystem below needs nothing more.
       serviceAccountName: lots-toolpack
       securityContext:
@@ -83,8 +83,8 @@ spec:
                   name: lots-secrets
                   key: LOTS_DEMO_SIGNAL_SECRET
             # Incidents on the real cluster (README.md): k8s_list, k8s_describe and k8s_logs (GET only, never Secrets or ConfigMaps)
-            # against the API server with the pod's ServiceAccount token. Its reach is the RBAC in ops-rbac.yaml: oncall-demo, read
-            # only. Used by the homelab-ops context (app.yaml). To remove: this line and the parts listed in ops-rbac.yaml.
+            # against the API server with the pod's ServiceAccount token. Its reach is the RBAC in ops-rbac.yaml: every namespace,
+            # read only. Used by the homelab-ops context (app.yaml). To remove: this line and the parts listed in ops-rbac.yaml.
             - { name: Kubernetes__InCluster, value: "true" }
             # Incidents on the real cluster, the fix path (README.md): the OpenAPI pack turns oncall-tools' two operations into the tools
             # recent_changes (GET /ops/changes, read) and rollback_service (POST /ops/rollback, write: only demo-api, only back to its

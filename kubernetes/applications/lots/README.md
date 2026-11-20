@@ -119,8 +119,11 @@ rollback, which waits for a person (the fix path, below); it changes nothing on 
 
   The new pod goes, the alert resolves, and Alertmanager sends the resolved alert, which resolves the incident.
 - **What the agent can reach:** the tool pack's `k8s_list`, `k8s_describe` and `k8s_logs` (GET only), as the ServiceAccount
-  `lots-toolpack` (`ops-rbac.yaml`): get, list and watch on pods, pods/log, events, services, deployments, statefulsets and
-  daemonsets in `oncall-demo` alone. No other namespace (a 403), no Secrets, no ConfigMaps, no writes, no exec. Its only way to
+  `lots-toolpack` (`ops-rbac.yaml`, a ClusterRole): get, list and watch in every namespace on the kinds those tools know (pods,
+  pods/log, events, services, PVCs, nodes, namespaces, deployments, statefulsets, daemonsets, jobs, cronjobs, ingresses). No
+  Secrets, no ConfigMaps, no writes, no exec, and nothing outside Kubernetes (Proxmox, OpenTofu state). Every namespace since
+  2026-11-20, when every alert started reaching Lots; until then `oncall-demo` alone. What it reads, pod specs with plain env
+  values and logs included, goes to the context's model and is kept with the run. Its only way to
   change anything is the approved `rollback_service` above; the drill button (an admin) and the reset (a person) are not the agent's.
 - **The fix path:** the service `demo-api` has `autonomy: propose`, so its investigation runs with the role `responder`
   (`proposeRoles` on the alert source) and may call oncall-tools' two operations through the tool pack's OpenAPI pack:

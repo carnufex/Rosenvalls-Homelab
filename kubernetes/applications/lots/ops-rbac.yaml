@@ -1,7 +1,11 @@
 # Incidents on the real cluster (README.md): the identity the tool pack's Kubernetes tools (k8s_list, k8s_describe, k8s_logs;
 # Kubernetes__InCluster in toolpack.yaml) use, and everything it may do. The tool pack has no namespace list of its own, so this RBAC
-# is the whole reach of those tools: one namespace, oncall-demo, read only. No ClusterRole, no Secrets, no ConfigMaps, no write verbs,
-# no exec. A k8s_* call anywhere else is a 403 from the API server.
+# is the whole reach of those tools: read only, in every namespace, of exactly the kinds the tools know (pods and their logs, events,
+# services, PVCs, nodes, namespaces, deployments, statefulsets, daemonsets, jobs, cronjobs, ingresses). No Secrets, no ConfigMaps, no
+# write verbs, no exec. Every namespace since 2026-11-20: Alertmanager sends Lots every alert, and an investigation that can only read
+# oncall-demo finds nothing about the others. What it reads (pod specs with their plain env values, and logs) goes to the model of
+# the context homelab-ops and is kept with the run. To go back to one namespace: a Role and RoleBinding in it in place of the two
+# cluster-wide objects below.
 # To remove: this file (and its line in kustomization.yaml), Kubernetes__InCluster and serviceAccountName in toolpack.yaml (back to
 # lots-runtime), and the kube-apiserver rule in networkpolicy.yaml.
 apiVersion: v1
@@ -18,25 +22,29 @@ imagePullSecrets:
 automountServiceAccountToken: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: lots-toolpack-read
-  namespace: oncall-demo
   annotations:
     argocd.argoproj.io/sync-wave: "-5"
 rules:
   - apiGroups: [""]
-    resources: [pods, pods/log, events, services]
+    resources: [pods, pods/log, events, services, persistentvolumeclaims, nodes, namespaces]
     verbs: [get, list, watch]
   - apiGroups: [apps]
     resources: [deployments, statefulsets, daemonsets]
     verbs: [get, list, watch]
+  - apiGroups: [batch]
+    resources: [jobs, cronjobs]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses]
+    verbs: [get, list, watch]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: lots-toolpack-read
-  namespace: oncall-demo
   annotations:
     argocd.argoproj.io/sync-wave: "-5"
 subjects:
@@ -45,5 +53,5 @@ subjects:
     namespace: lots
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: lots-toolpack-read
