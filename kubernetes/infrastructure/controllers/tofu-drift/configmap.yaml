@@ -180,11 +180,14 @@ data:
                  summary: "The OpenTofu drift check could not run.",
                  description: "tofu plan on master@\($c) failed, so drift is not noticed.\n\($l)\nLogs: kubectl -n tofu-drift logs job/<latest>"}}]')" ;;
     esac
+    # startsAt is always sent: without it Alertmanager takes the end time as the
+    # start. For an alert it already has, it keeps the earlier start.
     am_payload="$(jq -cn --argjson firing "${am_firing}" --argjson was "${am_was}" '
-      ($firing | map(. + {endsAt: (now + 259200 | floor | todate)}))
+      (now | floor) as $now
+      | ($firing | map(. + {startsAt: ($now | todate), endsAt: ($now + 259200 | todate)}))
       + ($was
          | map(select(.labels as $l | ($firing | any(.labels == $l)) | not))
-         | map({labels, annotations, startsAt, endsAt: (now | floor | todate)}))')"
+         | map({labels, annotations, startsAt: ($now | todate), endsAt: ($now | todate)}))')"
     if [ -n "${am_payload}" ] && [ "${am_payload}" != "[]" ]; then
       am_code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 -X POST -H 'Content-Type: application/json' \
         --data "${am_payload}" "${AM_URL}/api/v2/alerts" || true)"
