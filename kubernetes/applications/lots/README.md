@@ -122,9 +122,13 @@ rollback, which waits for a person (the fix path, below); it changes nothing on 
   `lots-toolpack` (`ops-rbac.yaml`, a ClusterRole): get, list and watch in every namespace on the kinds those tools know (pods,
   pods/log, events, services, PVCs, nodes, namespaces, deployments, statefulsets, daemonsets, jobs, cronjobs, ingresses). No
   Secrets, no ConfigMaps, no writes, no exec, and nothing outside Kubernetes (Proxmox, OpenTofu state). Every namespace since
-  2026-11-20, when every alert started reaching Lots; until then `oncall-demo` alone. What it reads, pod specs with plain env
-  values and logs included, goes to the context's model and is kept with the run. That model is the alias `default`, whose
-  first targets are hosted (Berget AI, in Sweden; the GPU PC's model is the last fallback), so cluster logs leave the LAN. Its only way to
+  2026-11-20, when every alert started reaching Lots; until then `oncall-demo` alone. What the tools return is an
+  object's status, conditions, containers (image, state, restarts) and events, and a pod's log lines; never its spec or its env
+  values. That goes to the context's model and is kept with the run. The model is the alias `default`, whose first targets are
+  hosted (Berget AI, in Sweden; the GPU PC's model is the last fallback), so cluster logs leave the LAN. A credential in a log line
+  does not: the shell masks known credential shapes in every tool result, and the guards `dlp` and `cluster-secrets`
+  (`gitops/guards.yaml`) mask the rest in tool results, alert text and the whole request (what each catches, and what none can,
+  is in that file; what they did is on the Guards page and in `GET /audit?guard=cluster-secrets`). Its only way to
   change anything is the approved `rollback_service` above; the drill button (an admin) and the reset (a person) are not the agent's.
 - **The fix path:** the service `demo-api` has `autonomy: propose`, so its investigation runs with the role `responder`
   (`proposeRoles` on the alert source) and may call oncall-tools' two operations through the tool pack's OpenAPI pack:

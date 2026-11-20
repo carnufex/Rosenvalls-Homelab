@@ -5,3 +5,87 @@ name: protected-names
 type: builtin
 builtin: protected-names
 mode: enforce
+---
+# Secrets stay in the cluster (2026-11-20). The homelab contexts read cluster logs, events and alert text from every namespace
+# (ops-rbac.yaml), and their model is hosted (the alias default: Berget AI first). Logs in general may go there; a credential in a
+# log line may not. Three layers, each masking the credential and letting the rest of the line through:
+#   1. The shell itself, always: every tool result is cleaned of known credential shapes before the model or the trace sees it
+#      (private keys, JWTs, Bearer/Basic values, GitHub/GitLab/Slack/AWS/OpenAI-style tokens, webhook URLs, password=... pairs,
+#      and every secret value the shell holds). Nothing here configures that.
+#   2. dlp below: the same shapes in everything else a request to a hosted model carries (the alert's own text, a person's note).
+#   3. cluster-secrets below: what those shapes miss in logs, in tool results and in the whole request.
+# action: redact, not deny: the investigation keeps the log line without the secret. To stop the run instead: action: deny.
+# Both are scoped to the two homelab contexts; other contexts keep their own rules.
+kind: Guard
+name: dlp
+type: builtin
+builtin: dlp
+mode: enforce
+contexts: [homelab-ops, homelab-updates]
+# kinds is left at the default (personal identity numbers, cards, IBANs and credentials): the guard's own starter scenarios, which
+# run at every apply, cover all four.
+settings:
+  action: redact
+---
+# What the built-in shapes miss in cluster logs:
+#   - a password in a URL (postgres://user:password@host): the scheme, user and password go, the host stays;
+#   - NAME=value and "name": "value" where the name says it is a secret (AUTH_TOKEN, AWS_SECRET_ACCESS_KEY, SECRET_KEY,
+#     ENCRYPTION_KEY, private_key, passphrase, credentials ...) and the value is at least 12 characters; the name goes too.
+#     It also masks a harmless long value after such a name (secretName: some-long-secret-name): a name lost, never a secret kept;
+#   - the value of a header that carries a credential (Authorization of any scheme, X-Api-Key, Cookie, Set-Cookie): to the end of
+#     the line.
+# It cannot know a secret that looks like nothing in particular (a bare random string with no name beside it).
+# onFailure: deny (the default): a pattern that cannot be decided withholds the tool result, or stops the request.
+# The scenarios run at every apply; the values in them are made up.
+kind: Guard
+name: cluster-secrets
+type: rules
+description: Credentials in cluster logs, events and alert text are masked before the model sees them.
+mode: enforce
+contexts: [homelab-ops, homelab-updates]
+points: [tool.after, model.before]
+when:
+  any:
+    - regex: '[a-z][a-z0-9+.-]*://[^\s/:@"'']*:[^\s/@"'']+@'
+    - regex: '[a-z0-9_.-]*(token|secret|passwd|password|passphrase|api[_-]?key|private[_-]?key|access[_-]?key|encryption[_-]?key|signing[_-]?key|credentials?)[a-z0-9_.-]*["'']?[ \t]*[:=][ \t]*["'']?[^\s"'',;&]{12,}'
+    - regex: '(proxy-authorization|authorization|x-api-key|x-auth-token|set-cookie|cookie)["'']?[ \t]*[:=][ \t]*["'']?[^\r\n"'']{8,}'
+action: redact
+replaceWith: "[redacted]"
+timeoutMs: 1000
+gate: { noFalsePositives: true, minDetection: 100 }
+scenarios:
+  - point: tool.after
+    text: '2026-11-20T10:00:00Z level=error msg="connect failed" dsn=postgres://app:not-a-real-password-0000@db.internal:5432/app'
+    expect: redact
+    redactTo: '2026-11-20T10:00:00Z level=error msg="connect failed" dsn=[redacted]db.internal:5432/app'
+  - point: tool.after
+    text: 'starting with AUTH_TOKEN=not-a-real-token-000000 and LOG_LEVEL=debug'
+    expect: redact
+    redactTo: 'starting with [redacted] and LOG_LEVEL=debug'
+  - point: tool.after
+    text: 'env dump: AWS_SECRET_ACCESS_KEY=notarealkey0000000000000000000000000000 REGION=eu-north-1'
+    expect: redact
+    redactTo: 'env dump: [redacted] REGION=eu-north-1'
+  - point: tool.after
+    text: '{"level":"debug","msg":"request","headers":{"x-api-key":"not-a-real-key-0000","accept":"*/*"}}'
+    expect: redact
+    redactTo: '{"level":"debug","msg":"request","headers":{"[redacted]","accept":"*/*"}}'
+  - point: tool.after
+    text: 'GET /api2/json/cluster/resources Authorization: PVEAPIToken=monitor@pve!check=00000000-0000-0000-0000-000000000000'
+    expect: redact
+    redactTo: 'GET /api2/json/cluster/resources [redacted]'
+  - point: tool.after
+    text: 'redis client: connecting to redis://:not-a-real-password-0000@valkey.immich.svc:6379/0'
+    expect: redact
+    redactTo: 'redis client: connecting to [redacted]valkey.immich.svc:6379/0'
+  - point: model.before
+    text: 'Alert: DatabaseDown. description: connection to mysql://gatebound:not-a-real-password-0000@gatebound-mariadb:3306 refused'
+    expect: redact
+    redactTo: 'Alert: DatabaseDown. description: connection to [redacted]gatebound-mariadb:3306 refused'
+  - { point: tool.after, text: 'level=info msg="Reconciled ExternalSecret" namespace=lots name=lots-secrets', expect: pass }
+  - { point: tool.after, text: 'container app | ready=false | restarts=7 | image=registry.example.org/app@sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', expect: pass }
+  - { point: tool.after, text: 'usage prompt_tokens=8192 completion_tokens=412 total_tokens=8604', expect: pass }
+  - { point: tool.after, text: 'probe failed: Get "http://lots.lots.svc.cluster.local:8080/health/ready": context deadline exceeded', expect: pass }
+  - { point: tool.after, text: 'event Warning BackOff: Back-off restarting failed container demo-api in pod demo-api-7d4846c785-q86qm (x12)', expect: pass }
+  - { point: tool.after, text: 'E1120 10:00:00 reflector.go:150] Failed to watch *v1.Secret: secrets is forbidden: User "system:serviceaccount:lots:lots-toolpack" cannot list resource "secrets"', expect: pass }
+  - { point: model.before, text: 'Alert: ProxmoxStorageFilling. Proxmox storage eliteDesk2/local-lvm is 85% full (45/53 GB).', expect: pass }
