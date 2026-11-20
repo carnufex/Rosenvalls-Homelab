@@ -1,0 +1,104 @@
+# Weekly fstrim of every Talos node's EPHEMERAL volume (/var).
+#
+# Talos mounts /var without `discard` and runs no periodic trim, so blocks freed by image GC and log rotation stay allocated in
+# the node's Proxmox disk until something trims. On a thin pool that is how eliteDesk2/local-lvm reached 85% on 2026-11-20 with
+# 37 GB really in use (the alert ProxmoxStorageFilling; a trim of control-03 and worker-09 took it to 69%). This does by itself
+# what scripts/talos-fstrim-pod.yaml does by hand.
+#
+# One pod per node, asleep except for the trim: every PERIOD_SECONDS (a week), counted from ANCHOR_EPOCH (Sunday 02:00 UTC), plus
+# an offset per node within SPREAD_SECONDS (six hours, from the node's name), so the nodes of one Proxmox host do not trim at the
+# same moment. A pod that starts waits for its next slot; it never trims at start, so a rollout or a node reboot trims nothing.
+#
+# It only frees space where the VM's boot disk has discard=on (tofu `boot_discard`); on the others the trim is accepted and
+# changes nothing. Privileges: root with the one capability FITRIM needs (SYS_ADMIN), everything else dropped, /var mounted read
+# only, no service account token, no network use. The namespace monitoring is pod-security privileged (node-exporter).
+#
+# 3 am: `kubectl -n monitoring logs ds/talos-fstrim` (or Loki, {namespace="monitoring", container="fstrim"}): one line per trim,
+# `talos-fstrim: node=<n> ok ...` or `FAILED ...`, and at start when the next one is. What tells you it stopped working is the
+# alert ProxmoxStorageFilling. To trim one node now: scripts/talos-fstrim-pod.yaml.
+# To remove: this file and its line in kustomization.yaml.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: talos-fstrim
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: talos-fstrim
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: talos-fstrim
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: talos-fstrim
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 5
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: fstrim
+          image: alpine:3.24.4@sha256:93b41ef40b1677fce8fcc64ff4af09daddfacf5040afde618bc46c1e2d1cc7d4
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - { name: PERIOD_SECONDS, value: "604800" }
+            # 1970-01-04 02:00 UTC, a Sunday: the slots are Sundays 02:00 UTC plus the node's offset.
+            - { name: ANCHOR_EPOCH, value: "266400" }
+            - { name: SPREAD_SECONDS, value: "21600" }
+          command:
+            - /bin/sh
+            - -c
+            - |
+              trap 'exit 0' TERM INT
+              offset=$(( $(printf '%s' "${NODE_NAME}" | cksum | cut -d' ' -f1) % SPREAD_SECONDS ))
+              while true; do
+                now=$(date -u +%s)
+                since=$(( (now - ANCHOR_EPOCH - offset) % PERIOD_SECONDS ))
+                delay=$(( PERIOD_SECONDS - since ))
+                echo "talos-fstrim: node=${NODE_NAME} next trim in ${delay}s ($(date -u -d "@$(( now + delay ))" '+%Y-%m-%d %H:%M UTC'))"
+                sleep "${delay}" &
+                wait $!
+                if out=$(fstrim -v /host/var 2>&1); then
+                  echo "talos-fstrim: node=${NODE_NAME} ok ${out}"
+                else
+                  echo "talos-fstrim: node=${NODE_NAME} FAILED ${out}"
+                fi
+                # Past the slot before the next one is computed.
+                sleep 2 &
+                wait $!
+              done
+          securityContext:
+            runAsUser: 0
+            privileged: false
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+              add: [SYS_ADMIN]
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
+          volumeMounts:
+            - name: var
+              mountPath: /host/var
+              readOnly: true
+      volumes:
+        - name: var
+          hostPath:
+            path: /var
+            type: Directory

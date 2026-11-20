@@ -19,6 +19,7 @@ resources:
   - proxmox-storage-alert-externalsecret.yaml
   - proxmox-storage-alert-configmap.yaml
   - proxmox-storage-alert-cronjob.yaml
+  - talos-fstrim-daemonset.yaml   # weekly fstrim of every node, so the Proxmox thin pools get freed blocks back
   - cilium-envoy-podmonitor.yaml
   - cilium-envoy-alerts.yaml
   - oncall-demo-alerts.yaml   # OncallDemoPodCrashLooping, investigated by Lots (applications/lots/README.md)

@@ -370,9 +370,14 @@ qcow2 boot disks of worker-01 (48G) and worker-02 (20G), the Talos and
 Debian images, apt's cache and the host's journal.
 
 - The boot disks have `discard=on` (2026-11-07). Talos does not trim on its
-  own, so freed blocks only go back to the host after a manual trim:
-  `scripts/talos-fstrim-pod.yaml`. The first trim shrank worker-02's file
-  from 21G to 14G.
+  own, so freed blocks only go back to the host after a trim. The DaemonSet
+  `monitoring/talos-fstrim` (`prometheus-stack/talos-fstrim-daemonset.yaml`)
+  trims `/var` on every node once a week, Sundays from 02:00 UTC, each node at
+  its own offset within six hours; `kubectl -n monitoring logs ds/talos-fstrim`
+  shows when a node's next trim is and what the last one did. To trim one node
+  now: `scripts/talos-fstrim-pod.yaml`. The first trim shrank worker-02's file
+  from 21G to 14G; on 2026-11-20 a trim of control-03 and worker-09 took
+  `eliteDesk2/local-lvm` from 85% to 69%.
 - Before the 2026-11-07 change, the files were fully allocated
   (`discard=ignore`). Check with `du -h /media/lagring/images/*/*.qcow2`.
 - Safe cleanup on the host: `apt-get clean`, `journalctl --vacuum-size=200M`,
