@@ -4,7 +4,7 @@
 # services, PVCs, nodes, namespaces, deployments, statefulsets, daemonsets, jobs, cronjobs, ingresses). No Secrets, no ConfigMaps, no
 # write verbs, no exec. Every namespace since 2026-11-20: Alertmanager sends Lots every alert, and an investigation that can only read
 # oncall-demo finds nothing about the others. What it reads (pod specs with their plain env values, and logs) goes to the model of
-# the context homelab-ops and is kept with the run. To go back to one namespace: a Role and RoleBinding in it in place of the two
+# the context homelab-ops (the alias default: hosted at Berget AI first, the GPU PC last) and is kept with the run. To go back to one namespace: a Role and RoleBinding in it in place of the two
 # cluster-wide objects below.
 # To remove: this file (and its line in kustomization.yaml), Kubernetes__InCluster and serviceAccountName in toolpack.yaml (back to
 # lots-runtime), and the kube-apiserver rule in networkpolicy.yaml.

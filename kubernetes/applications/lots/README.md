@@ -123,7 +123,8 @@ rollback, which waits for a person (the fix path, below); it changes nothing on 
   pods/log, events, services, PVCs, nodes, namespaces, deployments, statefulsets, daemonsets, jobs, cronjobs, ingresses). No
   Secrets, no ConfigMaps, no writes, no exec, and nothing outside Kubernetes (Proxmox, OpenTofu state). Every namespace since
   2026-11-20, when every alert started reaching Lots; until then `oncall-demo` alone. What it reads, pod specs with plain env
-  values and logs included, goes to the context's model and is kept with the run. Its only way to
+  values and logs included, goes to the context's model and is kept with the run. That model is the alias `default`, whose
+  first targets are hosted (Berget AI, in Sweden; the GPU PC's model is the last fallback), so cluster logs leave the LAN. Its only way to
   change anything is the approved `rollback_service` above; the drill button (an admin) and the reset (a person) are not the agent's.
 - **The fix path:** the service `demo-api` has `autonomy: propose`, so its investigation runs with the role `responder`
   (`proposeRoles` on the alert source) and may call oncall-tools' two operations through the tool pack's OpenAPI pack:
