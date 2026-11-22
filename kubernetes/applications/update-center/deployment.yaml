@@ -65,8 +65,6 @@ spec:
             # from update-center-env. Everything the autonomy rules clear is applied in the night window: digests, patches and SemVer
             # chart minors, under applications and infrastructure alike; the rules and AUTO_* are in update-center's README.
             - { name: LOTS_SIGNAL_URL, value: "http://lots.lots.svc.cluster.local:8080/signals/update-center" }
-            # First run: log every decision the rules would take without applying anything. Remove once the auto: lines look right.
-            - { name: AUTO_DRY_RUN, value: "true" }
             # Source repo (and Dockerfile) of each own image, for the base-image tracking (BASE_IMAGES_ENABLED, update-center
             # runtime-base-images and later). ghcr.io/carnufex/* (kingsguard) resolves by convention. Gatebound is left out while
             # it is paused (manual publish from Gatebound-2d, no CI). Repos without CI only ever get proposals, never auto bumps.
