@@ -185,20 +185,28 @@ rollback, which waits for a person (the fix path, below); it changes nothing on 
 
 ## Updates
 
-The homelab updates itself as far as rules allow, and asks a person for the rest.
+The homelab updates itself wherever the update can be verified and rolled back, and asks a person only where the update itself is
+the risk. One upstream thing is one question, however many apps pin it.
 
-- **What update-center does on its own** (carnufex/update-center, `docs/operations/update-center.md`): patch and digest bumps of
-  apps, fixes for high and critical CVEs up to a minor, Talos patches (then the tofu pin) and Proxmox packages, in its nightly window
-  (critical CVEs at once). Every bump is verified (ArgoCD synced and healthy, the new image running) and reverted automatically when
-  it is not.
-- **What comes to Lots:** everything its rules do not clear (majors, minors, databases and platform components under
-  `kubernetes/infrastructure`, Kubernetes minors) as `UpdateNeedsDecision`, advisories no update covers as `SecurityAdvisory`, and
-  every update that failed and was rolled back as `UpdateFailed`. update-center posts one alert per component to
-  `POST /signals/update-center` and resolves it when the component is up to date.
-- **What Lots does:** one incident per component (the service `updates`, `groupBy: [component]`), investigated in the context
-  `homelab-updates` as `svc-homelab-updates`: `get_update`, `release_notes`, a finding, and, when no manual step comes first,
-  the proposal `apply_update`. It waits for a person with admin on the incident page and on Approvals; the admin notice
-  `approval.requested` announces it in `#homelab-alerts`. Approved, update-center applies it with the same verification and rollback.
+- **What update-center does on its own** (carnufex/update-center, its README has the table; `docs/operations/update-center.md`):
+  a new digest of the same tag and a patch release, under `kubernetes/applications` and `kubernetes/infrastructure` alike and for
+  database engines too; a minor of a chart on SemVer from 1.0; fixes for high and critical CVEs up to a minor; Talos and Kubernetes
+  patches (then the tofu pin) and Proxmox packages. All in its nightly window (critical CVEs at once). Every bump is verified
+  (ArgoCD synced and healthy, the new image running) and reverted automatically when it is not.
+- **What waits without a question:** a new major (PostgreSQL 18 to 19). It is on update-center's page with the badge *avvaktar* and
+  no alert is sent, until a high, critical or known-exploited advisory is fixed by it; then it is a question. update-center has no
+  end-of-life data, so a major does not become a question because the running one is about to lose support.
+- **What comes to Lots:** `UpdateNeedsDecision` for a minor of an image, of a chart on 0.x or a calendar version, of a database engine,
+  anything but a new digest of a platform controller (Cilium, Longhorn, Argo CD, cert-manager, External Secrets, CloudNativePG), a
+  Talos or Kubernetes minor, and a major an advisory calls for; `SecurityAdvisory` for advisories no update covers; `UpdateFailed` for
+  every update that failed and was rolled back. update-center posts one alert per upstream thing to `POST /signals/update-center`:
+  the same image or chart with the same update in several apps is one alert naming all of them (the label `component` is then a
+  group, `image:*:postgresql`), and it resolves when they are up to date.
+- **What Lots does:** one incident per `component` label (the service `updates`, `groupBy: [component]`), investigated in the context
+  `homelab-updates` as `svc-homelab-updates`: `get_update` (for a group it lists the apps), `release_notes`, a finding, and, when no
+  manual step comes first, the proposal `apply_update`. It waits for a person with admin on the incident page and on Approvals; the
+  admin notice `approval.requested` announces it in `#homelab-alerts`. Approved, update-center applies it with the same verification
+  and rollback; a group is one job that updates the apps one after another and stops at the first that fails.
 - **Parts:** the context `homelab-updates` (`app.yaml`), `gitops/incidents-updates.yaml` (runbook, service, source),
   `toolpack-updates.yaml` (a second tool pack with only the OpenAPI pack, pointed at update-center's `/api/lots/openapi.json`),
   `Mcp__ToolServerAuth__Hosts__1` (`app.yaml`), the rules for update-center to the shell and the tool pack to update-center

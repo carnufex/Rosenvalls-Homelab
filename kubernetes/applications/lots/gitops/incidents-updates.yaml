@@ -1,11 +1,13 @@
 # Updates (README.md, "Updates"): applied by the shell itself (GitOps:Path).
 # update-center (carnufex/update-center) applies what its rules clear by itself and posts the rest to POST /signals/update-center, one
-# alert per component: UpdateNeedsDecision (a major, a minor, a database or platform component), SecurityAdvisory (an advisory no
-# automatic update covers) and UpdateFailed (an update that was tried and rolled back). Each component is its own incident (the
-# service's groupBy), investigated in the homelab-updates context (app.yaml) as svc-homelab-updates: it reads the update and its release
-# notes, reports a finding and, when nothing needs a manual step, proposes apply_update, which waits for a person with admin on the
-# incident page and on Approvals (announced in #homelab-alerts). Approved, update-center applies it, verifies the rollout and rolls
-# back by itself if it fails; the alert resolves when the component is up to date.
+# alert per upstream thing: UpdateNeedsDecision (a minor its rules cannot judge, a minor of a database, anything but a new digest of
+# a platform controller, a major that fixes a serious advisory; a major nothing calls for is not sent), SecurityAdvisory (an advisory
+# no automatic update covers) and UpdateFailed (an update that was tried and rolled back). The label component names the thing: one
+# component (image:media:plex), or the same image or chart with the same update in several apps as one group (image:*:postgresql).
+# Each is its own incident (the service's groupBy), investigated in the homelab-updates context (app.yaml) as svc-homelab-updates: it
+# reads the update and its release notes, reports a finding and, when nothing needs a manual step, proposes apply_update, which waits
+# for a person with admin on the incident page and on Approvals (announced in #homelab-alerts). Approved, update-center applies it,
+# verifies the rollout and rolls back by itself if it fails (a group: app by app); the alert resolves when it is up to date.
 # To remove: this file and the parts listed in toolpack-updates.yaml.
 kind: Skill
 name: update-runbook
@@ -19,6 +21,11 @@ body: |
      format), removed or renamed settings, new minimum versions of something else, and the flags update-center marked.
   3. A database (postgres, mariadb, redis) or an app whose warnings say its migration is one way: the person needs a backup or a
      snapshot first. That is a manual step: say so in nextStep and do not propose.
+
+  The component may be a group, written kind:*:name (image:*:postgresql): the same image or chart with the same update in several
+  apps. Use the name as it is. get_update lists the apps under members; release_notes are the same for all of them. One apply_update
+  on the group updates the apps one after another, each verified and rolled back by itself, and stops at the first that fails: do
+  not call apply_update for the members one by one. Name the apps in the finding.
 
   A finding says: what the update is (component, from, to), why it needs a decision, the breaking changes found (quoted, cited) or
   that none were found in the notes, what you ruled out, and the next step for a person.
@@ -36,7 +43,8 @@ name: updates
 profile: homelab-updates
 match:
   - { origin: update-center }
-# One incident per component: an incident closes when its component is up to date, and the next update is a new incident.
+# One incident per upstream thing (a component, or a group of apps that pin the same image or chart): an incident closes when it is
+# up to date, and the next update is a new incident.
 groupBy: [component]
 repos:
   - { url: https://github.com/carnufex/Rosenvalls-Homelab.git, role: deploy }

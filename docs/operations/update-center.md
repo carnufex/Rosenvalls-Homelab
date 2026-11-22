@@ -32,9 +32,12 @@ Scans every 30 min (or on "Uppdatera listan"):
    Categories: över-/underallokerad, saknar request, databas/cache (never auto-recommended). Also per-node
    requested vs really used vs VM RAM in Proxmox, and PVC used vs capacity.
 
-6. **Automatic patches** - every night at 04:00 (Europe/Stockholm; env `AUTO_PATCH_HOUR`, `-1` = off) the tool
-   runs *Uppdatera alla patchar* by itself as one batch job (actor `auto-patch`, visible in the job history and
-   in the Översikt patch group). Minor/major, Talos and Proxmox are never automatic.
+6. **Automatic updates** - every night at 04:00 (Europe/Stockholm; env `AUTO_PATCH_HOUR`, `-1` = off) the tool
+   applies what its rules mark *auto* (the badge on every row; the table is in update-center's README, "Automatic
+   updates"): new digests, patches and SemVer chart minors of apps and platform alike as one batch job (actor
+   `auto-patch`, visible in the job history), then Talos and Kubernetes patches, and Proxmox packages on Sundays.
+   A row marked *förslag* is a question in Lots (`kubernetes/applications/lots/README.md`, "Updates"); a row marked
+   *avvaktar* is a new major nobody is asked about yet. `AUTO_ENABLED=false` stops it, `AUTO_DRY_RUN=true` only logs.
 
 7. **Säkerhet (CVE watch)** - after each scan (at most every `SECURITY_REFRESH_MINUTES`, default 60) every
    watched product is matched against advisories: the app version of each image (upstream GitHub repo via
