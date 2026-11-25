@@ -16,6 +16,12 @@ data:
   # alert reaches Lots through the route lots (values.yaml), where a repeat is
   # an occurrence of the open incident, never a second one.
   #
+  # The same run raises ProxmoxVMStopped (labels node, vmid, name) for a VM that
+  # is set to start on boot (onboot=1) but is not running: nfs-01 stopped on
+  # 2026-11-23 around 03:00 and Immich's library was gone for three days with no
+  # alert. Templates are skipped. When the VM list cannot be read, the
+  # ProxmoxVMStopped alerts already firing are left to run out by themselves.
+  #
   # Every run sends the pools that are filling again with an end time
   # KEEP_SECONDS ahead (three runs: one missed run does not resolve and re-fire
   # the alert), and ends what it had firing that no longer holds.
@@ -87,4 +93,30 @@ data:
     else
       echo "FILLING:"; printf '%s' "$firing" | jq -r '.[].annotations.summary'
     fi
+
+    # VMs that should be running: onboot=1 in their config, not a template, not running.
+    stopped='[]'
+    vms="$(curl -sk --max-time 20 -H "Authorization: PVEAPIToken=${TOKEN}"         "${PVE_URL}/cluster/resources?type=vm" || true)"
+    if printf '%s' "$vms" | jq -e '.data | type == "array"' >/dev/null 2>&1; then
+      for row in $(printf '%s' "$vms" | jq -r '.data[]
+          | select(.type == "qemu" and .status != "running" and (.template // 0) == 0)
+          | "\(.node)/\(.vmid)"'); do
+        node="${row%/*}"; vmid="${row#*/}"
+        conf="$(curl -sk --max-time 15 -H "Authorization: PVEAPIToken=${TOKEN}"             "${PVE_URL}/nodes/${node}/qemu/${vmid}/config" || true)"
+        if [ "$(printf '%s' "$conf" | jq -r '.data.onboot // 0' 2>/dev/null)" = "1" ]; then
+          stopped="$(printf '%s' "$vms" | jq -c --argjson s "$stopped" --arg node "$node" --argjson vmid "$vmid" '
+            $s + [.data[] | select(.node == $node and .vmid == $vmid)
+            | {labels: {alertname: "ProxmoxVMStopped", severity: "critical", check: "proxmox-storage",
+                        node: .node, vmid: (.vmid | tostring), name: .name},
+               annotations: {
+                 summary: "Proxmox VM \(.name) (\(.vmid)) on \(.node) is \(.status) but is set to start on boot.",
+                 description: "Whatever it serves is down (nfs-01: Immich library and its backup; a k8s node: its pods). Start it (Proxmox > \(.node) > \(.vmid) > Start, or qm start \(.vmid) on \(.node)) and look in the host syslog for why it stopped."}}]')"
+        fi
+      done
+      if [ "$stopped" != "[]" ]; then echo "STOPPED:"; printf '%s' "$stopped" | jq -r '.[].annotations.summary'; else echo "OK: every onboot VM is running"; fi
+    else
+      echo "WARN: could not list the Proxmox VMs; ProxmoxVMStopped alerts are left as they are"
+      active="$(printf '%s' "$active" | jq -c 'map(select(.labels.alertname != "ProxmoxVMStopped"))')"
+    fi
+    firing="$(jq -cn --argjson a "$firing" --argjson b "$stopped" '$a + $b')"
     send "$firing" "$active" || { echo "ERROR: could not post to Alertmanager"; exit 1; }
