@@ -41,7 +41,7 @@ spec:
                     values: [worker-05, worker-06, worker-07, worker-08, worker-09]
       containers:
         - name: update-center
-          image: registry.rosenvall.se/carnufex/update-center:sha-24117ad # bumped by scripts/deploy.ps1 in the update-center repo
+          image: registry.rosenvall.se/carnufex/update-center:sha-b065a60 # bumped by scripts/deploy.ps1 in the update-center repo
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -64,8 +64,6 @@ spec:
             # Updates that need a decision go to Lots (applications/lots/README.md, "Updates"); LOTS_SIGNAL_TOKEN and SERVICE_TOKENS come
             # from update-center-env. Everything the autonomy rules clear is applied in the night window (AUTO_* in docs/API.md).
             - { name: LOTS_SIGNAL_URL, value: "http://lots.lots.svc.cluster.local:8080/signals/update-center" }
-            # First run: log every decision the rules would take without applying anything. Remove once the auto: lines look right.
-            - { name: AUTO_DRY_RUN, value: "true" }
             # Source repo (and Dockerfile) of each own image, for the base-image tracking (BASE_IMAGES_ENABLED, update-center
             # runtime-base-images and later). ghcr.io/carnufex/* (kingsguard) resolves by convention. Gatebound is left out while
             # it is paused (manual publish from Gatebound-2d, no CI). Repos without CI only ever get proposals, never auto bumps.
