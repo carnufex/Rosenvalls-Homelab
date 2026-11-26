@@ -8,7 +8,9 @@
 > off-cluster. **Resume:** set `replicas: 1` in `mariadb-deployment.yaml`, then
 > `tfs-deployment.yaml` and `web-deployment.yaml` once mariadb is Ready (TFS does
 > not reconnect to a DB that comes up after it), push, and check `Gatebound
-> Server Online!` in the tfs log.
+> Server Online!` in the tfs log. Move the PVCs back into Longhorn's backup group
+> (`recurring-job-group.longhorn.io/default: enabled`, `cold: disabled`): paused,
+> they sit in `cold` so the trim/backup jobs skip the detached volumes.
 
 Onboarding of the Gatebound-2d game (source repo `D:\Github\Gatebound-2d`) into
 the cluster. Mirrors the game's `docker-compose.yml`. Plain kustomize (not Helm)

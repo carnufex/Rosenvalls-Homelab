@@ -10,6 +10,17 @@ kind: PersistentVolumeClaim
 metadata:
   name: gatebound-play
   namespace: gatebound
+  labels:
+    # PAUSED app (replicas 0): the volume is detached, and Longhorn's weekly
+    # filesystem-trim aborts the whole run on a detached volume (2026-11-22), while
+    # the nightly backup has to attach it first (failed 2026-11-26). Its data does
+    # not change while detached and the last 7 backups are kept, so it sits in
+    # "cold" (no jobs). On resume: default: enabled, cold: disabled.
+    recurring-job.longhorn.io/source: enabled
+    recurring-job-group.longhorn.io/cold: enabled
+    # Longhorn copies PVC labels to the volume but never removes one: only
+    # "enabled" counts, so switch the old group off explicitly.
+    recurring-job-group.longhorn.io/default: disabled
   annotations:
     # Bind before the web workload that mounts it.
     argocd.argoproj.io/sync-wave: "-5"

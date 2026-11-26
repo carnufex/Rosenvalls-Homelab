@@ -1,6 +1,6 @@
 # Rosenvall DevOps
 
-> **PAUSED since 2026-11-19** (no use): deployments at `replicas: 0`, the hourly cleaner CronJobs `suspend: true`. PVCs, secrets and config are kept; resume by setting replicas back to 1 (and `suspend: false`).
+> **PAUSED since 2026-11-19** (no use): deployments at `replicas: 0`, the hourly cleaner CronJobs `suspend: true`. PVCs, secrets and config are kept; resume by setting replicas back to 1 (and `suspend: false`), and move the three PVCs back to Longhorn group `default` (`default: enabled`, `cold: disabled`).
 
 Rosenvall DevOps is routed through `gateway/internal` at `https://devops.rosenvall.se`.
 
