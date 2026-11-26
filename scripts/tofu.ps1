@@ -58,8 +58,14 @@ try {
         $exported += $wanted[$key]
     }
 
+    # Not "Stop" around the native call: when the output is redirected (*> file, 2>&1,
+    # an agent's shell) PowerShell 5.1 turns tofu's first stderr line into a
+    # terminating NativeCommandError, which killed an apply mid-run on 2026-11-26 and
+    # left the R2 state lock behind. tofu's own exit code is the result.
+    $ErrorActionPreference = "Continue"
     & tofu "-chdir=$tofuDir" @args
     $code = $LASTEXITCODE
+    $ErrorActionPreference = "Stop"
 }
 finally {
     foreach ($name in $exported) { Remove-Item -Path "env:$name" -ErrorAction SilentlyContinue }
