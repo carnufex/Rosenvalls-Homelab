@@ -23,8 +23,11 @@ data "talos_machine_configuration" "this" {
       })
     ],
     # The installer the node reinstalls/upgrades with; the provider default is its own
-    # (old) Talos release, not the cluster's.
-    [yamlencode({ machine = { install = { image = "ghcr.io/siderolabs/installer:${var.cluster.talos_version}" } } })],
+    # (old) Talos release, not the cluster's. The factory installer of the node's own
+    # schematic (the same one update-center upgrades with): the plain
+    # ghcr.io/siderolabs/installer has no iscsi-tools, so an upgrade without --image
+    # would have dropped Longhorn's iSCSI support from the node.
+    [yamlencode({ machine = { install = { image = "factory.talos.dev/nocloud-installer/${talos_image_factory_schematic.this[local.node_schematic_key[each.key]].id}:${var.cluster.talos_version}" } } })],
     # Conditionally add GPU patches for GPU-enabled worker nodes
     lookup(each.value, "igpu", false) ? [
       file("${path.module}/patches/gpu-modules.yaml"),

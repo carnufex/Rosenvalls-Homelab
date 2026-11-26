@@ -10,7 +10,8 @@ proxmox = {
 cluster_name     = "hemma-k8s"     # Namnet på ditt Kubernetes-kluster
 cluster_endpoint = "192.168.1.200" # En LEDIG IP-adress som blir VIP (Virtual IP) för klustret
 gateway          = "192.168.1.1"
-talos_version    = "v1.14.6"
+# talos_version: NOT set here on purpose. The default in variables.tf is the one source
+# (update-center "Synka tofu" bumps it); a value here silently shadowed those bumps.
 
 nodes_config = {
   "control-01" = {
