@@ -37,7 +37,7 @@ variable "cluster_endpoint" {
 variable "talos_version" {
   description = "Talos version to use"
   type        = string
-  default     = "v1.14.6"
+  default     = "v1.14.7"
 }
 
 variable "talos_config_version" {
