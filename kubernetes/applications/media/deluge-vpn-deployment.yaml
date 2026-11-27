@@ -31,7 +31,7 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: prepare-wireguard-config-dir
-          image: lscr.io/linuxserver/wireguard:1.0.20260223-r0-ls130@sha256:10db56ad834f94541307d5dfdbe87370e26d155bb341a5bf65789f970f24ab5c
+          image: lscr.io/linuxserver/wireguard:1.0.20260223-r0-ls131@sha256:30fcd4e2d5793935e3e3d913e3e874ecee27bc2bf01b2cb824a5cb01e02a1043
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
@@ -47,7 +47,7 @@ spec:
               mountPath: /config
       containers:
         - name: wireguard
-          image: lscr.io/linuxserver/wireguard:1.0.20260223-r0-ls130@sha256:10db56ad834f94541307d5dfdbe87370e26d155bb341a5bf65789f970f24ab5c
+          image: lscr.io/linuxserver/wireguard:1.0.20260223-r0-ls131@sha256:30fcd4e2d5793935e3e3d913e3e874ecee27bc2bf01b2cb824a5cb01e02a1043
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
